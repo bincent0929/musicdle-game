@@ -2,7 +2,9 @@
 
 ## September 17th:
 
-Working on getting a working html project going
+- Vincent: music
+- Nathan: Basic HTML
+- 
 
 # 🎶 Git Workflow Guide
 
