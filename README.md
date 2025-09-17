@@ -4,7 +4,7 @@
 
 - Vincent: music
 - Nathan: Basic HTML
-- 
+- Jaylen: Spotify/Youtube API
 
 # 🎶 Git Workflow Guide
 
