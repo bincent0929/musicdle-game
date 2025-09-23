@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <div class="header">
-      <href="#default" class="logo">MusicDle</a>
+      <href="#default" class="logo">Musicdle</a>
       <div class="header-right">
         <a class="active" href="index.html">Home</a>
         <a href="about.html">About</a>
@@ -10,16 +10,17 @@
     </div>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Guess the Music</title>
+    <title>Musicdle</title>
     <link rel="stylesheet" href="style.css" />
+    <script src="script.js"></script>
   </head>
   <body>
     <audio controls>
       <source src="assets/music/The-Latin-Side-Of-Vince-Guaraldi-By-Vince-Guaraldi/Corcovado.mp3" type="audio/mpeg">
-    Your browser does nto support the audio element.
+    Your browser does not support the audio element.
     </audio>
     <div class="start_button_div">
-      <button class="start_button">
+      <button class="start_button" onclick="startGame()">
         Do you want to start the game?
       </button>
     </div>
