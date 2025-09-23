@@ -27,8 +27,17 @@ const gameResetHTML = `
  * your functions from not being able to find the elements
  */
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('start_button').addEventListener('click', function() {
-        startGame();
+    /**
+     * this allows us to have functions work on newly added HTML
+     */
+    document.body.addEventListener('click', function(event) {
+        const clickedElement = event.target;
+
+        if (clickedElement.id == 'start_button') {
+            startGame();
+        } else if (clickedElement.id == 'reset_button') {
+            resetGame();
+        }
     });
     
     function startGame() {
