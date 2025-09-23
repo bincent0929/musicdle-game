@@ -41,16 +41,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function startGame() {
-        const game = document.getElementById('game');
-        game.innerHTML = gameStartHTML;
+        document.getElementById('game').innerHTML = gameStartHTML;
     }
 
-    document.getElementById('reset_button').addEventListener('click', function() {
-        resetGame();
-    });
-
     function resetGame() {
-        const game = document.getElementById('game');
-        game.innerHTML = gameResetHTML;
+        document.getElementById('game').innerHTML = gameResetHTML;
     }
 });
