@@ -48,3 +48,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('game').innerHTML = gameResetHTML;
     }
 });
+
+async function printSongs() {
+    const albumDirectory = './assets/music/The-Latin-Side-Of-Vince-Guaraldi-By-Vince-Guaraldi';
+
+    // reads the songs from the dir
+    const songs = await FileSystem.readdir(albumDirectory);
+
+    
+}
