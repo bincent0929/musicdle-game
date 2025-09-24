@@ -1,5 +1,4 @@
 # MusicDle
-
 ## September 17th:
 
 - Vincent: music
