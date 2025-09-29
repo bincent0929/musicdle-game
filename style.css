@@ -58,3 +58,13 @@
     float: none;
   }
 }
+
+/* start button */
+.start_button_div {
+  text-align: center;
+}
+
+.start_button {
+  width: 200px;
+  height: 100px;
+}
