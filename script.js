@@ -1,17 +1,13 @@
-function sayHello() {
-  alert("Hello from JavaScript! 🚀");
-}
-
 function makeGuess() {
   let src = document.getElementById("song").value;
   alert("Printing: " + src);
 }
 
 // CorrectAnswer + Distractors
-const correctAnswer = "Sample Song";
-const distractors = ["Wrong Song A", "Wrong Song B"]; // two wrong choices
+const correctAnswer = "Lord of the Rings";
+const distractors = ["Chronicles of Narnia", "Avatar"]; // two wrong choices
 
-// simple shuffle
+// simple shuffle logic
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
