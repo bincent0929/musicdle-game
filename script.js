@@ -2,6 +2,7 @@
 // this is for restoring the page back to a new game state
 //const gameDiv = document.getElementById('game').innerHTML;
 
+/*
 const gameStartHTML = `
             <h1>test</h1>
             
@@ -19,6 +20,7 @@ const gameResetHTML = `
                 </button>
             </div>
         `;
+*/
 
 /**
  * the document.addEventListener('DOMContentLoaded', function() {});
@@ -42,11 +44,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function startGame() {
-        document.getElementById('game').innerHTML = gameStartHTML;
+      fetch('game.html')
+        .then(response => response.text())
+        .then(gameStartHTML => {
+          document.getElementById('game').innerHTML = gameStartHTML;
+        })
+        .catch(error => console.error('Error loading HTML:', error));
+
+        document.getElementById('game').innerHTML = gameStartHtml;
     }
 
     function resetGame() {
-        document.getElementById('game').innerHTML = gameResetHTML;
+      fetch('game-reset.html')
+        .then(response => response.text())
+        .then(gameResetHtml => {
+          document.getElementById('game').innerHTML = gameResetHtml;
+        })
+        .catch(error => console.error('Error loading HTML:', error));
+
+        document.getElementById('game').innerHTML = gameResetHtml;
     }
 });
 
