@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <div class="header">
-      <href="#default" class="logo">Musicdle</a>
-      <div class="header-right">
-        <a class="active" href="index.html">Home</a>
-        <a href="about.html">About</a>
-      </div>
-    </div>
     <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+      crossorigin="anonymous"
+    ></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Musicdle</title>
     <link rel="stylesheet" href="style.css" />
@@ -22,5 +36,103 @@
         </button>
       </div>
     </div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand d-flex align-items-center" href="index.html">
+        <img
+          src="minor_html/musicnote.png"
+          width="40"
+          height="35"
+          class="d-inline-block align-top mr-2"
+          alt="Logo"
+        />
+        MusicDle</a
+      >
+      <div class="dropdown ml-auto">
+        <button
+          class="navbar-toggler"
+          type="button"
+          id="menuButton"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="dropdown-menu dropdown-menu-right"
+          aria-labelledby="menuButton"
+        >
+          <a class="dropdown-item" href="hint_mode/hintmode.html">Hint mode</a>
+          <a class="dropdown-item" href="minor_html/about.html">About</a>
+          <a class="dropdown-item" href="minor_html/contact.html">Contact</a>
+        </div>
+      </div>
+    </nav>
+
+    <form>
+      <div class="container text-center mt-4">
+        <h2>Guess the Music</h2>
+
+        <!-- audio player -->
+        <audio id="audio" controls class="my-3">
+          <source src="sample.mp3" type="audio/mpeg" />
+          Your browser does not support the audio element.
+        </audio>
+
+        <div class="mb-2">
+          <label for="song" class="mr-2">Song:</label>
+
+          <input
+            id="song"
+            type="text"
+            class="form-control d-inline-block"
+            style="max-width: 280px"
+            placeholder="(optional)"
+          />
+        </div>
+
+        <!-- buttons: first loads sample next three are guesses -->
+        <div class="btn-group-vertical" style="max-width: 320px; width: 100%">
+          <button
+            type="button"
+            class="btn btn-primary mb-2 shadow-lg"
+            onclick="loadSample();"
+          >
+            Load Sample
+          </button>
+          <button
+            type="button"
+            id="guessBtn1"
+            class="btn btn-outline-primary mb-2 shadow"
+            onclick="guessFromButton(this);"
+            disabled
+          >
+            Guess 1
+          </button>
+          <button
+            type="button"
+            id="guessBtn2"
+            class="btn btn-outline-primary mb-2 shadow"
+            onclick="guessFromButton(this);"
+            disabled
+          >
+            Guess 2
+          </button>
+          <button
+            type="button"
+            id="guessBtn3"
+            class="btn btn-outline-primary mb-2 shadow"
+            onclick="guessFromButton(this);"
+            disabled
+          >
+            Guess 3
+          </button>
+        </div>
+
+        <div id="result" class="mt-3 font-weight-bold"></div>
+      </div>
+    </form>
+
+    <!--<script src="script.js"></script> this is stoered in header-->
   </body>
 </html>
