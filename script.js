@@ -1,3 +1,4 @@
+// Vincent game-start logic
 // this is for restoring the page back to a new game state
 //const gameDiv = document.getElementById('game').innerHTML;
 
@@ -61,6 +62,8 @@ function makeGuess() {
   let src = document.getElementById("song").value;
   alert("Printing: " + src);
 }
+
+// Nathan Game Logic
 
 // CorrectAnswer + Distractors
 const correctAnswer = "Lord of the Rings";
