@@ -58,3 +58,19 @@
     float: none;
   }
 }
+
+/* start button */
+.game_div {
+  text-align: center;
+}
+
+.start_button {
+  width: 200px;
+  height: 100px;
+}
+
+/* buttons now move on hover */
+.btn:hover {
+    transform: translateY(-2px); /* slight lift effect */
+    transition: all 0.2s ease-in-out;
+  }
