@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.text())
         .then(gameStartHTML => {
           document.getElementById('game').innerHTML = gameStartHTML;
+          loadSample();
         })
         .catch(error => console.error('Error loading HTML:', error));
     }
