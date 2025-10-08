@@ -37,8 +37,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const clickedElement = event.target;
 
         if (clickedElement.id == 'start_button') {
+            event.preventDefault()
             startGame();
         } else if (clickedElement.id == 'reset_button') {
+            event.preventDefault()
             resetGame();
         }
     });
@@ -48,11 +50,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.text())
         .then(gameStartHTML => {
           document.getElementById('game').innerHTML = gameStartHTML;
-          loadSample()
-
+          loadSample();
         })
         .catch(error => console.error('Error loading HTML:', error));
-        document.getElementById('game').innerHTML = gameStartHtml;
     }
 
     function resetGame() {
@@ -62,8 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('game').innerHTML = gameResetHtml;
         })
         .catch(error => console.error('Error loading HTML:', error));
-
-        document.getElementById('game').innerHTML = gameResetHtml;
     }
 });
 
