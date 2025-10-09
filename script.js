@@ -137,3 +137,13 @@ function guessFromButton(btn) {
     resultEl.style.color = "red";
   }
 }
+
+// NATHAN GAME LOGIC!!!!!!!!!!!!!!
+
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+// VINCENT GAME LOGIC!!!!!!!!!!!!!!
+
+
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
