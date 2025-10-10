@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function(): void {
         .then((gameStartHTML: string) => {
           const gameElement = document.getElementById('game') as HTMLElement;
           gameElement.innerHTML = gameStartHTML;
-          loadSample();
+          gameInitialize()
         })
         .catch((error: Error) => console.error('Error loading HTML:', error));
     }
@@ -87,20 +87,6 @@ function setGuessButtons(options) {
   document.getElementById("result").textContent = "";
 }
 
-function loadSample() {
-  const audio = document.getElementById("audio");
-
-  // ensure sample is loaded/played
-  audio.pause();
-  audio.src = "sample.mp3";
-  audio.load();
-  audio.play().catch(() => {});
-
-  // throw all guess into random order
-  const options = shuffle([correctAnswer, ...distractors]);
-  setGuessButtons(options);
-}
-
 function guessFromButton(btn) {
   const guess = btn.getAttribute("data-guess");
   const resultEl = document.getElementById("result");
@@ -127,7 +113,7 @@ function guessFromButton(btn) {
  * @returns {map} tracks
  * gives a map that includes the track titles and their previewUrls
  */
-async function getAlbumTracks(albumId: String, accessToken: String): Promise<Map<string, string>> {
+async function getAlbumTracks(albumId: String, accessToken: String): Promise<Array<{name: string, previewUrl: string}>> {
   const response: Response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
     headers: {
       'Authorization': `Bearer ${accessToken}`
@@ -140,10 +126,12 @@ async function getAlbumTracks(albumId: String, accessToken: String): Promise<Map
 
   const data: any = await response.json() // json data received from spotify
 
-  const tracks: Map<string, string> = data.items.map((track: any) => ({
+  const tracks: Array<{name: string, previewUrl: string}> = data.items.map((track: any) => ({
     name: track.name,
     previewUrl: track.preview_url
   }));
+
+  console.log(tracks[0].name);
 
   return tracks
 }
@@ -159,6 +147,23 @@ function pickTrackToBeGuessed(tracks: Map<string, string>): number {
     return correctTrackToBeGuessedIndex;
 }
 
+function loadCorrectTrackPreview(correctIndex: number, tracks: Array<{name: string, previewUrl: string}>): void {
+  const audio = document.getElementById("audio") as HTMLAudioElement;
+  
+  audio.pause();
+  audio.src = tracks[correctIndex].previewUrl;
+  audio.load();
+  audio.play().catch(() => {});
+}
 
+const client_secret: string = "65419dbb9cc74946851f0a5755a9cd96";
+const albumId: string = "6pyKEXTSWmqvSGGg7Hc1t4";
+function gameInitialize(): void {
+    const trackArray : Array<{name: string, previewUrl: string}> = getAlbumTracks(albumId ,client_secret);
+
+    const correctTrackIndex = pickTrackToBeGuessed(trackArray);
+
+    loadCorrectTrackPreview(correctTrackIndex, trackArray);
+}
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
