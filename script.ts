@@ -29,12 +29,12 @@ const gameResetHTML = `
  * make sure that all of your scripting is inside this to avoid
  * your functions from not being able to find the elements
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function(): void {
     /**
      * this allows us to have functions work on newly added HTML
      */
-    document.body.addEventListener('click', function(event) {
-        const clickedElement = event.target;
+    document.body.addEventListener('click', function(event: MouseEvent): void {
+        const clickedElement = event.target as HTMLElement;
 
         if (clickedElement.id == 'start_button') {
             event.preventDefault()
@@ -45,53 +45,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    function startGame() {
+    function startGame(): void {
       fetch('game.html')
-        .then(response => response.text())
-        .then(gameStartHTML => {
-          document.getElementById('game').innerHTML = gameStartHTML;
+        .then((response: Response) => response.text())
+        .then((gameStartHTML: string) => {
+          const gameElement = document.getElementById('game') as HTMLElement;
+          gameElement.innerHTML = gameStartHTML;
           loadSample();
         })
-        .catch(error => console.error('Error loading HTML:', error));
+        .catch((error: Error) => console.error('Error loading HTML:', error));
     }
 
-    function resetGame() {
+    function resetGame():void {
       fetch('game-reset.html')
-        .then(response => response.text())
-        .then(gameResetHtml => {
-          document.getElementById('game').innerHTML = gameResetHtml;
+        .then((response: Response) => response.text())
+        .then((gameResetHtml: string) => {
+          const gameElement = document.getElementById('game') as HTMLElement;
+          gameElement.innerHTML = gameResetHtml;
         })
-        .catch(error => console.error('Error loading HTML:', error));
+        .catch((error: Error) => console.error('Error loading HTML:', error));
     }
 });
 
-async function printSongs() {
-    const albumDirectory = './assets/music/The-Latin-Side-Of-Vince-Guaraldi-By-Vince-Guaraldi';
-
-    // reads the songs from the dir
-    const songs = await FileSystem.readdir(albumDirectory);
-
-    
-}
-function makeGuess() {
-  let src = document.getElementById("song").value;
-  alert("Printing: " + src);
-}
-
 // Nathan Game Logic
-
-// CorrectAnswer + Distractors
-const correctAnswer = "Lord of the Rings";
-const distractors = ["Chronicles of Narnia", "Avatar"]; // two wrong choices
-
-// simple shuffle logic
-function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
-}
 
 function setGuessButtons(options) {
   const btns = [
@@ -144,7 +120,6 @@ function guessFromButton(btn) {
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // VINCENT GAME LOGIC!!!!!!!!!!!!!!
-
 /**
  * 
  * @param {string} albumId 
@@ -152,11 +127,10 @@ function guessFromButton(btn) {
  * @returns {map} tracks
  * gives a map that includes the track titles and their previewUrls
  */
-/*
-async function getAlbumTracks(albumId, accessToken) {
-  const response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
+async function getAlbumTracks(albumId: String, accessToken: String): Promise<Map<string, string>> {
+  const response: Response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
     headers: {
-      'Auhtorization': `Bearer ${accessToken}`
+      'Authorization': `Bearer ${accessToken}`
     }
   });
 
@@ -164,23 +138,27 @@ async function getAlbumTracks(albumId, accessToken) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  const data = await response.json() // json data received from spotify
+  const data: any = await response.json() // json data received from spotify
 
-  const tracks = data.items.map(track => ({
+  const tracks: Map<string, string> = data.items.map((track: any) => ({
     name: track.name,
-    previewUrl: track.previewurl
+    previewUrl: track.preview_url
   }));
 
   return tracks
 }
 
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
+function randomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function pickTrackToBeGuessed(tracks) {
-  randomInt(0, tracks.size())
+function pickTrackToBeGuessed(tracks: Map<string, string>): number {
+    const correctTrackToBeGuessedIndex: number = 
+    randomInt(0, tracks.size - 1); // picks between 0 and the length of the map
+
+    return correctTrackToBeGuessedIndex;
 }
-*/
+
+
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
