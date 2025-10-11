@@ -9,11 +9,12 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Allow JavaScript to access this API
 
-def get_songs_and_paths(folder_path: str) -> list:
+def get_songs_and_paths(folder_path: str) -> tuple:
     try:
         items = os.listdir(folder_path)
 
         song_path = []
+        song_names = []
         # this returns a list with the file name and file path
         
         for item in items:
@@ -27,8 +28,9 @@ def get_songs_and_paths(folder_path: str) -> list:
                 clean_name = clean_name.replace('-', ' ')
 
                 song_path.append((clean_name, full_path))
+                song_names.append(clean_name)
 
-        return song_path
+        return song_path, song_names
     
     except FileNotFoundError:
         print(f"Error: The folder '{folder_path}' was not found.")
@@ -47,11 +49,11 @@ def get_local_album_tracks_endpoint():
     """This endpoint is what JavaScript calls"""
     folder_path = "./assets/music/The-Latin-Side-Of-Vince-Guaraldi-By-Vince-Guaraldi"
     try:
-        song_path = get_songs_and_paths(folder_path)
+        song_path, song_names = get_songs_and_paths(folder_path)
         correct_song_path = pick_correct_song(song_path)
         return jsonify({
             'success': True,
-            'data': song_path,
+            'song_names': song_names,
             'correct_choice_and_path': correct_song_path,
             'album_path': folder_path
         })
