@@ -10,7 +10,8 @@
 		"ghcr.io/devcontainers-extra/features/caddy:1": {},
 		"ghcr.io/devcontainers-extra/features/tmux-apt-get:1": {},
 		"ghcr.io/devcontainers-community/npm-features/typescript:1": {},
-		"ghcr.io/devcontainers/features/node:1": {} // needed for choosing the songs and displaying them
+		"ghcr.io/devcontainers/features/node:1": {}, // needed for choosing the songs and displaying them
+		"ghcr.io/devcontainers/features/python:1": {}
 	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.

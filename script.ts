@@ -22,53 +22,8 @@ const gameResetHTML = `
         `;
 */
 
-/**
- * the document.addEventListener('DOMContentLoaded', function() {});
- * is for making sure that the page is loaded and that the elements
- * are present/findable before the functions in here try to work on them.
- * make sure that all of your scripting is inside this to avoid
- * your functions from not being able to find the elements
- */
-document.addEventListener('DOMContentLoaded', function(): void {
-    /**
-     * this allows us to have functions work on newly added HTML
-     */
-    document.body.addEventListener('click', function(event: MouseEvent): void {
-        const clickedElement = event.target as HTMLElement;
-
-        if (clickedElement.id == 'start_button') {
-            event.preventDefault()
-            startGame();
-        } else if (clickedElement.id == 'reset_button') {
-            event.preventDefault()
-            resetGame();
-        }
-    });
-    
-    function startGame(): void {
-      fetch('game.html')
-        .then((response: Response) => response.text())
-        .then((gameStartHTML: string) => {
-          const gameElement = document.getElementById('game') as HTMLElement;
-          gameElement.innerHTML = gameStartHTML;
-          gameInitialize()
-        })
-        .catch((error: Error) => console.error('Error loading HTML:', error));
-    }
-
-    function resetGame():void {
-      fetch('game-reset.html')
-        .then((response: Response) => response.text())
-        .then((gameResetHtml: string) => {
-          const gameElement = document.getElementById('game') as HTMLElement;
-          gameElement.innerHTML = gameResetHtml;
-        })
-        .catch((error: Error) => console.error('Error loading HTML:', error));
-    }
-});
-
 // Nathan Game Logic
-
+/*
 function setGuessButtons(options) {
   const btns = [
     document.getElementById("guessBtn1"),
@@ -99,42 +54,58 @@ function guessFromButton(btn) {
     resultEl.style.color = "red";
   }
 }
-
+*/
 // NATHAN GAME LOGIC!!!!!!!!!!!!!!
 
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 // VINCENT GAME LOGIC!!!!!!!!!!!!!!
+
 /**
- * 
- * @param {string} albumId 
- * @param {string} accessToken 
- * @returns {map} tracks
- * gives a map that includes the track titles and their previewUrls
+ * the document.addEventListener('DOMContentLoaded', function() {});
+ * is for making sure that the page is loaded and that the elements
+ * are present/findable before the functions in here try to work on them.
+ * make sure that all of your scripting is inside this to avoid
+ * your functions from not being able to find the elements
  */
-async function getAlbumTracks(albumId: String, accessToken: String): Promise<Array<{name: string, previewUrl: string}>> {
-  const response: Response = await fetch(`https://api.spotify.com/v1/albums/${albumId}/tracks`, {
-    headers: {
-      'Authorization': `Bearer ${accessToken}`
+document.addEventListener('DOMContentLoaded', function(): void {
+    /**
+     * this allows us to have functions work on newly added HTML
+     */
+    document.body.addEventListener('click', function(event: MouseEvent): void {
+        const clickedElement = event.target as HTMLElement;
+
+        if (clickedElement.id == 'start_button') {
+            event.preventDefault()
+            startGame();
+        } else if (clickedElement.id == 'reset_button') {
+            event.preventDefault()
+            resetGame();
+        }
+    });
+    
+    function startGame(): void {
+      fetch('game.html')
+        .then((response: Response) => response.text())
+        .then((gameStartHTML: string) => {
+          const gameElement = document.getElementById('game') as HTMLElement;
+          gameElement.innerHTML = gameStartHTML;
+        })
+        .catch((error: Error) => console.error('Error loading HTML:', error));
     }
-  });
 
-  if(!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
+    function resetGame():void {
+      fetch('game-reset.html')
+        .then((response: Response) => response.text())
+        .then((gameResetHtml: string) => {
+          const gameElement = document.getElementById('game') as HTMLElement;
+          gameElement.innerHTML = gameResetHtml;
+        })
+        .catch((error: Error) => console.error('Error loading HTML:', error));
+    }
+});
 
-  const data: any = await response.json() // json data received from spotify
-
-  const tracks: Array<{name: string, previewUrl: string}> = data.items.map((track: any) => ({
-    name: track.name,
-    previewUrl: track.preview_url
-  }));
-
-  console.log(tracks[0].name);
-
-  return tracks
-}
 
 function randomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -156,7 +127,7 @@ function loadCorrectTrackPreview(correctIndex: number, tracks: Array<{name: stri
   audio.play().catch(() => {});
 }
 
-const client_secret: string = "65419dbb9cc74946851f0a5755a9cd96";
+
 const albumId: string = "6pyKEXTSWmqvSGGg7Hc1t4";
 function gameInitialize(): void {
     const trackArray : Array<{name: string, previewUrl: string}> = getAlbumTracks(albumId ,client_secret);
