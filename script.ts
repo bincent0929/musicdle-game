@@ -106,6 +106,98 @@ document.addEventListener('DOMContentLoaded', function(): void {
     }
 });
 
+// API Response Type Definitions
+interface TrackData {
+  [songName: string]: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data?: TrackData;
+  album_path?: string;
+  error?: string;
+}
+
+interface Track {
+  name: string;
+  path: string;
+}
+
+interface AlbumInfo {
+  albumPath: string;
+  tracks: Track[];
+  trackMap: Map<string, string>;
+}
+
+// Handles the music data
+class MusicDataManager {
+  private apiUrl: string;
+  private albumInfo: AlbumInfo | null = null;
+  private lastFetchTime: Date | null = null;
+
+  constructor(apiUrl: string = 'http://localhost:5000/api/tracks') {
+    this.apiUrl = apiUrl;
+  }
+
+  // fetches the track info from the backend
+  async fetchTracks(): Promise<AlbumInfo> {
+    try {
+      const response = await fetch(this.apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data: ApiResponse = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Unknown error occurred');
+      }
+
+      if (!data.data || !data.album_path) {
+        throw new Error('Invalid response structure');
+        // shouldn't have to worry about this.
+      }
+
+      this.albumInfo = this.processTrackData(data.data, data.album_path);
+      this.lastFetchTime = new Date();
+
+      return this.albumInfo;
+    } catch (error) {
+      console.error('Error fetching tracks:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Processes raw track data into a structured format
+   */
+  private processTrackData(trackData: TrackData, albumPath: string): AlbumInfo {
+    const tracks: Track[] = [];
+    const trackMap = new Map<string, string>();
+
+    for (const [name, path] of Object.entries(trackData)) {
+      tracks.push({ name, path });
+      trackMap.set(name, path);
+    }
+
+    // Sort tracks alphabetically by name
+    tracks.sort((a, b) => a.name.localeCompare(b.name));
+
+    return {
+      albumPath,
+      tracks,
+      trackMap,
+    };
+  }
+}
+
+
 
 function randomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1) + min);
@@ -125,16 +217,6 @@ function loadCorrectTrackPreview(correctIndex: number, tracks: Array<{name: stri
   audio.src = tracks[correctIndex].previewUrl;
   audio.load();
   audio.play().catch(() => {});
-}
-
-
-const albumId: string = "6pyKEXTSWmqvSGGg7Hc1t4";
-function gameInitialize(): void {
-    const trackArray : Array<{name: string, previewUrl: string}> = getAlbumTracks(albumId ,client_secret);
-
-    const correctTrackIndex = pickTrackToBeGuessed(trackArray);
-
-    loadCorrectTrackPreview(correctTrackIndex, trackArray);
 }
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
