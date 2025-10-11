@@ -106,8 +106,50 @@ document.addEventListener('DOMContentLoaded', function(): void {
     }
 });
 
-// API Response Type Definitions
+//!!!!!!!!!!!!!!!!!! API Response Type Definitions
 
+// type defintions for received album data
+export interface AlbumData {
+  album_path: string;
+  correct_choice_and_path: [string, string];
+  song_names: string[];
+  success: boolean;
+}
 
+// more specific type for the correct choice data
+export interface CorrectChoice {
+  name: string;
+  path: string;
+}
+
+// an "extend interface" with the parsed correctChoice
+export interface ParsedAlbumData extends AlbumData {
+  correct_choice?: CorrectChoice;
+}
+
+// stores the data with proper typing
+export let currentAlbumData: AlbumData | null = null;
+
+// function that sets the album data when received
+export const setAlbumData = (data: AlbumData): void => {
+  currentAlbumData = data;
+}
+
+// helper to get the parsed data with the destructured correct choice
+export const getParsedAlbumData = (): ParsedAlbumData | null => {
+  if (!currentAlbumData) return null;
+
+  return {
+    ...currentAlbumData,
+    correct_choice: {
+      name: currentAlbumData.correct_choice_and_path[0],
+      path: currentAlbumData.correct_choice_and_path[1]
+    }
+  };
+};
+
+// prints out the names of the songs and which is correct
+
+// prints out the audio element
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
