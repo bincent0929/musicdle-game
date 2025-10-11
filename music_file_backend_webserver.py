@@ -8,15 +8,26 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Allow JavaScript to access this API
 
-def get_file_names(folder_path):
+def get_songs_and_paths(folder_path):
     try:
         items = os.listdir(folder_path)
 
+        song_path = {}
         # this returns a list with the file name and file path
-        files = [os.path.join(folder_path, item) for item in items 
-                if os.path.isfile(os.path.join(folder_path, item))]
         
-        return files
+        for item in items:
+            full_path = os.path.join(folder_path, item)
+            if os.path.isfile(full_path):
+                clean_name = item
+
+                if clean_name.lower().endswith('.mp3'):
+                    clean_name = clean_name[:-4]
+
+                clean_name = clean_name.replace('-', ' ')
+
+                song_path[clean_name] = full_path
+
+        return song_path
     
     except FileNotFoundError:
         print(f"Error: The folder '{folder_path}' was not found.")
@@ -27,15 +38,16 @@ def get_file_names(folder_path):
 
 
 # API ENDPOINT that JavaScript will call
-@app.route('/api/album/<album_id>/tracks', methods=['GET'])
-def get_album_tracks_endpoint(album_id):
+@app.route('/api/tracks', methods=['GET'])
+def get_local_album_tracks_endpoint():
     """This endpoint is what JavaScript calls"""
+    folder_path = "./assets/music/The-Latin-Side-Of-Vince-Guaraldi-By-Vince-Guaraldi"
     try:
-        tracks = 
+        song_path = get_songs_and_paths(folder_path)
         return jsonify({
             'success': True,
-            'data': tracks,
-            'album_id': album_id
+            'data': song_path,
+            'album_path': folder_path
         })
     except Exception as e:
         return jsonify({
@@ -44,5 +56,4 @@ def get_album_tracks_endpoint(album_id):
         }), 500
 
 if __name__ == '__main__':
-    # spotify.get_access_token()
     app.run(port=5000, debug=True)
