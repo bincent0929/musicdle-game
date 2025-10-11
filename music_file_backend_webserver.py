@@ -1,18 +1,19 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
+import random
 
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  # Allow JavaScript to access this API
 
-def get_songs_and_paths(folder_path):
+def get_songs_and_paths(folder_path: str) -> list:
     try:
         items = os.listdir(folder_path)
 
-        song_path = {}
+        song_path = []
         # this returns a list with the file name and file path
         
         for item in items:
@@ -25,7 +26,7 @@ def get_songs_and_paths(folder_path):
 
                 clean_name = clean_name.replace('-', ' ')
 
-                song_path[clean_name] = full_path
+                song_path.append((clean_name, full_path))
 
         return song_path
     
@@ -35,7 +36,10 @@ def get_songs_and_paths(folder_path):
     except PermissionError:
         print(f"Error: Permission denied to access '{folder_path}'.")
         return []
-
+    
+def pick_correct_song(song_path: list) -> str:
+    correct_song_path = random.choice(song_path)
+    return correct_song_path
 
 # API ENDPOINT that JavaScript will call
 @app.route('/api/tracks', methods=['GET'])
@@ -44,9 +48,11 @@ def get_local_album_tracks_endpoint():
     folder_path = "./assets/music/The-Latin-Side-Of-Vince-Guaraldi-By-Vince-Guaraldi"
     try:
         song_path = get_songs_and_paths(folder_path)
+        correct_song_path = pick_correct_song(song_path)
         return jsonify({
             'success': True,
             'data': song_path,
+            'correct_choice_and_path': correct_song_path,
             'album_path': folder_path
         })
     except Exception as e:
