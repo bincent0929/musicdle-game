@@ -128,13 +128,14 @@ function guessFromButton(button: HTMLButtonElement): void {
       return;
     }
     button.textContent = "Correct";
-    button.classList.remove("btn-outline-primary");
+    // button.classList.remove("btn-outline-primary");
     button.style.backgroundColor = "green";
     button.style.color = "white";
     gameCompleteAnchor.classList.remove("hidden");
+    gameCompleteAnchor.classList.add("inline-block");
   }else {
     button.textContent = "Wrong";
-    button.classList.remove("btn-outline-primary");
+    //button.classList.remove("btn-outline-primary");
     button.style.backgroundColor = "red";
     button.style.color = "white";
     button.disabled = true;
