@@ -92,3 +92,12 @@ Here are the docs if you want to look into changing it: https://caddyserver.com/
 Use the files in `/assets/music` for temporary testing of playing music and the logic before using an API.
 
 How typescript, whenever you change the `.ts` file you want to run `tsc typescript-file.ts` and then it will spit out a javascript file that we'll use in the website.
+
+
+
+
+to run backend server
+
+sudo apt update
+pip3 --version
+pip3 install flask
