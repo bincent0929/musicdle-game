@@ -108,45 +108,64 @@ document.addEventListener('DOMContentLoaded', function(): void {
 
 //!!!!!!!!!!!!!!!!!! API Response Type Definitions
 
-// type defintions for received album data
-export interface AlbumData {
-  album_path: string;
-  correct_choice_and_path: [string, string];
-  song_names: string[];
-  success: boolean;
-}
+// This creates a global namespace when compiled to JS
+namespace AlbumManager {
+  // Type definitions
+  export interface AlbumData {
+    album_path: string;
+    correct_choice_and_path: [string, string];
+    song_names: string[];
+    success: boolean;
+  }
 
-// more specific type for the correct choice data
-export interface CorrectChoice {
-  name: string;
-  path: string;
-}
+  export interface CorrectChoice {
+    name: string;
+    path: string;
+  }
 
-// an "extend interface" with the parsed correctChoice
-export interface ParsedAlbumData extends AlbumData {
-  correct_choice?: CorrectChoice;
-}
+  // Store the data
+  let currentData: AlbumData | null = null;
 
-// stores the data with proper typing
-export let currentAlbumData: AlbumData | null = null;
+  // Public methods
+  export function setAlbumData(data: AlbumData): void {
+    currentData = data;
+  }
 
-// function that sets the album data when received
-export const setAlbumData = (data: AlbumData): void => {
-  currentAlbumData = data;
-}
+  export function getAlbumData(): AlbumData | null {
+    return currentData;
+  }
 
-// helper to get the parsed data with the destructured correct choice
-export const getParsedAlbumData = (): ParsedAlbumData | null => {
-  if (!currentAlbumData) return null;
+  export function getCorrectChoice(): CorrectChoice | null {
+    if (!currentData) return null;
+    return {
+      name: currentData.correct_choice_and_path[0],
+      path: currentData.correct_choice_and_path[1]
+    };
+  }
 
-  return {
-    ...currentAlbumData,
-    correct_choice: {
-      name: currentAlbumData.correct_choice_and_path[0],
-      path: currentAlbumData.correct_choice_and_path[1]
+  export function getSongNames(): string[] {
+    return currentData?.song_names || [];
+  }
+
+  export async function fetchAndSetAlbumData(): Promise<boolean> {
+    try {
+      const response = await fetch('http://localhost:5000/api/tracks');
+
+      const data: AlbumData = await response.json();
+
+      if (data.success && data.album_path && data.song_names && data.correct_choice_and_path) {
+        setAlbumData(data);
+        console.log('Album data loaded successfully');
+        return true;
+      } else {
+        throw new Error('Invalid data structure received from API');
+      }
+    } catch(error) {
+        console.error('Error fetching album data:', error);
+        return false;
     }
-  };
-};
+  }
+}
 
 // prints out the names of the songs and which is correct
 
