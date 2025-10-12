@@ -41,7 +41,7 @@ namespace AlbumManager {
 
   export async function fetchAndSetAlbumData(): Promise<boolean> {
     try {
-      const response = await fetch('http://localhost:5000/api/tracks');
+      const response = await fetch('http://127.0.0.1:5000/api/tracks');
 
       const data: AlbumData = await response.json();
 
@@ -52,9 +52,9 @@ namespace AlbumManager {
       } else {
         throw new Error('Invalid data structure received from API');
       }
-    } catch(error) {
-        console.error('Error fetching album data:', error);
-        return false;
+    } catch (error) {
+      console.error('Error fetching album data:', error);
+      return false;
     }
   }
 }
@@ -62,7 +62,7 @@ namespace AlbumManager {
 async function initializeAlbum() {
   const success = await AlbumManager.fetchAndSetAlbumData();
   // or: const success = await fetchAlbumData();
-  
+
   if (success) {
     console.log("data received from backend!")
     return true;
@@ -74,7 +74,7 @@ async function initializeAlbum() {
 
 function loadAudioPlayer(): void {
   const correctChoice = AlbumManager.getCorrectChoice();
-  
+
   if (!correctChoice) {
     console.error("jump ship");
     return;
@@ -83,12 +83,12 @@ function loadAudioPlayer(): void {
   }
 
   const audioEl = document.getElementById("audio") as HTMLAudioElement | null;
-  
+
   if (!audioEl) {   // this was why audio element was working do to type safe locality
     console.error("Audio element with id='audio' not found in DOM");
     return;
   }
-  
+
   audioEl.src = correctChoice.path;
   audioEl.load()
   console.log("music player loaded");
@@ -101,7 +101,7 @@ function loadButton(): void {
     console.error("jump ship");
     return;
   }
-  for(let i = 1; i <= 9 ; i++){
+  for (let i = 1; i <= 9; i++) {
     const btn1 = document.getElementById(`guessBtn${i}`) as HTMLButtonElement | null;
     if (!btn1) {
       console.error("button is null dumbass");
@@ -109,9 +109,9 @@ function loadButton(): void {
     }
     btn1.textContent = songNames[i - 1];
     btn1.disabled = false;
-    if (songNames[i-1] === correctChoice.name){
+    if (songNames[i - 1] === correctChoice.name) {
       btn1.setAttribute("data-correct", "true");
-    }else {
+    } else {
       btn1.setAttribute("data-correct", "false");
     }
     btn1.classList.remove("btn-success", "btn-danger", "hidden");
@@ -121,7 +121,7 @@ function loadButton(): void {
 
 function guessFromButton(button: HTMLButtonElement): void {
   const tstf = button.getAttribute("data-correct") === "true";
-  if (tstf === true){
+  if (tstf === true) {
     const gameCompleteAnchor = document.getElementById(`game-completed-link`) as HTMLAnchorElement | null;
     if (!gameCompleteAnchor) {
       console.error("game completed anchor not found");
@@ -133,7 +133,7 @@ function guessFromButton(button: HTMLButtonElement): void {
     button.style.color = "white";
     gameCompleteAnchor.classList.remove("hidden");
     gameCompleteAnchor.classList.add("inline-block");
-  }else {
+  } else {
     button.textContent = "Wrong";
     //button.classList.remove("btn-outline-primary");
     button.style.backgroundColor = "red";
@@ -145,7 +145,7 @@ function guessFromButton(button: HTMLButtonElement): void {
 async function startApp() {
   const success = await initializeAlbum();
 
-  if(success) {
+  if (success) {
     loadAudioPlayer();
     loadButton();
     // add any functions here that need the backend data
