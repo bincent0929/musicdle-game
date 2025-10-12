@@ -34,12 +34,12 @@ def get_songs_and_paths(folder_path: str) -> tuple[list[tuple[str, str]],list[st
     
     except FileNotFoundError:
         print(f"Error: The folder '{folder_path}' was not found.")
-        return []
+        return ([],[])
     except PermissionError:
         print(f"Error: Permission denied to access '{folder_path}'.")
-        return []
+        return ([],[])
     
-def pick_correct_song(song_path: list[tuple[str, str]]) -> str:
+def pick_correct_song(song_path: list[tuple[str, str]]) -> tuple[str, str]:
     correct_song_path = random.choice(song_path)
     return correct_song_path
 
