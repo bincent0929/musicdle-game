@@ -65,14 +65,12 @@ async function initializeAlbum() {
   
   if (success) {
     console.log("data received from backend!")
+    return true;
   } else {
     // Handle the error case
     alert('Failed to load album data');
   }
 }
-
-// Call on page load
-window.addEventListener('DOMContentLoaded', initializeAlbum);
 
 function loadAudioPlayer(): void {
   const correctChoice = AlbumManager.getCorrectChoice();
@@ -80,6 +78,8 @@ function loadAudioPlayer(): void {
   if (!correctChoice) {
     console.error("jump ship");
     return;
+  } else {
+    console.log(correctChoice);
   }
 
   const audioEl = document.getElementById("audio") as HTMLAudioElement | null;
@@ -93,7 +93,7 @@ function loadAudioPlayer(): void {
   audioEl.load()
   console.log("music player loaded");
 }
-
+/*
 function loadButton(): void {
   const songNames = AlbumManager.getSongNames();
   const correctChoice = AlbumManager.getCorrectChoice();
@@ -102,12 +102,30 @@ function loadButton(): void {
     return;
   }
   for(let i = 1; i <= 9 ; i++){
-    const b = document.getElementById('gussBtn{i}') as HTMLButtonElement | null;
-    if (!b) {
+    const btn1 = document.getElementById(`gussBtn{i}`) as HTMLButtonElement | null;
+    if (!btn1) {
       console.error("b is null dumbass");
       return
     }
-    b.textContent = songNames[i];
-    
+    btn1.textContent = songNames[i];
+    btn1.disabled = false;
+    if (songNames[i] === correctChoice.name){
+      btn1.setAttribute("data-correct", "true");
+    }else {
+      btn1.setAttribute("data-correct", "false");
+    }
   }
 }
+*/
+async function startApp() {
+  const success = await initializeAlbum();
+
+  if(success) {
+    loadAudioPlayer();
+    // add any functions here that need the backend data
+  } else {
+    console.error("Failed to load the album's data")
+  }
+}
+
+window.addEventListener('DOMContentLoaded', startApp);
