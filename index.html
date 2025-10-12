@@ -2,75 +2,26 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-      crossorigin="anonymous"
-    />
-    <script
-      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-      crossorigin="anonymous"
-    ></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Musicdle</title>
-    <link rel="stylesheet" href="style.css" />
-    <script src="script.js"></script>
+    <link rel="stylesheet" href="/styles/compiled-styles.css" />
+    <!--<script src="scripts/script.js"></script>-->
   </head>
-
-  <body>
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand d-flex align-items-center" href="index.html">
-        <img
-          src="minor_html/musicnote.png"
-          width="40"
-          height="35"
-          class="d-inline-block align-top mr-2"
-          alt="Logo"
-        />
-        MusicDle</a
-      >
-      <div class="dropdown ml-auto">
-        <button
-          class="navbar-toggler"
-          type="button"
-          id="menuButton"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div
-          class="dropdown-menu dropdown-menu-right"
-          aria-labelledby="menuButton"
-        >
-          <a class="dropdown-item" href="hint_mode/hintmode.html">Hint mode</a>
-          <a class="dropdown-item" href="minor_html/about.html">About</a>
-          <a class="dropdown-item" href="minor_html/contact.html">Contact</a>
-        </div>
+  <body class="bg-gray-50">
+    <!-- Welcome Page -->
+    <div id="game" class="flex flex-col items-center justify-center min-h-screen">
+      <div id="logo" class="flex items-center gap-4">
+        <img class="w-12 h-12 object-contain bg-transparent" src="/assets/photos/8thNote.svg">
+        <h1 class="text-4xl font-bold">Welcome To Musicdle</h1>
+        <img class="w-12 h-12 object-contain bg-transparent" src="/assets/photos/8thNote.svg">
       </div>
-    </nav>
-
-    <div class="game_div" id="game">
-      <div class="start_button_div">
-        <button id="start_button">
-          Do you want to start the game?
-        </button>
+      <div id="start_game_link" class="mt-6">
+        <a href="game.html" 
+          class="inline-block px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+          Start Game
+        </a>
       </div>
     </div>
-
+    
   </body>
 </html>
