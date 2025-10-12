@@ -1,4 +1,4 @@
-TSC = tsc script.ts
+TSC = tsc script.ts --lib ES2015,DOM
 CADDY = caddy
 PYTHON = python3
 BACKEND_FILE = music_file_backend_webserver.py
