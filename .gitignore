@@ -1,2 +1,3 @@
 *.js
 .env
+styles/compiled-styles.css
