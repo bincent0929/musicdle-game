@@ -1,140 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-      crossorigin="anonymous"
-    />
-    <script
-      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-      crossorigin="anonymous"
-    ></script>
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Musicdle</title>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="styles/game-styles.css" />
     <script src="scripts/game.js"></script>
   </head>  
   
-  <body> <!--on load doesnt work as this file is fetched-->
-    <form>
-      <div class="container text-center mt-4">
-        <h2>Guess the Music!</h2>
-
-        <!-- audio player -->
-        <audio id="audio" controls class="my-3">
-          
-        </audio>
-
-    <!-- buttons: first loads sample next three are guesses -->
-    <div class="btn-group-vertical" style="max-width: 320px; width: 100%">
-      
-      <button
-        type="button"
-        id="guessBtn1"
-        class="btn btn-outline-primary mb-2 shadow"
-        onclick="guessFromButton(this);"
-        disabled
-      >
-        Guess 1
-      </button>
-      <button
-        type="button"
-        id="guessBtn2"
-        class="btn btn-outline-primary mb-2 shadow"
-        onclick="guessFromButton(this);"
-        disabled
-      >
-        Guess 2
-      </button>
-      <button
-        type="button"
-        id="guessBtn3"
-        class="btn btn-outline-primary mb-2 shadow"
-        onclick="guessFromButton(this);"
-        disabled
-      >
-        Guess 3
-      </button>
-      <button
-        type="button"
-        id="guessBtn4"
-        class="btn btn-outline-primary mb-2 shadow"
-        onclick="guessFromButton(this);"
-        disabled
-      >
-        Guess 4
-      </button>
-      <button
+  <body>
+    <div id="game_div" class="flex flex-col items-center justify-center min-h-screen">
+      <h2 class="text-2xl font-bold">Guess the Music!</h2>
+      <audio id="audio" controls class="my-3"></audio>
+      <div class="flex flex-col">
+        <button
           type="button"
-          id="guessBtn5"
-          class="btn btn-outline-primary mb-2 shadow"
+          id="guessBtn1"
+          class="btn btn-outline-primary mb-2 shadow hidden"
           onclick="guessFromButton(this);"
           disabled
         >
-          Guess 5
+          Guess 1
         </button>
-      <button
-        type="button"
-        id="guessBtn6"
-        class="btn btn-outline-primary mb-2 shadow"
-        onclick="guessFromButton(this);"
-        disabled
-      >
-        Guess 6
-      </button>
-      <button
-        type="button"
-        id="guessBtn7"
-        class="btn btn-outline-primary mb-2 shadow"
-        onclick="guessFromButton(this);"
-        disabled
-      >
-        Guess 7
-      </button>
-      <button
-        type="button"
-        id="guessBtn8"
-        class="btn btn-outline-primary mb-2 shadow"
-        onclick="guessFromButton(this);"
-        disabled
-      >
-        Guess 8
-      </button>
-      <button
-        type="button"
-        id="guessBtn9"
-        class="btn btn-outline-primary mb-2 shadow"
-        onclick="guessFromButton(this);"
-        disabled
-      >
-        Guess 9
-      </button>
-    </div>
-
-    <div id="result" class="mt-3 font-weight-bold"></div>
-  </div>
-
-      <div class="reset_button_div">
-        <button id="reset_button"
-        class="btn btn-outline-primary mb-2 shadow">
-            Do you want to reset the game?
+        <button
+          type="button"
+          id="guessBtn2"
+          class="btn btn-outline-primary mb-2 shadow hidden"
+          onclick="guessFromButton(this);"
+          disabled
+        >
+          Guess 2
+        </button>
+        <button
+          type="button"
+          id="guessBtn3"
+          class="btn btn-outline-primary mb-2 shadow hidden"
+          onclick="guessFromButton(this);"
+          disabled
+        >
+          Guess 3
+        </button>
+        <button
+          type="button"
+          id="guessBtn4"
+          class="btn btn-outline-primary mb-2 shadow hidden"
+          onclick="guessFromButton(this);"
+          disabled
+        >
+          Guess 4
+        </button>
+        <button
+            type="button"
+            id="guessBtn5"
+            class="btn btn-outline-primary mb-2 shadow hidden"
+            onclick="guessFromButton(this);"
+            disabled
+          >
+            Guess 5
+          </button>
+        <button
+          type="button"
+          id="guessBtn6"
+          class="btn btn-outline-primary mb-2 shadow hidden"
+          onclick="guessFromButton(this);"
+          disabled
+        >
+          Guess 6
+        </button>
+        <button
+          type="button"
+          id="guessBtn7"
+          class="btn btn-outline-primary mb-2 shadow hidden"
+          onclick="guessFromButton(this);"
+          disabled
+        >
+          Guess 7
+        </button>
+        <button
+          type="button"
+          id="guessBtn8"
+          class="btn btn-outline-primary mb-2 shadow hidden"
+          onclick="guessFromButton(this);"
+          disabled
+        >
+          Guess 8
+        </button>
+        <button
+          type="button"
+          id="guessBtn9"
+          class="btn btn-outline-primary mb-2 shadow hidden"
+          onclick="guessFromButton(this);"
+          disabled
+        >
+          Guess 9
         </button>
       </div>
-
-    </form>
+    </div>
   </body>
 </html>

@@ -114,7 +114,7 @@ function loadButton(): void {
     }else {
       btn1.setAttribute("data-correct", "false");
     }
-    btn1.classList.remove("btn-success", "btn-danger");
+    btn1.classList.remove("btn-success", "btn-danger", "hidden");
     btn1.classList.add("btn-outline-primary");
   }
 }
