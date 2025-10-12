@@ -124,12 +124,13 @@ function guessFromButton(button: HTMLButtonElement): void {
   if (tstf === true){
     button.textContent = "Correct";
     button.classList.remove("btn-outline-primary");
-    button.classList.add("btn-success");  // this needs to be changed
-
+    button.style.backgroundColor = "green";
+    button.style.color = "white";
   }else {
     button.textContent = "Wrong";
     button.classList.remove("btn-outline-primary");
-    button.classList.add("btn-danger"); // this needs to be changed
+    button.style.backgroundColor = "red";
+    button.style.color = "white";
     button.disabled = true;
   }
 }
