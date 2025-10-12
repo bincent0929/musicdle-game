@@ -165,7 +165,43 @@ namespace AlbumManager {
         return false;
     }
   }
+  
+  export function loadAudioPlayer(): void {
+    const correctChoice = getCorrectChoice();
+      if (!correctChoice) {
+      console.error("jump ship");
+      return;
+    }
+    const audioEl = document.getElementById("audio") as HTMLAudioElement | null;
+    if (!audioEl) {   //this was why audio element was working do to type safe locality
+      console.error("Audio element with id='audio' not found in DOM");
+      return;
+    }
+    audioEl.src = correctChoice.path;
+    audioEl.load()
+    console.log("music player checker");
+  }
 }
+
+async function initializeAlbum() {
+  const success = await AlbumManager.fetchAndSetAlbumData();
+  // or: const success = await fetchAlbumData();
+  
+  if (success) {
+    // Now you can use the data
+    const songs = AlbumManager.getSongNames();
+    const correctChoice = AlbumManager.getCorrectChoice();
+    // ... do something with the data
+  } else {
+    // Handle the error case
+    alert('Failed to load album data');
+  }
+}
+
+// Call on page load
+window.addEventListener('DOMContentLoaded', initializeAlbum);
+
+
 
 // prints out the names of the songs and which is correct
 

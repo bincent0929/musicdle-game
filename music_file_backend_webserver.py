@@ -9,12 +9,12 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Allow JavaScript to access this API
 
-def get_songs_and_paths(folder_path: str) -> tuple:
+def get_songs_and_paths(folder_path: str) -> tuple[list[tuple[str, str]],list[str]]:
     try:
         items = os.listdir(folder_path)
 
-        song_path = []
-        song_names = []
+        song_path : list[tuple[str, str]] = []
+        song_names : list[str] = []
         # this returns a list with the file name and file path
         
         for item in items:
@@ -25,7 +25,7 @@ def get_songs_and_paths(folder_path: str) -> tuple:
                 if clean_name.lower().endswith('.mp3'):
                     clean_name = clean_name[:-4]
 
-                clean_name = clean_name.replace('-', ' ')
+                clean_name : str = clean_name.replace('-', ' ')
 
                 song_path.append((clean_name, full_path))
                 song_names.append(clean_name)
@@ -39,7 +39,7 @@ def get_songs_and_paths(folder_path: str) -> tuple:
         print(f"Error: Permission denied to access '{folder_path}'.")
         return []
     
-def pick_correct_song(song_path: list) -> str:
+def pick_correct_song(song_path: list[tuple[str, str]]) -> str:
     correct_song_path = random.choice(song_path)
     return correct_song_path
 
