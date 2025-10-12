@@ -124,12 +124,12 @@ function guessFromButton(button: HTMLButtonElement): void {
   if (tstf === true){
     button.textContent = "Correct";
     button.classList.remove("btn-outline-primary");
-    button.classList.add("btn-success");
+    button.classList.add("btn-success");  // this needs to be changed
 
   }else {
     button.textContent = "Wrong";
     button.classList.remove("btn-outline-primary");
-    button.classList.add("btn-danger");
+    button.classList.add("btn-danger"); // this needs to be changed
     button.disabled = true;
   }
 }
