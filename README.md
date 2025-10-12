@@ -1,3 +1,7 @@
+# For Building The Website
+
+For getting the site running, you'll want to compile the typescript to javascript `tsc scripts/game.ts` and run tailwind to output into the css `tailwindcss -o styles/tcss-game-styles.css` add `--watch` if you're currently working on the styling. It will update the styles as you add classes to the HTML. Then start the python backend using `python music_file_backend_webserver.py` and run `caddy run`. Now the website should be up.
+
 # MusicDle
 ## September 17th:
 
@@ -83,21 +87,3 @@ git push -u origin <your-branch-name>
 > - Keep branches small & focused (1 feature per branch)
 > - Write clear commit messages
 > - Use draft PRs if work is in progress
-To run the webserver to check how the website is looking run `caddy run` in your terminal and you'll be able to open the webpage through going https://localhost:443.
-
-If you want to have multiple terminals open, then you should use tmux. It is built into the container. Just run `tmux` and then run `caddy run` and then press `CRTL+b` then `d` and you'll have Caddy running in the background.
-
-Here are the docs if you want to look into changing it: https://caddyserver.com/docs/quick-starts/static-files
-
-Use the files in `/assets/music` for temporary testing of playing music and the logic before using an API.
-
-How typescript, whenever you change the `.ts` file you want to run `tsc typescript-file.ts` and then it will spit out a javascript file that we'll use in the website.
-
-
-
-
-to run backend server
-
-sudo apt update
-pip3 --version
-pip3 install flask
