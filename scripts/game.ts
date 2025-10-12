@@ -93,7 +93,7 @@ function loadAudioPlayer(): void {
   audioEl.load()
   console.log("music player loaded");
 }
-/*
+
 function loadButton(): void {
   const songNames = AlbumManager.getSongNames();
   const correctChoice = AlbumManager.getCorrectChoice();
@@ -102,26 +102,44 @@ function loadButton(): void {
     return;
   }
   for(let i = 1; i <= 9 ; i++){
-    const btn1 = document.getElementById(`gussBtn{i}`) as HTMLButtonElement | null;
+    const btn1 = document.getElementById(`guessBtn${i}`) as HTMLButtonElement | null;
     if (!btn1) {
-      console.error("b is null dumbass");
-      return
+      console.error("button is null dumbass");
+      continue
     }
-    btn1.textContent = songNames[i];
+    btn1.textContent = songNames[i - 1];
     btn1.disabled = false;
-    if (songNames[i] === correctChoice.name){
+    if (songNames[i-1] === correctChoice.name){
       btn1.setAttribute("data-correct", "true");
     }else {
       btn1.setAttribute("data-correct", "false");
     }
+    btn1.classList.remove("btn-success", "btn-danger");
+    btn1.classList.add("btn-outline-primary");
   }
 }
-*/
+
+function guessFromButton(button: HTMLButtonElement): void {
+  const tstf = button.getAttribute("data-correct") === "true";
+  if (tstf === true){
+    button.textContent = "Correct";
+    button.classList.remove("btn-outline-primary");
+    button.classList.add("btn-success");
+
+  }else {
+    button.textContent = "Wrong";
+    button.classList.remove("btn-outline-primary");
+    button.classList.add("btn-danger");
+    button.disabled = true;
+  }
+}
+
 async function startApp() {
   const success = await initializeAlbum();
 
   if(success) {
     loadAudioPlayer();
+    loadButton();
     // add any functions here that need the backend data
   } else {
     console.error("Failed to load the album's data")
