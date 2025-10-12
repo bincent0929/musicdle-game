@@ -1,10 +1,7 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import os
-from dotenv import load_dotenv
 import random
-
-load_dotenv()
 
 app = Flask(__name__)
 CORS(app)  # Allow JavaScript to access this API

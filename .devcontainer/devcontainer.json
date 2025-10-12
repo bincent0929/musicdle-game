@@ -17,7 +17,11 @@
 	// "features": {},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [443]
+	"forwardPorts": [443],
+
+	// Install Flask and Flask-CORS after container creation
+	// this is for the backend server that reads our music files
+	"postCreateCommand": "pip install flask flask_cors"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
