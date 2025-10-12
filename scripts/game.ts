@@ -122,10 +122,16 @@ function loadButton(): void {
 function guessFromButton(button: HTMLButtonElement): void {
   const tstf = button.getAttribute("data-correct") === "true";
   if (tstf === true){
+    const gameCompleteAnchor = document.getElementById(`game-completed-link`) as HTMLAnchorElement | null;
+    if (!gameCompleteAnchor) {
+      console.error("game completed anchor not found");
+      return;
+    }
     button.textContent = "Correct";
     button.classList.remove("btn-outline-primary");
     button.style.backgroundColor = "green";
     button.style.color = "white";
+    gameCompleteAnchor.classList.remove("hidden");
   }else {
     button.textContent = "Wrong";
     button.classList.remove("btn-outline-primary");
