@@ -25,12 +25,10 @@
     ></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Musicdle</title>
-    
-    <!--<link rel="stylesheet" href="style.css" />-->
-    <link rel="stylesheet" href="game-style.css" />
-    <script src="script.js"></script>
-
-  </head>
+    <link rel="stylesheet" href="style.css" />
+    <script src="scripts/game.js"></script>
+  </head>  
+  
   <body> <!--on load doesnt work as this file is fetched-->
     <form>
       <div class="container text-center mt-4">
@@ -40,18 +38,6 @@
         <audio id="audio" controls class="my-3">
           
         </audio>
-
-    <div class="mb-2">
-      <label for="song" class="mr-2">Song:</label>
-
-      <input
-        id="song"
-        type="text"
-        class="form-control d-inline-block"
-        style="max-width: 280px"
-        placeholder="(optional)"
-      />
-    </div>
 
     <!-- buttons: first loads sample next three are guesses -->
     <div class="btn-group-vertical" style="max-width: 320px; width: 100%">
@@ -83,6 +69,60 @@
       >
         Guess 3
       </button>
+      <button
+        type="button"
+        id="guessBtn4"
+        class="btn btn-outline-primary mb-2 shadow"
+        onclick="guessFromButton(this);"
+        disabled
+      >
+        Guess 4
+      </button>
+      <button
+          type="button"
+          id="guessBtn5"
+          class="btn btn-outline-primary mb-2 shadow"
+          onclick="guessFromButton(this);"
+          disabled
+        >
+          Guess 5
+        </button>
+      <button
+        type="button"
+        id="guessBtn6"
+        class="btn btn-outline-primary mb-2 shadow"
+        onclick="guessFromButton(this);"
+        disabled
+      >
+        Guess 6
+      </button>
+      <button
+        type="button"
+        id="guessBtn7"
+        class="btn btn-outline-primary mb-2 shadow"
+        onclick="guessFromButton(this);"
+        disabled
+      >
+        Guess 7
+      </button>
+      <button
+        type="button"
+        id="guessBtn8"
+        class="btn btn-outline-primary mb-2 shadow"
+        onclick="guessFromButton(this);"
+        disabled
+      >
+        Guess 8
+      </button>
+      <button
+        type="button"
+        id="guessBtn9"
+        class="btn btn-outline-primary mb-2 shadow"
+        onclick="guessFromButton(this);"
+        disabled
+      >
+        Guess 9
+      </button>
     </div>
 
     <div id="result" class="mt-3 font-weight-bold"></div>
@@ -98,7 +138,3 @@
     </form>
   </body>
 </html>
-
-
-
-
