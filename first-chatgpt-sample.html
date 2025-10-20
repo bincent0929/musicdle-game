@@ -1,0 +1,47 @@
+<!-- 
+  iTunes Preview Finder
+  A simple web app to search for songs on iTunes and play their previews.
+
+  This basically just allows you to type an artist and pulls up 12 of their songs including a 30 second preview
+-->
+
+<!doctype html><meta charset="utf-8">
+<title>iTunes Preview Finder</title>
+
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem}
+  header{display:flex;gap:.5rem;flex-wrap:wrap}
+  input,button{padding:.5rem .7rem;border:1px solid #ccc;border-radius:.6rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-top:1rem}
+  .card{border:1px solid #e5e7eb;border-radius:1rem;padding:1rem}
+  .t{font-weight:600}.a{color:#555}
+</style>
+
+<header>
+  <input id="q" placeholder="Artist or song (e.g., 'Taylor Swift')" size="32">
+  <input id="limit" type="number" min="1" max="50" value="12">
+  <button id="go">Search</button>
+</header>
+<div id="out" class="grid"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+$("go").onclick = async () => {
+  const term = $("q").value.trim(); if(!term) return alert("Enter a search");
+  const limit = Math.max(1, Math.min(50, parseInt($("limit").value||"12",10)));
+  const url = `https://itunes.apple.com/search?media=music&entity=song&term=${encodeURIComponent(term)}&limit=${limit}`;
+  const res = await fetch(url); const data = await res.json();
+  const root = $("out"); root.innerHTML = "";
+  (data.results||[]).forEach(r => {
+    const div = document.createElement("div");
+    div.className="card";
+    div.innerHTML = `
+      <div class="t">${r.trackName}</div>
+      <div class="a">by ${r.artistName}</div>
+      <audio controls src="${r.previewUrl||""}"></audio>
+      <div><a href="${r.trackViewUrl}" target="_blank" rel="noopener">View on Apple</a></div>`;
+    root.appendChild(div);
+  });
+  if (!data.results?.length) root.innerHTML = "<p>No results.</p>";
+};
+</script>
