@@ -3,39 +3,58 @@
  * for the iTunes Search API documentation.
  */
 
-const $ = id => document.getElementById(id);
-// pulls the top 100 songs for the genre in the given country
+const $ = (id:string) => document.getElementById(id);
+
+// fetches a json from Apple's API
 const rssTopSongs = (country: string, genre: string, limit=100) =>
   `https://itunes.apple.com/${country}/rss/topsongs/limit=${limit}/genre=${genre}/json`;
 
-let current = null;
-function normalize(s){ return (s||"").toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+// stores the current song's arist and title info
+let current : {artist: string, title: string} | null = null;
+function normalize(s:string){ 
+  return (s||"").toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); 
+}
 
 /* ------------ main game: pick & play a popular track ------------ */
+/**
+ * 1. pulls from the itunes API for the top songs.
+ * 2. randomly picks one songs from the fetched songs.
+ * 3. pulls the artist name, preview, and title from the lookup API.
+ * @param tries 
+ * @returns 
+ */
 async function pickSongWithPreview(tries=6){
-  const country = $("country").value;
-  const genre = $("genre").value;
-  $("status").textContent = "Loading top songs…";
-  $("meta").textContent = "";
-  $("guess").value = "";
-  $("player").src = "";
+  const country = ($("country") as HTMLInputElement).value;
+  const genre = ($("genre") as HTMLInputElement).value;
+  
+  ($("status") as HTMLElement).textContent = "Loading top songs…";
+  ($("meta") as HTMLElement).textContent = "";
+  ($("guess") as HTMLInputElement).value = "";
+  ($("player") as HTMLAudioElement).src = "";
 
+  // fetches the top 100 songs
   const feed = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(()=>({feed:{entry:[]}}));
   const entries = feed?.feed?.entry || [];
   if (!entries.length) throw new Error("No songs found for that genre/country.");
 
   for (let i=0; i<tries; i++){
+    // randomly chooses a song
     const chosen = entries[Math.floor(Math.random()*entries.length)];
+    // grabs the info for the song
     const trackId = chosen?.id?.attributes?.["im:id"];
     const fallbackArtist = chosen?.["im:artist"]?.label || "";
     const fallbackTitle  = chosen?.["im:name"]?.label || "";
     if (!trackId) continue;
-
+    
+    // looks up the song using its id from the iTunes lookup API
     const looked = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
       .then(r => r.json()).catch(()=>null);
+    // !! x needs to be properly typed based on the API
     const item = looked?.results?.find(x => x.kind === "song") || looked?.results?.[0];
+    // grabs the preview url from the result
     const preview = item?.previewUrl;
     if (preview){
+      // this log is just for debugging purposes
       console.log("Picked track:", fallbackArtist, "–", fallbackTitle);
       return { preview, artist: item?.artistName || fallbackArtist, title: item?.trackName || fallbackTitle };
     }
@@ -61,7 +80,7 @@ async function pickSong(){
 
 function checkGuess(){
   if(!current) return;
-  const g = normalize($("guess").value);
+  const g = normalize(($("guess") as HTMLInputElement).value);
   const correct = normalize(current.title);
   if (!g) { $("status").textContent = "Type a guess first!"; return; }
   $("status").textContent = (g && (correct.includes(g) || g === correct)) ? "✅ Correct!" : "❌ Not quite. Try again or Reveal.";
