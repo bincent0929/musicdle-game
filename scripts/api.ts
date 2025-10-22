@@ -148,7 +148,7 @@ function normalize(s:string){
  * 2. randomly picks one songs from the fetched songs.
  * 3. pulls the artist name, preview, and title from the lookup API.
  * @param tries 
- * @returns 
+ * @returns Promise<{preview: string, artist: string, title: string}>
  */
 async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: string, title: string}> {
   // this are taken from the user's input on the page
@@ -179,7 +179,7 @@ async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: s
     const looked = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
       .then(r => r.json()).catch(()=>null);
     // !! x needs to be properly typed based on the API
-    const item = looked?.results?.find(x => x.kind === "song") || looked?.results?.[0];
+    const item = looked?.results?.find((x:ITunesTrack) => x.kind === "song") || looked?.results?.[0];
     // grabs the preview url from the result
     const preview : string = item?.previewUrl;
     if (preview){
