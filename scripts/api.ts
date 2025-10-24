@@ -275,19 +275,50 @@ function dedupeByTitle(results){
   return out;
 }
 
-async function searchArtistSongs(q){
+async function searchArtistSongs(query: string): Promise<void> {
+  // Cancel any ongoing request before starting a new one
   if (aborter) aborter.abort();
   aborter = new AbortController();
-  const signal = aborter.signal;
+  const { signal } = aborter;
 
-  const country = $("country").value;
-  // Use artistTerm so typing an artist yields their tracks
-  const url = `https://itunes.apple.com/search?media=music&entity=song&attribute=artistTerm&country=${country}&limit=50&term=${encodeURIComponent(q)}`;
+  // Get the country code
+  const countryInput = $("country") as HTMLInputElement | null;
+  const country = countryInput?.value || "us";
 
-  const data = await fetch(url, { signal }).then(r=>r.json()).catch(()=>({results:[]}));
-  const items = dedupeByTitle(data.results || []).slice(0, 30);
-  ddItems = items; renderDD(items);
-  ddIndex = items.length ? 0 : -1; highlight(ddIndex);
+  // Skip if the query is too short
+  if (query.trim().length < 2) {
+    hideDD();
+    return;
+  }
+
+  const searchUrl = new URL("https://itunes.apple.com/search");
+  searchUrl.searchParams.set("media", "music");
+  searchUrl.searchParams.set("entity", "song");
+  searchUrl.searchParams.set("attribute", "artistTerm");
+  searchUrl.searchParams.set("country", country);
+  searchUrl.searchParams.set("limit", "50");
+  searchUrl.searchParams.set("term", query.trim());
+
+  try {
+    const response = await fetch(searchUrl.toString(), { signal });
+    const data: ITunesSearchResponse = await response.json();
+
+    // Duplicates
+    const uniqueSongs = dedupeByTitle(data.results ?? []).slice(0, 30);
+
+    ddItems = uniqueSongs;
+    renderDD(uniqueSongs);
+
+    // Select the first suggestion by default
+    ddIndex = uniqueSongs.length > 0 ? 0 : -1;
+    highlight(ddIndex);
+  } catch (error) {
+    // If the user stopped typing before the request finished
+    if (error instanceof DOMException && error.name === "AbortError") return;
+
+    console.error("Error fetching artist songs:", error);
+    hideDD();
+  }
 }
 
 const DEBOUNCE_MS = 180;
