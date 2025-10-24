@@ -252,12 +252,25 @@ function highlight(index){
   [...guessDD.children].forEach((c, i) => c.setAttribute("aria-selected", i===index ? "true" : "false"));
   if (index>=0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({block:"nearest"});
 }
-function selectItem(index){
-  const it = ddItems[index]; if (!it) return;
-  // Fill the guess input with the song title (so they can submit)
-  $("guess").value = it.title;
+
+function selectItem(index: number): void {
+  // Ensure the index is valid
+  const selectedItem = ddItems?.[index];
+  if (!selectedItem) {
+    console.warn(`selectItem: Invalid index ${index} or no items available.`);
+    return;
+  }
+  const guessInput = $("guess") as HTMLInputElement | null;
+  if (!guessInput) {
+    console.error("selectItem: Could not find guess input element.");
+    return;
+  }
+
+  // Fill the input with the selected song title
+  guessInput.value = selectedItem.title;
+
   hideDD();
-  $("guess").focus();
+  guessInput.focus();
 }
 
 function dedupeByTitle(results){
