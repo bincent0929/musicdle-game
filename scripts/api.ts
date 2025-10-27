@@ -209,20 +209,37 @@ async function pickSong(){
 
 function checkGuess(){
   if(!current) return;
-  const g = normalize(($("guess") as HTMLInputElement).value);
+  const guessInput = $("guess") as HTMLInputElement | null;
+  const statusEl = $("status");
+  if (!guessInput || !statusEl) return;
+  
+  const g = normalize(guessInput.value);
   const correct = normalize(current.title);
-  if (!g) { $("status").textContent = "Type a guess first!"; return; }
-  $("status").textContent = (g && (correct.includes(g) || g === correct)) ? "✅ Correct!" : "❌ Not quite. Try again or Reveal.";
+  if (!g) { 
+    statusEl.textContent = "Type a guess first!"; 
+    return; 
+  }
+  statusEl.textContent = (g && (correct.includes(g) || g === correct)) ? "✅ Correct!" : "❌ Not quite. Try again or Reveal.";
 }
 // This is not working right now
 function reveal(){
   if(!current) return;
-  $("status").textContent = "🔎 Revealed.";
-  $("meta").innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+  const statusEl = $("status");
+  const metaEl = $("meta");
+  if (!statusEl || !metaEl) return;
+  
+  statusEl.textContent = "🔎 Revealed.";
+  metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
 }
-$("new").onclick = pickSong;
-$("submit").onclick = checkGuess;
-$("guess").addEventListener("keydown", e => { if(e.key==="Enter") checkGuess(); });
+
+const newBtn = $("new");
+const submitBtn = $("submit");
+const guessInput = $("guess");
+
+if (newBtn) newBtn.onclick = pickSong;
+if (submitBtn) submitBtn.onclick = checkGuess;
+if (guessInput) guessInput.addEventListener("keydown", e => { if(e.key==="Enter") checkGuess(); });
+
 
 /* ------------ integrated dropdown on the Guess input ------------ */
 const guessDD = $("guessDD");
