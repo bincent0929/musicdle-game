@@ -1,191 +1,34 @@
-/**
- * Look at https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/index.html#//apple_ref/doc/uid/TP40017632-CH3-SW1
- * for the iTunes Search API documentation.
- */
-/**
- * iTunes Search API Track Result
- * Based on Apple's official documentation
- */
+async function pickSongWithPreview(tries = 6) {
+  const country = "US";
+  //const genre = $("genre").value;
+  //$("status").textContent = "Loading top songs…";
+  $("meta").textContent = "";
+  $("guess").value = "";
+  $("player").src = "";
 
-/**
- * I had Claude go ahead and write up an interface (kind of like a structure)
- * for the return type of the iTunes API.
- */
-interface ITunesTrack {
-  // Core identification
-  wrapperType: "track" | "collection" | "artist";
-  kind: "book" | "album" | "coached-audio" | "feature-movie" |
-  "interactive-booklet" | "music-video" | "pdf" | "podcast" |
-  "podcast-episode" | "software-package" | "song" | "tv-episode" | "artist";
-
-  // IDs
-  trackId: number;
-  artistId: number;
-  collectionId: number;
-
-  // Names
-  trackName: string;
-  artistName: string;
-  collectionName: string;
-
-  // Censored versions (objectionable words *'d out)
-  trackCensoredName: string;
-  collectionCensoredName: string;
-
-  // URLs for viewing in iTunes Store
-  artistViewUrl: string;
-  collectionViewUrl: string;
-  trackViewUrl: string;
-
-  // Preview URL (30-second preview) - only for tracks
-  previewUrl?: string;
-
-  // Artwork URLs
-  artworkUrl60?: string;   // 60x60 pixels
-  artworkUrl100?: string;  // 100x100 pixels
-
-  // Pricing
-  collectionPrice: number;
-  trackPrice: number;
-  currency: string;  // e.g., "USD"
-
-  // Explicit content ratings (RIAA parental advisory)
-  trackExplicitness: "explicit" | "cleaned" | "notExplicit";
-  collectionExplicitness: "explicit" | "cleaned" | "notExplicit";
-
-  // Track metadata
-  discCount: number;
-  discNumber: number;
-  trackCount: number;
-  trackNumber: number;
-  trackTimeMillis: number;  // Track duration in milliseconds
-
-  // Location and genre
-  country: string;  // e.g., "USA"
-  primaryGenreName: string;  // e.g., "Rock"
-
-  // Additional fields commonly returned but not in the example
-  releaseDate?: string;  // ISO 8601 format
-  collectionArtistId?: number;
-  collectionArtistName?: string;
-  collectionArtistViewUrl?: string;
-
-  // For different media types
-  contentAdvisoryRating?: string;  // For movies/TV
-  shortDescription?: string;
-  longDescription?: string;
-
-  // Radio station specific
-  radioStationUrl?: string;
-
-  // Streaming availability
-  isStreamable?: boolean;
-
-  // Additional artwork sizes (sometimes included)
-  artworkUrl30?: string;
-  artworkUrl512?: string;
-  artworkUrl600?: string;
-
-  // Genre IDs
-  genreIds?: string[];
-  genres?: string[];
-}
-
-/**
- * iTunes API Response wrapper
- */
-interface ITunesSearchResponse {
-  resultCount: number;
-  results: ITunesTrack[];
-}
-
-/**
- * Type guard for songs with preview URLs
- */
-function isSongWithPreview(track: ITunesTrack): track is ITunesTrack & { previewUrl: string } {
-  return track.kind === "song" && !!track.previewUrl;
-}
-
-/**
- * Type for explicit content ratings
- */
-type ExplicitnessRating = "explicit" | "cleaned" | "notExplicit";
-
-/**
- * Media kinds enum for better type safety
- */
-enum ITunesMediaKind {
-  Book = "book",
-  Album = "album",
-  CoachedAudio = "coached-audio",
-  FeatureMovie = "feature-movie",
-  InteractiveBooklet = "interactive-booklet",
-  MusicVideo = "music-video",
-  PDF = "pdf",
-  Podcast = "podcast",
-  PodcastEpisode = "podcast-episode",
-  SoftwarePackage = "software-package",
-  Song = "song",
-  TVEpisode = "tv-episode",
-  Artist = "artist"
-}
-
-const $ = (id: string) => document.getElementById(id);
-
-// fetches a json from Apple's API
-const rssTopSongs = (country: string, genre: string, limit = 100) =>
-  `https://itunes.apple.com/${country}/rss/topsongs/limit=${limit}/genre=${genre}/json`;
-
-// stores the current song's arist and title info
-let current: { artist: string, title: string } | null = null;
-function normalize(s: string) {
-  return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-}
-
-/* ------------ main game: pick & play a popular track ------------ */
-/**
- * 1. pulls from the itunes API for the top songs.
- * 2. randomly picks one songs from the fetched songs.
- * 3. pulls the artist name, preview, and title from the lookup API.
- * @param tries 
- * @returns 
- */
-async function pickSongWithPreview(tries = 6): Promise<{ preview: string, artist: string, title: string }> {
-  // this are taken from the user's input on the page
-  const country = ($("country") as HTMLInputElement).value;
-  const genre = ($("genre") as HTMLInputElement).value;
-
-  ($("status") as HTMLElement).textContent = "Loading top songs…";
-  ($("meta") as HTMLElement).textContent = "";
-  ($("guess") as HTMLInputElement).value = "";
-  ($("player") as HTMLAudioElement).src = "";
-
-  // fetches the top 100 songs
-  const feed = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(() => ({ feed: { entry: [] } }));
+  // 1) Get top songs feed
+  const feed = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
   const entries = feed?.feed?.entry || [];
   if (!entries.length) throw new Error("No songs found for that genre/country.");
 
+  // 2) Try up to N random entries until one has previewUrl
   for (let i = 0; i < tries; i++) {
-    // randomly chooses a song
     const chosen = entries[Math.floor(Math.random() * entries.length)];
-    // grabs the info for the song
-    const trackId: number = chosen?.id?.attributes?.["im:id"];
-    // !! the artist could be a number value or it could be the string. It needs to be double checked.
-    const fallbackArtist: string = chosen?.["im:artist"]?.label || "";
-    const fallbackTitle: string = chosen?.["im:name"]?.label || "";
+    const trackId = chosen?.id?.attributes?.["im:id"];
+    const fallbackArtist = chosen?.["im:artist"]?.label || "";
+    const fallbackTitle = chosen?.["im:name"]?.label || "";
     if (!trackId) continue;
 
-    // looks up the song using its id from the iTunes lookup API
     const looked = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
       .then(r => r.json()).catch(() => null);
-    // !! x needs to be properly typed based on the API
     const item = looked?.results?.find(x => x.kind === "song") || looked?.results?.[0];
-    // grabs the preview url from the result
-    const preview: string = item?.previewUrl;
+    const preview = item?.previewUrl;
     if (preview) {
-      // !! this log is just for debugging purposes
-      console.log("Picked track:", fallbackArtist, "–", fallbackTitle);
-      return { preview, artist: item?.artistName || fallbackArtist, title: item?.trackName || fallbackTitle };
+      return {
+        preview,
+        artist: item?.artistName || fallbackArtist,
+        title: item?.trackName || fallbackTitle
+      };
     }
   }
   throw new Error("Could not find a preview for any of the picked tracks. Try again.");
@@ -209,7 +52,7 @@ async function pickSong() {
 
 function checkGuess() {
   if (!current) return;
-  const g = normalize(($("guess") as HTMLInputElement).value);
+  const g = normalize($("guess").value);
   const correct = normalize(current.title);
   if (!g) { $("status").textContent = "Type a guess first!"; return; }
   $("status").textContent = (g && (correct.includes(g) || g === correct)) ? "✅ Correct!" : "❌ Not quite. Try again or Reveal.";
@@ -248,25 +91,10 @@ function renderDD(items) {
   }
   showDD();
 }
-
-// highlighting function
-function highlight(index: number): void {
-  const guesDD = document.getElementById("guessDD") as HTMLElement | null;
-  if (!guesDD) return;
-
-  const children = Array.from(guesDD.getElementsByClassName("dd-item")) as HTMLElement[];
-  children.forEach((c, i) => {
-    c.setAttribute("aria-selected", i === index ? "true" : "false");
-  });
-
-  if (index >= 0 && children[index]) {
-    children[index].scrollIntoView({
-      block: "nearest"
-    }
-    );
-  }
+function highlight(index) {
+  [...guessDD.children].forEach((c, i) => c.setAttribute("aria-selected", i === index ? "true" : "false"));
+  if (index >= 0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({ block: "nearest" });
 }
-
 function selectItem(index) {
   const it = ddItems[index]; if (!it) return;
   // Fill the guess input with the song title (so they can submit)
