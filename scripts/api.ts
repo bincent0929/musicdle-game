@@ -148,7 +148,7 @@ function normalize(s:string){
  * 2. randomly picks one songs from the fetched songs.
  * 3. pulls the artist name, preview, and title from the lookup API.
  * @param tries 
- * @returns 
+ * @returns Promise<{preview: string, artist: string, title: string}>
  */
 async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: string, title: string}> {
   // this are taken from the user's input on the page
@@ -179,7 +179,7 @@ async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: s
     const looked = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
       .then(r => r.json()).catch(()=>null);
     // !! x needs to be properly typed based on the API
-    const item = looked?.results?.find(x => x.kind === "song") || looked?.results?.[0];
+    const item = looked?.results?.find((x:ITunesTrack) => x.kind === "song") || looked?.results?.[0];
     // grabs the preview url from the result
     const preview : string = item?.previewUrl;
     if (preview){
@@ -192,37 +192,62 @@ async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: s
 }
 
 async function pickSong(){
+  let statusElement = $("status") as HTMLElement;
+  let metaElement = $("meta") as HTMLElement;
+    
+  if (!statusElement) throw new Error("Status element not found.");
+  if (!metaElement) throw new Error("Meta element not found.");
+  
   try {
     const info = await pickSongWithPreview();
     current = { artist: info.artist, title: info.title };
-    const player = $("player");
+    const player = $("player") as HTMLAudioElement;
+    //if (player === null) throw new Error("Audio player not found.");
     player.src = info.preview; player.load();
     const p = player.play();
-    if (p && p.catch) await p.catch(()=>{$("status").textContent="Tap ▶️ to start playback (autoplay blocked).";});
-    if (!player.paused) $("status").textContent = "Playing preview… guess the title!";
-    $("meta").textContent = "";
+
+    if (p && p.catch) await p.catch(()=>{statusElement.textContent="Tap ▶️ to start playback (autoplay blocked).";});
+    if (!player.paused) statusElement.textContent = "Playing preview… guess the title!";
+    metaElement.textContent = "";
   } catch (e){
-    $("status").textContent = e.message || "Error fetching song.";
-    $("meta").textContent = "";
+    statusElement.textContent = (e as Error).message || "Error fetching song.";
+    metaElement.textContent = "";
   }
 }
 
 function checkGuess(){
   if(!current) return;
-  const g = normalize(($("guess") as HTMLInputElement).value);
+  const guessInput = $("guess") as HTMLInputElement | null;
+  const statusEl = $("status");
+  if (!guessInput || !statusEl) return;
+  
+  const g = normalize(guessInput.value);
   const correct = normalize(current.title);
-  if (!g) { $("status").textContent = "Type a guess first!"; return; }
-  $("status").textContent = (g && (correct.includes(g) || g === correct)) ? "✅ Correct!" : "❌ Not quite. Try again or Reveal.";
+  if (!g) { 
+    statusEl.textContent = "Type a guess first!"; 
+    return; 
+  }
+  statusEl.textContent = (g && (correct.includes(g) || g === correct)) ? "✅ Correct!" : "❌ Not quite. Try again or Reveal.";
 }
 // This is not working right now
 function reveal(){
   if(!current) return;
-  $("status").textContent = "🔎 Revealed.";
-  $("meta").innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+  const statusEl = $("status");
+  const metaEl = $("meta");
+  if (!statusEl || !metaEl) return;
+  
+  statusEl.textContent = "🔎 Revealed.";
+  metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
 }
-$("new").onclick = pickSong;
-$("submit").onclick = checkGuess;
-$("guess").addEventListener("keydown", e => { if(e.key==="Enter") checkGuess(); });
+
+const newBtn = $("new");
+const submitBtn = $("submit");
+const guessInput = $("guess");
+
+if (newBtn) newBtn.onclick = pickSong;
+if (submitBtn) submitBtn.onclick = checkGuess;
+if (guessInput) guessInput.addEventListener("keydown", e => { if(e.key==="Enter") checkGuess(); });
+
 
 /* ------------ integrated dropdown on the Guess input ------------ */
 const guessDD = $("guessDD");
@@ -232,6 +257,10 @@ function hideDD(){ guessDD.classList.add("hidden"); guessDD.innerHTML=""; ddInde
 function showDD(){ guessDD.classList.remove("hidden"); }
 
 function renderDD(items){
+  if(!guessDD){
+    console.warn(`guessDD could be null`);
+    return;
+  }
   guessDD.innerHTML = "";
   items.forEach((it, i) => {
     const el = document.createElement("div");
@@ -248,18 +277,29 @@ function renderDD(items){
   }
   showDD();
 }
-
 function highlight(index){
   [...guessDD.children].forEach((c, i) => c.setAttribute("aria-selected", i===index ? "true" : "false"));
   if (index>=0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({block:"nearest"});
 }
 
-function selectItem(index){
-  const it = ddItems[index]; if (!it) return;
-  // Fill the guess input with the song title (so they can submit)
-  $("guess").value = it.title;
+function selectItem(index: number): void {
+  // Ensure the index is valid
+  const selectedItem = ddItems?.[index];
+  if (!selectedItem) {
+    console.warn(`selectItem: Invalid index ${index} or no items available.`);
+    return;
+  }
+  const guessInput = $("guess") as HTMLInputElement | null;
+  if (!guessInput) {
+    console.error("selectItem: Could not find guess input element.");
+    return;
+  }
+
+  // Fill the input with the selected song title
+  guessInput.value = selectedItem.title;
+
   hideDD();
-  $("guess").focus();
+  guessInput.focus();
 }
 
 function dedupeByTitle(results){
@@ -277,19 +317,50 @@ function dedupeByTitle(results){
   return out;
 }
 
-async function searchArtistSongs(q){
+async function searchArtistSongs(query: string): Promise<void> {
+  // Cancel any ongoing request before starting a new one
   if (aborter) aborter.abort();
   aborter = new AbortController();
-  const signal = aborter.signal;
+  const { signal } = aborter;
 
-  const country = $("country").value;
-  // Use artistTerm so typing an artist yields their tracks
-  const url = `https://itunes.apple.com/search?media=music&entity=song&attribute=artistTerm&country=${country}&limit=50&term=${encodeURIComponent(q)}`;
+  // Get the country code
+  const countryInput = $("country") as HTMLInputElement | null;
+  const country = countryInput?.value || "us";
 
-  const data = await fetch(url, { signal }).then(r=>r.json()).catch(()=>({results:[]}));
-  const items = dedupeByTitle(data.results || []).slice(0, 30);
-  ddItems = items; renderDD(items);
-  ddIndex = items.length ? 0 : -1; highlight(ddIndex);
+  // Skip if the query is too short
+  if (query.trim().length < 2) {
+    hideDD();
+    return;
+  }
+
+  const searchUrl = new URL("https://itunes.apple.com/search");
+  searchUrl.searchParams.set("media", "music");
+  searchUrl.searchParams.set("entity", "song");
+  searchUrl.searchParams.set("attribute", "artistTerm");
+  searchUrl.searchParams.set("country", country);
+  searchUrl.searchParams.set("limit", "50");
+  searchUrl.searchParams.set("term", query.trim());
+
+  try {
+    const response = await fetch(searchUrl.toString(), { signal });
+    const data: ITunesSearchResponse = await response.json();
+
+    // Duplicates
+    const uniqueSongs = dedupeByTitle(data.results ?? []).slice(0, 30);
+
+    ddItems = uniqueSongs;
+    renderDD(uniqueSongs);
+
+    // Select the first suggestion by default
+    ddIndex = uniqueSongs.length > 0 ? 0 : -1;
+    highlight(ddIndex);
+  } catch (error) {
+    // If the user stopped typing before the request finished
+    if (error instanceof DOMException && error.name === "AbortError") return;
+
+    console.error("Error fetching artist songs:", error);
+    hideDD();
+  }
 }
 
 const DEBOUNCE_MS = 180;
