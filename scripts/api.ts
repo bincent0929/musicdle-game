@@ -148,7 +148,7 @@ function normalize(s:string){
  * 2. randomly picks one songs from the fetched songs.
  * 3. pulls the artist name, preview, and title from the lookup API.
  * @param tries 
- * @returns 
+ * @returns Promise<{preview: string, artist: string, title: string}>
  */
 async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: string, title: string}> {
   // this are taken from the user's input on the page
@@ -179,7 +179,7 @@ async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: s
     const looked = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
       .then(r => r.json()).catch(()=>null);
     // !! x needs to be properly typed based on the API
-    const item = looked?.results?.find(x => x.kind === "song") || looked?.results?.[0];
+    const item = looked?.results?.find((x:ITunesTrack) => x.kind === "song") || looked?.results?.[0];
     // grabs the preview url from the result
     const preview : string = item?.previewUrl;
     if (preview){
@@ -192,18 +192,26 @@ async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: s
 }
 
 async function pickSong(){
+  let statusElement = $("status") as HTMLElement;
+  let metaElement = $("meta") as HTMLElement;
+    
+  if (!statusElement) throw new Error("Status element not found.");
+  if (!metaElement) throw new Error("Meta element not found.");
+  
   try {
     const info = await pickSongWithPreview();
     current = { artist: info.artist, title: info.title };
-    const player = $("player");
+    const player = $("player") as HTMLAudioElement;
+    //if (player === null) throw new Error("Audio player not found.");
     player.src = info.preview; player.load();
     const p = player.play();
-    if (p && p.catch) await p.catch(()=>{$("status").textContent="Tap ▶️ to start playback (autoplay blocked).";});
-    if (!player.paused) $("status").textContent = "Playing preview… guess the title!";
-    $("meta").textContent = "";
+
+    if (p && p.catch) await p.catch(()=>{statusElement.textContent="Tap ▶️ to start playback (autoplay blocked).";});
+    if (!player.paused) statusElement.textContent = "Playing preview… guess the title!";
+    metaElement.textContent = "";
   } catch (e){
-    $("status").textContent = e.message || "Error fetching song.";
-    $("meta").textContent = "";
+    statusElement.textContent = (e as Error).message || "Error fetching song.";
+    metaElement.textContent = "";
   }
 }
 
