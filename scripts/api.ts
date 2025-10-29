@@ -130,6 +130,7 @@ enum ITunesMediaKind {
   Artist = "artist"
 }
 
+// allows us to use $ as shorthand for document.getElementById
 const $ = (id:string) => document.getElementById(id);
 
 // fetches a json from Apple's API
