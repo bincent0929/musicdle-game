@@ -1,3 +1,16 @@
+interface CurrentTrack {
+  artist: string;
+  title: string;
+}
+
+interface DropdownItem {
+  title: string;
+  artist: string;
+  artwork: string;
+}
+
+let current: CurrentTrack | null = null;
+
 async function pickSongWithPreview(tries = 6) {
   const country = "US";
   //const genre = $("genre").value;
@@ -68,8 +81,10 @@ $("submit").onclick = checkGuess;
 $("guess").addEventListener("keydown", e => { if (e.key === "Enter") checkGuess(); });
 
 /* ------------ integrated dropdown on the Guess input ------------ */
-const guessDD = $("guessDD");
-let ddIndex = -1, ddItems = [], aborter = null;
+const guessDD = $("guessDD") as HTMLDivElement;
+let ddIndex = -1;
+let ddItems: DropdownItem[] = [];
+let aborter: AbortController | null = null;
 
 function hideDD() { guessDD.classList.add("hidden"); guessDD.innerHTML = ""; ddIndex = -1; ddItems = []; }
 function showDD() { guessDD.classList.remove("hidden"); }
@@ -135,7 +150,7 @@ async function searchArtistSongs(q) {
 }
 
 const DEBOUNCE_MS = 180;
-let t = null;
+let t: number | undefined;
 $("guess").addEventListener("input", (e) => {
   const q = e.target.value.trim();
   clearTimeout(t);
