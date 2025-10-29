@@ -91,10 +91,11 @@ function renderDD(items) {
   }
   showDD();
 }
-function highlight(index) {
+function highlight(index: number): void {
   [...guessDD.children].forEach((c, i) => c.setAttribute("aria-selected", i === index ? "true" : "false"));
   if (index >= 0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({ block: "nearest" });
 }
+
 function selectItem(index) {
   const it = ddItems[index]; if (!it) return;
   // Fill the guess input with the song title (so they can submit)
