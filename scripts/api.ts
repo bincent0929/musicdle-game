@@ -225,8 +225,8 @@ $("submit").onclick = checkGuess;
 $("guess").addEventListener("keydown", e => { if(e.key==="Enter") checkGuess(); });
 
 /* ------------ integrated dropdown on the Guess input ------------ */
-const guessDD = $("guessDD");
-let ddIndex = -1, ddItems = [], aborter = null;
+const guessDD = $("guessDD") as HTMLElement;
+let ddIndex = -1, ddItems:any[] = [], aborter = null;
 
 function hideDD(){ guessDD.classList.add("hidden"); guessDD.innerHTML=""; ddIndex=-1; ddItems=[]; }
 function showDD(){ guessDD.classList.remove("hidden"); }
@@ -291,14 +291,17 @@ async function searchArtistSongs(q){
 }
 
 const DEBOUNCE_MS = 180;
-let t = null;
-$("guess").addEventListener("input", (e)=>{
-  const q = e.target.value.trim();
+let t:any = null;
+let guessElement = $("guess") as HTMLInputElement;
+
+guessElement.addEventListener("input", (e)=>{
+  const eventTarget = e.target as HTMLInputElement;
+  const q = eventTarget.value.trim();
   clearTimeout(t);
   if (q.length < 2){ hideDD(); return; }
   t = setTimeout(()=>searchArtistSongs(q), DEBOUNCE_MS);
 });
-$("guess").addEventListener("keydown", (e)=>{
+guessElement.addEventListener("keydown", (e)=>{
   if (guessDD.classList.contains("hidden")) return;
   if (e.key === "ArrowDown"){ e.preventDefault(); ddIndex = Math.min(ddIndex+1, ddItems.length-1); highlight(ddIndex); }
   else if (e.key === "ArrowUp"){ e.preventDefault(); ddIndex = Math.max(ddIndex-1, 0); highlight(ddIndex); }
@@ -308,6 +311,7 @@ $("guess").addEventListener("keydown", (e)=>{
 
 // click outside to close
 document.addEventListener("click", (e)=>{
-  const wrap = document.querySelector(".guess-wrap");
-  if (!wrap.contains(e.target)) hideDD();
+  const wrap = document.querySelector(".guess-wrap")
+  if(!wrap) return;
+  if (!wrap.contains(e.target as Node)) hideDD();
 });
