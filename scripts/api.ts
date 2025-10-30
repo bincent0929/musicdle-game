@@ -200,8 +200,9 @@ async function pickSong(){
     const info = await pickSongWithPreview();
     current = { artist: info.artist, title: info.title };
     const player = $("player") as HTMLAudioElement;
-    //if (player === null) throw new Error("Audio player not found.");
+    if (player === null) throw new Error("Audio player not found.");
     player.src = info.preview; player.load();
+    // define the type for p
     const p = player.play();
 
     if (p && p.catch) await p.catch(()=>{statusElement.textContent="Tap ▶️ to start playback (autoplay blocked).";});
