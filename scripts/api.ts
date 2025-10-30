@@ -169,9 +169,9 @@ async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: s
   // 2) Try up to N random entries until one has previewUrl
   for (let i = 0; i < tries; i++) {
     const chosen = entries[Math.floor(Math.random() * entries.length)];
-    const trackId = chosen?.id?.attributes?.["im:id"];
-    const fallbackArtist = chosen?.["im:artist"]?.label || "";
-    const fallbackTitle = chosen?.["im:name"]?.label || "";
+    const trackId: ITunesTrack['trackId'] = chosen?.id?.attributes?.["im:id"];
+    const fallbackArtist:ITunesTrack['artistName'] = chosen?.["im:artist"]?.label || "";
+    const fallbackTitle:ITunesTrack['trackName'] = chosen?.["im:name"]?.label || "";
     if (!trackId) continue;
 
     const looked = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
