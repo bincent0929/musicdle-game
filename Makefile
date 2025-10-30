@@ -1,5 +1,6 @@
 #TSC = tsc scripts/script.ts --lib ES2015,DOM
 TSC2 = tsc scripts/game.ts --lib ES2015,DOM
+TSC3 = tsc minor_html/stats.ts --lib ES2015,DOM
 CADDY = caddy
 PYTHON = python3
 BACKEND_FILE = music_file_backend_webserver.py
@@ -9,6 +10,8 @@ TAILWIND = tailwindcss -o styles/compiled-styles.css
 run:
 	@echo "convert ts"
 	$(TSC2)
+	@echo "convert stats ts"
+	$(TSC3)
 	@echo "tailwind"
 	$(TAILWIND)
 	@echo "backend"
