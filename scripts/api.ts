@@ -308,7 +308,7 @@ function selectItem(index: number): void {
   guessInput.focus();
 }
 
-function dedupeByTitle(results) {
+function dedupeByTitle(results: ITunesTrack[]): DropdownItem[] {
   const seen = new Set(); const out = [];
   for (const r of results) {
     const key = (r.trackName || "").toLowerCase();
