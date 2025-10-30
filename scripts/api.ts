@@ -130,6 +130,7 @@ enum ITunesMediaKind {
   Artist = "artist"
 }
 
+// allows us to use $ as shorthand for document.getElementById
 const $ = (id:string) => document.getElementById(id);
 
 // fetches a json from Apple's API
@@ -160,22 +161,19 @@ async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: s
   ($("guess") as HTMLInputElement).value = "";
   ($("player") as HTMLAudioElement).src = "";
 
-  // fetches the top 100 songs
-  const feed = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(()=>({feed:{entry:[]}}));
+  // 1) Get top songs feed
+  const feed = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
   const entries = feed?.feed?.entry || [];
   if (!entries.length) throw new Error("No songs found for that genre/country.");
 
-  for (let i=0; i<tries; i++){
-    // randomly chooses a song
-    const chosen = entries[Math.floor(Math.random()*entries.length)];
-    // grabs the info for the song
-    const trackId : number = chosen?.id?.attributes?.["im:id"];
-    // !! the artist could be a number value or it could be the string. It needs to be double checked.
-    const fallbackArtist : string = chosen?.["im:artist"]?.label || "";
-    const fallbackTitle : string  = chosen?.["im:name"]?.label || "";
+  // 2) Try up to N random entries until one has previewUrl
+  for (let i = 0; i < tries; i++) {
+    const chosen = entries[Math.floor(Math.random() * entries.length)];
+    const trackId = chosen?.id?.attributes?.["im:id"];
+    const fallbackArtist = chosen?.["im:artist"]?.label || "";
+    const fallbackTitle = chosen?.["im:name"]?.label || "";
     if (!trackId) continue;
-    
-    // looks up the song using its id from the iTunes lookup API
+
     const looked = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
       .then(r => r.json()).catch(()=>null);
     // !! x needs to be properly typed based on the API
@@ -250,17 +248,19 @@ if (guessInput) guessInput.addEventListener("keydown", e => { if(e.key==="Enter"
 
 
 /* ------------ integrated dropdown on the Guess input ------------ */
-const guessDD = $("guessDD");
-let ddIndex = -1, ddItems = [], aborter = null;
+const guessDD = $("guessDD") as HTMLDivElement;
+let ddIndex = -1;
+let ddItems: DropdownItem[] = [];
+let aborter: AbortController | null = null;
 
-function hideDD(){ guessDD.classList.add("hidden"); guessDD.innerHTML=""; ddIndex=-1; ddItems=[]; }
-function showDD(){ guessDD.classList.remove("hidden"); }
+function hideDD() { guessDD.classList.add("hidden"); guessDD.innerHTML = ""; ddIndex = -1; ddItems = []; }
+function showDD() { guessDD.classList.remove("hidden"); }
 
-function renderDD(items){
+function renderDD(items) {
   guessDD.innerHTML = "";
   items.forEach((it, i) => {
     const el = document.createElement("div");
-    el.className = "dd-item"; el.setAttribute("role","option"); el.dataset.idx = i;
+    el.className = "dd-item"; el.setAttribute("role", "option"); el.dataset.idx = i;
     el.innerHTML = `<img src="${it.artwork}" alt="">
       <div><div class="dd-title">${it.title}</div><div class="muted">${it.artist}</div></div>`;
     el.onclick = () => selectItem(i);
@@ -268,14 +268,14 @@ function renderDD(items){
   });
   if (!items.length) {
     const empty = document.createElement("div");
-    empty.className="dd-item"; empty.textContent="No songs found.";
+    empty.className = "dd-item"; empty.textContent = "No songs found.";
     guessDD.appendChild(empty);
   }
   showDD();
 }
-function highlight(index){
-  [...guessDD.children].forEach((c, i) => c.setAttribute("aria-selected", i===index ? "true" : "false"));
-  if (index>=0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({block:"nearest"});
+function highlight(index: number): void {
+  [...guessDD.children].forEach((c, i) => c.setAttribute("aria-selected", i === index ? "true" : "false"));
+  if (index >= 0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({ block: "nearest" });
 }
 
 function selectItem(index: number): void {
@@ -298,16 +298,16 @@ function selectItem(index: number): void {
   guessInput.focus();
 }
 
-function dedupeByTitle(results){
+function dedupeByTitle(results) {
   const seen = new Set(); const out = [];
-  for (const r of results){
+  for (const r of results) {
     const key = (r.trackName || "").toLowerCase();
     if (!key || seen.has(key) || !r.previewUrl) continue;  // require preview
     seen.add(key);
     out.push({
       title: r.trackName,
       artist: r.artistName,
-      artwork: (r.artworkUrl100 || "").replace("100x100bb","60x60bb")
+      artwork: (r.artworkUrl100 || "").replace("100x100bb", "60x60bb")
     });
   }
   return out;
@@ -360,23 +360,23 @@ async function searchArtistSongs(query: string): Promise<void> {
 }
 
 const DEBOUNCE_MS = 180;
-let t = null;
-$("guess").addEventListener("input", (e)=>{
+let t: number | undefined;
+$("guess").addEventListener("input", (e) => {
   const q = e.target.value.trim();
   clearTimeout(t);
-  if (q.length < 2){ hideDD(); return; }
-  t = setTimeout(()=>searchArtistSongs(q), DEBOUNCE_MS);
+  if (q.length < 2) { hideDD(); return; }
+  t = setTimeout(() => searchArtistSongs(q), DEBOUNCE_MS);
 });
-$("guess").addEventListener("keydown", (e)=>{
+$("guess").addEventListener("keydown", (e) => {
   if (guessDD.classList.contains("hidden")) return;
-  if (e.key === "ArrowDown"){ e.preventDefault(); ddIndex = Math.min(ddIndex+1, ddItems.length-1); highlight(ddIndex); }
-  else if (e.key === "ArrowUp"){ e.preventDefault(); ddIndex = Math.max(ddIndex-1, 0); highlight(ddIndex); }
-  else if (e.key === "Enter"){ if (ddIndex>=0){ e.preventDefault(); selectItem(ddIndex); } }
-  else if (e.key === "Escape"){ hideDD(); }
+  if (e.key === "ArrowDown") { e.preventDefault(); ddIndex = Math.min(ddIndex + 1, ddItems.length - 1); highlight(ddIndex); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); ddIndex = Math.max(ddIndex - 1, 0); highlight(ddIndex); }
+  else if (e.key === "Enter") { if (ddIndex >= 0) { e.preventDefault(); selectItem(ddIndex); } }
+  else if (e.key === "Escape") { hideDD(); }
 });
 
 // click outside to close
-document.addEventListener("click", (e)=>{
+document.addEventListener("click", (e) => {
   const wrap = document.querySelector(".guess-wrap");
   if (!wrap.contains(e.target)) hideDD();
 });
