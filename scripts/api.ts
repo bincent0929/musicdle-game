@@ -90,6 +90,7 @@ interface ITunesTrack {
   genreIds?: string[];
   genres?: string[];
 }
+
 /**dropdownItem definition */
 interface DropdownItem {
   title: string;
@@ -103,13 +104,6 @@ interface DropdownItem {
 interface ITunesSearchResponse {
   resultCount: number;
   results: ITunesTrack[];
-}
-
-/**
- * Type guard for songs with preview URLs
- */
-function isSongWithPreview(track: ITunesTrack): track is ITunesTrack & { previewUrl: string } {
-  return track.kind === "song" && !!track.previewUrl;
 }
 
 /**
@@ -136,23 +130,54 @@ enum ITunesMediaKind {
   Artist = "artist"
 }
 
-// allows us to use $ as shorthand for document.getElementById
-const $ = (id:string) => document.getElementById(id);
+interface ITunesRSSEntry {
+  /**
+   * The reason `im` is here is because that's how the
+   * RSS XML is formatted by Apple in the response
+   */
+  id: {
+    attributes: {
+      "im:id": string;
+    };
+  };
+  "im:name": {
+    label: string; // track title
+  }
+  "im:artist": {
+    label: string; // artist name
+  }
+}
 
-// fetches a json from Apple's API
-const rssTopSongs = (country: string, genre: string, limit=100) =>
-  `https://itunes.apple.com/${country}/rss/topsongs/limit=${limit}/genre=${genre}/json`;
-
-// stores the current song's arist and title info
+interface ITunesRSSResponse {
+  feed: {
+    entry: ITunesRSSEntry[]
+  }
+}
 
 interface currentSong {
+  preview: string
   artist: string
   title: string
 }
 
 let current : currentSong | null = null;
+
+// allows us to use $ as shorthand for document.getElementById
+const $ = (id:string) => document.getElementById(id);
+
+// this just defines the string that you'll use to fetch
+const rssTopSongs = (country: string, genre: string, limit=100) : string =>
+  `https://itunes.apple.com/${country}/rss/topsongs/limit=${limit}/genre=${genre}/json`;
+
 function normalize(s:string){ 
   return (s||"").toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); 
+}
+
+/**
+ * Type guard for songs with preview URLs
+ */
+function isSongWithPreview(track: ITunesTrack): track is ITunesTrack & { previewUrl: string } {
+  return track.kind === "song" && !!track.previewUrl;
 }
 
 /* ------------ main game: pick & play a popular track ------------ */
@@ -174,24 +199,23 @@ async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: s
   ($("player") as HTMLAudioElement).src = "";
 
   // 1) Get top songs feed
-  const feed = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
+  const feed : ITunesRSSResponse = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
   const entries = feed?.feed?.entry || [];
   if (!entries.length) throw new Error("No songs found for that genre/country.");
 
   // 2) Try up to N random entries until one has previewUrl
   for (let i = 0; i < tries; i++) {
     const chosen = entries[Math.floor(Math.random() * entries.length)];
-    const trackId: ITunesTrack['trackId'] = chosen?.id?.attributes?.["im:id"];
-    const fallbackArtist:ITunesTrack['artistName'] = chosen?.["im:artist"]?.label || "";
-    const fallbackTitle:ITunesTrack['trackName'] = chosen?.["im:name"]?.label || "";
+    const trackId: ITunesRSSEntry['id']['attributes']['im:id'] = chosen?.id?.attributes?.["im:id"];
+    const fallbackArtist: ITunesRSSEntry['im:artist']['label'] = chosen?.["im:artist"]?.label || "";
+    const fallbackTitle: ITunesRSSEntry['im:name']['label'] = chosen?.["im:name"]?.label || "";
     if (!trackId) continue;
 
-    const looked = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
+    const looked: ITunesSearchResponse | null = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
       .then(r => r.json()).catch(()=>null);
-    // !! x needs to be properly typed based on the API
-    const item = looked?.results?.find((x:ITunesTrack) => x.kind === "song") || looked?.results?.[0];
+    const item: ITunesTrack | undefined = looked?.results?.find((x:ITunesTrack) => x.kind === "song") || looked?.results?.[0];
     // grabs the preview url from the result
-    const preview : string = item?.previewUrl;
+    const preview = item?.previewUrl;
     if (preview){
       // !! this log is just for debugging purposes
       console.log("Picked track:", fallbackArtist, "–", fallbackTitle);
@@ -209,11 +233,11 @@ async function pickSong(){
   if (!metaElement) throw new Error("Meta element not found.");
   
   try {
-    const info = await pickSongWithPreview();
-    current = { artist: info.artist, title: info.title };
+    current = await pickSongWithPreview();
+    //current = { artist: info.artist, title: info.title };
     const player = $("player") as HTMLAudioElement;
     if (player === null) throw new Error("Audio player not found.");
-    player.src = info.preview; player.load();
+    player.src = current.preview; player.load();
     const p = player.play();
 
     if (p && p.catch) await p.catch(()=>{statusElement.textContent="Tap ▶️ to start playback (autoplay blocked).";});
