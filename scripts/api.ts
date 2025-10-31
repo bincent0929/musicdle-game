@@ -90,6 +90,12 @@ interface ITunesTrack {
   genreIds?: string[];
   genres?: string[];
 }
+/**dropdownItem definition */
+interface DropdownItem {
+  title: string;
+  artist: string;
+  artwork: string;
+}
 
 /**
  * iTunes API Response wrapper
@@ -138,7 +144,13 @@ const rssTopSongs = (country: string, genre: string, limit=100) =>
   `https://itunes.apple.com/${country}/rss/topsongs/limit=${limit}/genre=${genre}/json`;
 
 // stores the current song's arist and title info
-let current : {artist: string, title: string} | null = null;
+
+interface currentSong {
+  artist: string
+  title: string
+}
+
+let current : currentSong | null = null;
 function normalize(s:string){ 
   return (s||"").toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); 
 }
@@ -200,7 +212,7 @@ async function pickSong(){
     const info = await pickSongWithPreview();
     current = { artist: info.artist, title: info.title };
     const player = $("player") as HTMLAudioElement;
-    //if (player === null) throw new Error("Audio player not found.");
+    if (player === null) throw new Error("Audio player not found.");
     player.src = info.preview; player.load();
     const p = player.play();
 
@@ -256,11 +268,15 @@ let aborter: AbortController | null = null;
 function hideDD() { guessDD.classList.add("hidden"); guessDD.innerHTML = ""; ddIndex = -1; ddItems = []; }
 function showDD() { guessDD.classList.remove("hidden"); }
 
-function renderDD(items) {
+function renderDD(items: DropdownItem[]): void {
+  if (!guessDD) {
+    console.warn(`guessDD null case`);
+    return;
+  }
   guessDD.innerHTML = "";
-  items.forEach((it, i) => {
+  items.forEach((it: DropdownItem, i: number) => {
     const el = document.createElement("div");
-    el.className = "dd-item"; el.setAttribute("role", "option"); el.dataset.idx = i;
+    el.className = "dd-item"; el.setAttribute("role", "option"); el.dataset.idx = String(i);
     el.innerHTML = `<img src="${it.artwork}" alt="">
       <div><div class="dd-title">${it.title}</div><div class="muted">${it.artist}</div></div>`;
     el.onclick = () => selectItem(i);
@@ -298,7 +314,7 @@ function selectItem(index: number): void {
   guessInput.focus();
 }
 
-function dedupeByTitle(results) {
+function dedupeByTitle(results: ITunesTrack[]): DropdownItem[] {
   const seen = new Set(); const out = [];
   for (const r of results) {
     const key = (r.trackName || "").toLowerCase();
