@@ -144,7 +144,13 @@ const rssTopSongs = (country: string, genre: string, limit=100) =>
   `https://itunes.apple.com/${country}/rss/topsongs/limit=${limit}/genre=${genre}/json`;
 
 // stores the current song's arist and title info
-let current : {artist: string, title: string} | null = null;
+
+interface currentSong {
+  artist: string
+  title: string
+}
+
+let current : currentSong | null = null;
 function normalize(s:string){ 
   return (s||"").toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); 
 }
@@ -208,7 +214,6 @@ async function pickSong(){
     const player = $("player") as HTMLAudioElement;
     if (player === null) throw new Error("Audio player not found.");
     player.src = info.preview; player.load();
-    // define the type for p
     const p = player.play();
 
     if (p && p.catch) await p.catch(()=>{statusElement.textContent="Tap ▶️ to start playback (autoplay blocked).";});
