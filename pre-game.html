@@ -59,6 +59,8 @@
           <button id="reveal" class="px-3 py-2 border border-gray-300 rounded-lg text-base text-gray-600 mx-auto block">Reveal</button>
         </div>
         <div id="bottom-info" class="text-center">
+           <!-- Finish button is hidden until Reveal is clicked; reveal() will unhide it and attach the redirect handler -->
+          <button id="finish" class="hidden px-3 py-2 bg-yellow-400 hover:bg-yellow-500 border border-yellow-400 rounded-lg text-base text-white">Finish</button>
           <div id="status" class="mt-2 font-semibold"></div>
           <div id="meta" class="text-gray-600 mt-1.5"></div>
         </div>
