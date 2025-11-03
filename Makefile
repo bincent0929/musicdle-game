@@ -1,26 +1,19 @@
-#TSC = tsc scripts/script.ts --lib ES2015,DOM
-TSC2 = tsc scripts/game.ts --lib ES2015,DOM
-TSC3 = tsc minor_html/stats.ts --lib ES2015,DOM
-CADDY = caddy
-PYTHON = python3
-BACKEND_FILE = music_file_backend_webserver.py
+API_TSC = tsc scripts/api.ts --outDir scripts --target ES2017 --lib ES2017,DOM
+# not needed yet
+#TSC3 = tsc minor_html/stats.ts --lib ES2015,DOM
+CADDY = caddy run
 TAILWIND = tailwindcss -o styles/compiled-styles.css
 
 
 run:
 	@echo "convert ts"
-	$(TSC2)
-	@echo "convert stats ts"
-	$(TSC3)
-	@echo "tailwind"
+	$(API_TSC)
+	@echo "tailwind to css"
 	$(TAILWIND)
-	@echo "backend"
-	$(PYTHON) $(BACKEND_FILE) &
-	@echo "Caddy"
-	$(CADDY) run
+	@echo "start caddy"
+	$(CADDY)
 
 
 stop:
 	@echo "kill"
-	@pkill -f "$(PYTHON) $(BACKEND_FILE)" || true
 	@pkill -f "$(CADDY)" || true
