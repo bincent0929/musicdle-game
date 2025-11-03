@@ -227,7 +227,6 @@ async function pickSongWithPreview(tries=6): Promise<currentSong> {
 
 async function pickSong(){
   let statusElement = $("status") as HTMLElement;
-  // the meta element is not being updated right now
   let metaElement = $("meta") as HTMLElement;
     
   if (!statusElement) throw new Error("Status element not found.");
@@ -265,7 +264,6 @@ function checkGuess(){
   statusEl.textContent = (g && (correct.includes(g) || g === correct)) ? "✅ Correct!" : "❌ Not quite. Try again or Reveal.";
 }
 
-// still NOT working!
 function reveal(){
   if(!current) return;
   const statusEl = $("status");
