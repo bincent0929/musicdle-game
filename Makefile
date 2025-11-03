@@ -5,6 +5,7 @@ CADDY = caddy run
 TAILWIND = tailwindcss -o styles/compiled-styles.css
 TAILWIND_WATCH = tailwindcss -o styles/compiled-styles.css --watch
 
+# Use `make` and then run, start, etc. based on what you want to be running/ran
 
 run:
 	@echo "convert ts"
