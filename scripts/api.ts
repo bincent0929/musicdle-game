@@ -300,21 +300,21 @@ function renderDD(items: DropdownItem[]): void {
   guessDD.innerHTML = "";
   items.forEach((it: DropdownItem, i: number) => {
     const el = document.createElement("div");
-    el.className = "dd-item"; el.setAttribute("role", "option"); el.dataset.idx = String(i);
-    el.innerHTML = `<img src="${it.artwork}" alt="">
-      <div><div class="dd-title">${it.title}</div><div class="muted">${it.artist}</div></div>`;
+    el.className = "flex gap-2.5 items-center px-3 py-2 cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100"; el.setAttribute("role", "option"); el.dataset.idx = String(i);
+    el.innerHTML = `<img src="${it.artwork}" alt="" class="w-10 h-10 rounded-md object-cover">
+      <div><div class="font-semibold">${it.title}</div><div class="text-gray-600">${it.artist}</div></div>`;
     el.onclick = () => selectItem(i);
     guessDD.appendChild(el);
   });
   if (!items.length) {
     const empty = document.createElement("div");
-    empty.className = "dd-item"; empty.textContent = "No songs found.";
+    empty.className = "px-3 py-2 text-gray-600"; empty.textContent = "No songs found.";
     guessDD.appendChild(empty);
   }
   showDD();
 }
 function highlight(index: number): void {
-  [...guessDD.children].forEach((c, i) => c.setAttribute("aria-selected", i === index ? "true" : "false"));
+  Array.from(guessDD.children).forEach((c, i) => c.setAttribute("aria-selected", i === index ? "true" : "false"));
   if (index >= 0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({ block: "nearest" });
 }
 

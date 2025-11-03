@@ -8,49 +8,51 @@
     <link rel="stylesheet" href="/styles/compiled-styles.css" />
   </head>
 
-  <body class="bg-gray-50">
-    <div id="game_div" class="flex flex-col items-center justify-center min-h-screen">
-      <label>Genre:
-        <select id="genre">
-          <option value="14">Pop</option>
-          <option value="18">Hip-Hop/Rap</option>
-          <option value="21">Rock</option>
-          <option value="6">Country</option>
-          <option value="15">R&B/Soul</option>
-          <option value="20">Alternative</option>
-          <option value="17">Dance</option>
-          <option value="11">Jazz</option>
-          <option value="12">Latin</option>
-          <option value="7">Electronic</option>
-        </select>
-      </label>
-      <label>Country:
-        <select id="country">
-          <option value="us">US</option>
-          <option value="gb">UK</option>
-          <option value="ca">CA</option>
-          <option value="au">AU</option>
-          <option value="de">DE</option>
-          <option value="jp">JP</option>
-        </select>
-      </label>
-      <button id="new">Play a top song</button>
-      
-      <div class="card">
+  <body class="bg-gray-50 font-sans flex items-center justify-center min-h-screen">
+    <div class="max-w-4xl px-4">
+      <header class="flex gap-2.5 flex-wrap items-center">
+        <label>Genre:
+          <select id="genre" class="px-3 py-2 border border-gray-300 rounded-lg text-base">
+            <option value="14">Pop</option>
+            <option value="18">Hip-Hop/Rap</option>
+            <option value="21">Rock</option>
+            <option value="6">Country</option>
+            <option value="15">R&B/Soul</option>
+            <option value="20">Alternative</option>
+            <option value="17">Dance</option>
+            <option value="11">Jazz</option>
+            <option value="12">Latin</option>
+            <option value="7">Electronic</option>
+          </select>
+        </label>
+        <label>Country:
+          <select id="country" class="px-3 py-2 border border-gray-300 rounded-lg text-base">
+            <option value="us">US</option>
+            <option value="gb">UK</option>
+            <option value="ca">CA</option>
+            <option value="au">AU</option>
+            <option value="de">DE</option>
+            <option value="jp">JP</option>
+          </select>
+        </label>
+        <button id="new" class="px-3 py-2 border border-gray-300 rounded-lg text-base">Play a top song</button>
+      </header>
+
+      <div class="border border-gray-200 rounded-2xl p-4 mt-4">
         <audio id="player" controls preload="none"></audio>
 
-        <div class="row" style="margin-top:.6rem">
+        <div class="flex gap-2.5 flex-wrap items-center mt-2.5">
           <!-- Guess input + dropdown -->
-          <div class="guess-wrap">
-            <input id="guess" placeholder="Guess the song title… (type an artist to browse their songs)" size="34" autocomplete="off" />
-            <div id="guessDD" class="dropdown hidden" role="listbox" aria-label="Artist songs"></div>
+          <div class="relative flex-1 basis-[360px] max-w-[520px]">
+            <input id="guess" placeholder="Guess the song title… (type an artist to browse their songs)" size="34" autocomplete="off" class="px-3 py-2 border border-gray-300 rounded-lg text-base w-full" />
+            <div id="guessDD" class="absolute top-[calc(100%+0.25rem)] left-0 right-0 z-20 bg-white border border-gray-200 rounded-lg max-h-[260px] overflow-auto shadow-lg hidden" role="listbox" aria-label="Artist songs"></div>
           </div>
-          <button id="submit">Submit</button>
-          <button id="reveal" class="muted">Reveal</button>
+          <button id="submit" class="px-3 py-2 border border-gray-300 rounded-lg text-base">Submit</button>
+          <button id="reveal" class="px-3 py-2 border border-gray-300 rounded-lg text-base text-gray-600">Reveal</button>
         </div>
 
-        <div class="result" id="status"></div>
-        <div id="meta" class="muted" style="margin-top:.4rem"></div>
+        <div id="status" class="mt-2 font-semibold"></div>
+        <div id="meta" class="text-gray-600 mt-1.5"></div>
       </div>
 
       <script src="scripts/api.js"></script>
