@@ -106,30 +106,6 @@ interface ITunesSearchResponse {
   results: ITunesTrack[];
 }
 
-/**
- * Type for explicit content ratings
- */
-type ExplicitnessRating = "explicit" | "cleaned" | "notExplicit";
-
-/**
- * Media kinds enum for better type safety
- */
-enum ITunesMediaKind {
-  Book = "book",
-  Album = "album",
-  CoachedAudio = "coached-audio",
-  FeatureMovie = "feature-movie",
-  InteractiveBooklet = "interactive-booklet",
-  MusicVideo = "music-video",
-  PDF = "pdf",
-  Podcast = "podcast",
-  PodcastEpisode = "podcast-episode",
-  SoftwarePackage = "software-package",
-  Song = "song",
-  TVEpisode = "tv-episode",
-  Artist = "artist"
-}
-
 interface ITunesRSSEntry {
   /**
    * The reason `im` is here is because that's how the
@@ -160,7 +136,45 @@ interface currentSong {
   title: string
 }
 
+interface GameState {
+  attemptsRemaining: number;
+  wrongGuesses: number;
+  maxListenTime: number;
+  hasWon: boolean;
+}
+
+/**
+ * Media kinds enum for better type safety
+ */
+enum ITunesMediaKind {
+  Book = "book",
+  Album = "album",
+  CoachedAudio = "coached-audio",
+  FeatureMovie = "feature-movie",
+  InteractiveBooklet = "interactive-booklet",
+  MusicVideo = "music-video",
+  PDF = "pdf",
+  Podcast = "podcast",
+  PodcastEpisode = "podcast-episode",
+  SoftwarePackage = "software-package",
+  Song = "song",
+  TVEpisode = "tv-episode",
+  Artist = "artist"
+}
+
+/**
+ * Type for explicit content ratings
+ */
+type ExplicitnessRating = "explicit" | "cleaned" | "notExplicit";
+
 let current : currentSong | null = null;
+
+let gameState: GameState = {
+  attemptsRemaining: 5,
+  wrongGuesses: 0,
+  maxListenTime: 6,
+  hasWon: false
+};
 
 // allows us to use $ as shorthand for document.getElementById
 const $ = (id:string) => document.getElementById(id);
@@ -225,24 +239,84 @@ async function pickSongWithPreview(tries=6): Promise<currentSong> {
   throw new Error("Could not find a preview for any of the picked tracks. Try again.");
 }
 
+/**
+ * Updates the UI to show current game state
+ */
+function updateGameStateUI(): void {
+  const attemptsEl = $("attempts");
+  const unlockedEl = $("unlocked");
+
+  if (attemptsEl) {
+    attemptsEl.textContent = `Attempts remaining: ${gameState.attemptsRemaining}/5`;
+  }
+
+  if (unlockedEl) {
+    unlockedEl.textContent = `Unlocked: ${gameState.maxListenTime} seconds`;
+  }
+}
+
+/**
+ * Sets up audio event listeners to restrict playback to unlocked time
+ */
+function setupAudioRestrictions(player: HTMLAudioElement): void {
+  // Remove any existing listeners to avoid duplicates
+  const newPlayer = player.cloneNode(true) as HTMLAudioElement;
+  player.parentNode?.replaceChild(newPlayer, player);
+
+  // timeupdate: pause and reset when reaching the time limit
+  newPlayer.addEventListener('timeupdate', () => {
+    if (!gameState.hasWon && newPlayer.currentTime >= gameState.maxListenTime) {
+      newPlayer.pause();
+      newPlayer.currentTime = 0;
+    }
+  });
+
+  // seeking: prevent seeking beyond unlocked time
+  newPlayer.addEventListener('seeking', () => {
+    if (!gameState.hasWon && newPlayer.currentTime > gameState.maxListenTime) {
+      newPlayer.currentTime = gameState.maxListenTime;
+    }
+  });
+
+  // ended: reset to beginning for replay
+  newPlayer.addEventListener('ended', () => {
+    newPlayer.currentTime = 0;
+  });
+}
+
 async function pickSong(){
   let statusElement = $("status") as HTMLElement;
   let metaElement = $("meta") as HTMLElement;
-    
+
   if (!statusElement) throw new Error("Status element not found.");
   if (!metaElement) throw new Error("Meta element not found.");
-  
+
   try {
+    // Reset game state for new song
+    gameState = {
+      attemptsRemaining: 5,
+      wrongGuesses: 0,
+      maxListenTime: 6,
+      hasWon: false
+    };
+
     current = await pickSongWithPreview();
-    //current = { artist: info.artist, title: info.title };
     const player = $("player") as HTMLAudioElement;
     if (player === null) throw new Error("Audio player not found.");
-    player.src = current.preview; player.load();
-    const p = player.play();
+    player.src = current.preview;
+    player.load();
+
+    // Set up audio restrictions
+    setupAudioRestrictions(player);
+
+    // Get the new player element after replacement in setupAudioRestrictions
+    const restrictedPlayer = $("player") as HTMLAudioElement;
+    const p = restrictedPlayer.play();
 
     if (p && p.catch) await p.catch(()=>{statusElement.textContent="Tap ▶️ to start playback (autoplay blocked).";});
-    if (!player.paused) statusElement.textContent = "Playing preview… guess the title!";
+    if (!restrictedPlayer.paused) statusElement.textContent = "Playing preview… guess the title!";
     metaElement.textContent = "";
+    updateGameStateUI();
   } catch (e){
     statusElement.textContent = (e as Error).message || "Error fetching song.";
     metaElement.textContent = "";
@@ -253,15 +327,47 @@ function checkGuess(){
   if(!current) return;
   const guessInput = $("guess") as HTMLInputElement | null;
   const statusEl = $("status");
-  if (!guessInput || !statusEl) return;
-  
-  const g = normalize(guessInput.value);
-  const correct = normalize(current.title);
-  if (!g) { 
-    statusEl.textContent = "Type a guess first!"; 
-    return; 
+  const metaEl = $("meta");
+  if (!guessInput || !statusEl || !metaEl) return;
+
+  const playerGuess : currentSong['title'] = normalize(guessInput.value);
+  const correctTitle = normalize(current.title);
+  if (!playerGuess) {
+    statusEl.textContent = "Type a guess first!";
+    return;
   }
-  statusEl.textContent = (g && (correct.includes(g) || g === correct)) ? "✅ Correct!" : "❌ Not quite. Try again or Reveal.";
+
+  const isCorrect = playerGuess && (correctTitle.includes(playerGuess) || playerGuess === correctTitle);
+
+  if (isCorrect) {
+    // Correct guess!
+    gameState.hasWon = true;
+    gameState.maxListenTime = 30; // Unlock full 30-second preview
+    statusEl.textContent = "✅ Correct!";
+    metaEl.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
+    updateGameStateUI();
+  } else {
+    // Wrong guess
+    gameState.attemptsRemaining--;
+    gameState.wrongGuesses++;
+
+    // Unlock +6 more seconds (cap at 30)
+    gameState.maxListenTime = Math.min(6 + (gameState.wrongGuesses * 6), 30);
+
+    if (gameState.attemptsRemaining > 0) {
+      statusEl.textContent = `❌ Not quite. ${gameState.maxListenTime} seconds unlocked!`;
+      updateGameStateUI();
+    } else {
+      // Out of attempts - reveal the answer
+      statusEl.textContent = "❌ Out of attempts!";
+      metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+      gameState.maxListenTime = 30; // Unlock full audio after game over
+      updateGameStateUI();
+    }
+  }
+
+  // Clear the guess input
+  guessInput.value = "";
 }
 
 function reveal(){
@@ -269,9 +375,14 @@ function reveal(){
   const statusEl = $("status");
   const metaEl = $("meta");
   if (!statusEl || !metaEl) return;
-  
+
   statusEl.textContent = "🔎 Revealed.";
   metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+
+  // Unlock full audio when revealed
+  gameState.maxListenTime = 30;
+  gameState.attemptsRemaining = 0;
+  updateGameStateUI();
 }
 
 const newBtn = $("new");
