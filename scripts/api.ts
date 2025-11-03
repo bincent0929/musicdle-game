@@ -188,7 +188,7 @@ function isSongWithPreview(track: ITunesTrack): track is ITunesTrack & { preview
  * @param tries 
  * @returns Promise<{preview: string, artist: string, title: string}>
  */
-async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: string, title: string}> {
+async function pickSongWithPreview(tries=6): Promise<currentSong> {
   // this are taken from the user's input on the page
   const country = ($("country") as HTMLInputElement).value;
   const genre = ($("genre") as HTMLInputElement).value;
