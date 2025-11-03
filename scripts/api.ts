@@ -197,6 +197,7 @@ async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   ($("meta") as HTMLElement).textContent = "";
   ($("guess") as HTMLInputElement).value = "";
   ($("player") as HTMLAudioElement).src = "";
+  ($("finish") as HTMLButtonElement).classList.add("hidden");
 
   // 1) Get top songs feed
   const feed: ITunesRSSResponse = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
@@ -278,24 +279,12 @@ function reveal() {
     const finishBtn = document.getElementById("finish") as HTMLButtonElement | null;
     if (finishBtn) {
       finishBtn.classList.remove("hidden");
-      // make handler idempotent
-      finishBtn.onclick = () => { gameCompleted(); };
-      // optionally focus it so users notice it
-      try { finishBtn.focus(); } catch (e) { /* ignore */ }
+      finishBtn.onclick = () => { window.location.href = "game-completed.html" };
     }
   } catch (err) {
     console.error("Could not show Finish button:", err);
   }
 }
-
-function gameCompleted() {
-  setTimeout(() => {
-    window.location.href = "game-completed.html";
-  }, 500); // 0.5 second delay to let user see the reveal text
-}
-
-
-
 
 const newBtn = $("new");
 const submitBtn = $("submit");
