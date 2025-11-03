@@ -278,10 +278,12 @@ function reveal(){
 
 const newBtn = $("new");
 const submitBtn = $("submit");
+const revealBtn = $("reveal");
 const guessInput = $("guess");
 
 if (newBtn) newBtn.onclick = pickSong;
 if (submitBtn) submitBtn.onclick = checkGuess;
+if (revealBtn) revealBtn.onclick = reveal;
 if (guessInput) guessInput.addEventListener("keydown", e => { if(e.key==="Enter") checkGuess(); });
 
 
