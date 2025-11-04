@@ -233,7 +233,7 @@ async function pickSongWithPreview(tries = 6): Promise<currentSong> {
     const preview = item?.previewUrl;
     if (preview) {
       // !! this log is just for debugging purposes
-      console.log("Picked track:", fallbackArtist, "–", fallbackTitle);
+      //console.log("Picked track:", fallbackArtist, "–", fallbackTitle);
       return { preview, artist: item?.artistName || fallbackArtist, title: item?.trackName || fallbackTitle };
     }
   }
