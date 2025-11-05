@@ -1,95 +1,75 @@
+<!--
+  This is VERY close to becoming the new game.html.
+  We just need to get the game finished functionality working,
+  the reveal button working, and the meta button working or removed.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Musicdle</title>
     <link rel="stylesheet" href="/styles/compiled-styles.css" />
-    <script src="scripts/game.js"></script>
-  </head>  
-  
-  <body class="bg-gray-50">
-    <div id="game_div" class="flex flex-col items-center justify-center min-h-screen">
-      <h2 class="text-2xl font-bold">Guess the Music!</h2>
-      <audio id="audio" controls class="my-3"></audio>
-      <div class="flex flex-col">
-        <button
-          type="button"
-          id="guessBtn1"
-          class="btn btn-outline-primary mb-2 shadow hidden"
-          onclick="guessFromButton(this);"
-          disabled
-          
-        >
-        </button>
-        <button
-          type="button"
-          id="guessBtn2"
-          class="btn btn-outline-primary mb-2 shadow hidden"
-          onclick="guessFromButton(this);"
-          disabled
-        >
-        </button>
-        <button
-          type="button"
-          id="guessBtn3"
-          class="btn btn-outline-primary mb-2 shadow hidden"
-          onclick="guessFromButton(this);"
-          disabled
-        >
-        </button>
-        <button
-          type="button"
-          id="guessBtn4"
-          class="btn btn-outline-primary mb-2 shadow hidden"
-          onclick="guessFromButton(this);"
-          disabled
-        >
-        </button>
-        <button
-            type="button"
-            id="guessBtn5"
-            class="btn btn-outline-primary mb-2 shadow hidden"
-            onclick="guessFromButton(this);"
-            disabled
-          >
-          </button>
-        <button
-          type="button"
-          id="guessBtn6"
-          class="btn btn-outline-primary mb-2 shadow hidden"
-          onclick="guessFromButton(this);"
-          disabled
-        >
-        </button>
-        <button
-          type="button"
-          id="guessBtn7"
-          class="btn btn-outline-primary mb-2 shadow hidden"
-          onclick="guessFromButton(this);"
-          disabled
-        >
-        </button>
-        <button
-          type="button"
-          id="guessBtn8"
-          class="btn btn-outline-primary mb-2 shadow hidden"
-          onclick="guessFromButton(this);"
-          disabled
-        >
+  </head>
 
-        </button>
-        <button
-          type="button"
-          id="guessBtn9"
-          class="btn btn-outline-primary mb-2 shadow hidden"
-          onclick="guessFromButton(this);"
-          disabled
-        >
-          Guess 9
-        </button>
+  <body class="bg-gray-50 font-sans flex items-center justify-center min-h-screen">
+    <div class="max-w-4xl px-4">
+      <h2 class="text-2xl font-bold text-center mb-4">Guess the Music!</h2>
+      <div class="flex gap-2.5 flex-wrap items-center">
+        <label>Genre:
+          <select id="genre" class="px-3 py-2 border border-gray-300 rounded-lg text-base">
+            <option value="14">Pop</option>
+            <option value="18">Hip-Hop/Rap</option>
+            <option value="21">Rock</option>
+            <option value="6">Country</option>
+            <option value="15">R&B/Soul</option>
+            <option value="20">Alternative</option>
+            <option value="17">Dance</option>
+            <option value="11">Jazz</option>
+            <option value="12">Latin</option>
+            <option value="7">Electronic</option>
+          </select>
+        </label>
+        <label>Country:
+          <select id="country" class="px-3 py-2 border border-gray-300 rounded-lg text-base">
+            <option value="us">US</option>
+            <option value="gb">UK</option>
+            <option value="ca">CA</option>
+            <option value="au">AU</option>
+            <option value="de">DE</option>
+            <option value="jp">JP</option>
+          </select>
+        </label>
+        <button id="new" class="px-3 py-2 border border-gray-300 rounded-lg text-base">Play a top song</button>
       </div>
-      <a id="game-completed-link" class="hidden px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 transition" href="game-completed.html">You found the song!</a>
+
+      <div class="border border-gray-200 rounded-2xl p-4 mt-4">
+        <audio id="player" controls preload="none" class="mx-auto block"></audio>
+
+        <div class="flex gap-2.5 flex-wrap items-center mt-2.5">
+          <!-- Guess input + dropdown -->
+          <div class="relative flex-1 basis-[360px] max-w-[520px]">
+            <input id="guess" placeholder="Guess the song title… (type an artist to browse their songs)" size="34" autocomplete="off" class="px-3 py-2 border border-gray-300 rounded-lg text-base w-full" />
+            <div id="guessDD" class="absolute top-[calc(100%+0.25rem)] left-0 right-0 z-20 bg-white border border-gray-200 rounded-lg max-h-[260px] overflow-auto shadow-lg hidden" role="listbox" aria-label="Artist songs"></div>
+          </div>
+          <button id="submit" class="px-3 py-2 border border-gray-300 rounded-lg text-base">Submit</button>
+          <!-- this reveal button is NOT working -->
+          <button id="reveal" class="px-3 py-2 border border-gray-300 rounded-lg text-base text-gray-600 mx-auto block">Reveal</button>
+        </div>
+        <div id="bottom-info" class="text-center">
+          <div id="status" class="mt-2 font-semibold"></div>
+          <div id="meta" class="text-gray-600 mt-1.5"></div>
+          <div class="flex gap-4 justify-center mt-3 text-sm text-gray-700">
+            <div id="attempts" class="font-medium"></div>
+            <div id="unlocked" class="font-medium"></div>
+          </div>
+        </div>
+        <button id="finish" class="hidden mx-auto block px-3 py-2 bg-gradient-to-bl from-red-300 via-pink-200 to-red-300 hover:from-white-300 hover:via-red-400 hover:to-pink-500 border border-black rounded-lg text-base text-black font-medium shadow-md transition">Finish</button>
+      </div>
+
+      <script src="scripts/api.js"></script>
     </div>
   </body>
 </html>

@@ -14,82 +14,83 @@
 interface ITunesTrack {
   // Core identification
   wrapperType: "track" | "collection" | "artist";
-  kind: "book" | "album" | "coached-audio" | "feature-movie" | 
-        "interactive-booklet" | "music-video" | "pdf" | "podcast" | 
-        "podcast-episode" | "software-package" | "song" | "tv-episode" | "artist";
-  
+  kind: "book" | "album" | "coached-audio" | "feature-movie" |
+  "interactive-booklet" | "music-video" | "pdf" | "podcast" |
+  "podcast-episode" | "software-package" | "song" | "tv-episode" | "artist";
+
   // IDs
   trackId: number;
   artistId: number;
   collectionId: number;
-  
+
   // Names
   trackName: string;
   artistName: string;
   collectionName: string;
-  
+
   // Censored versions (objectionable words *'d out)
   trackCensoredName: string;
   collectionCensoredName: string;
-  
+
   // URLs for viewing in iTunes Store
   artistViewUrl: string;
   collectionViewUrl: string;
   trackViewUrl: string;
-  
+
   // Preview URL (30-second preview) - only for tracks
   previewUrl?: string;
-  
+
   // Artwork URLs
   artworkUrl60?: string;   // 60x60 pixels
   artworkUrl100?: string;  // 100x100 pixels
-  
+
   // Pricing
   collectionPrice: number;
   trackPrice: number;
   currency: string;  // e.g., "USD"
-  
+
   // Explicit content ratings (RIAA parental advisory)
   trackExplicitness: "explicit" | "cleaned" | "notExplicit";
   collectionExplicitness: "explicit" | "cleaned" | "notExplicit";
-  
+
   // Track metadata
   discCount: number;
   discNumber: number;
   trackCount: number;
   trackNumber: number;
   trackTimeMillis: number;  // Track duration in milliseconds
-  
+
   // Location and genre
   country: string;  // e.g., "USA"
   primaryGenreName: string;  // e.g., "Rock"
-  
+
   // Additional fields commonly returned but not in the example
   releaseDate?: string;  // ISO 8601 format
   collectionArtistId?: number;
   collectionArtistName?: string;
   collectionArtistViewUrl?: string;
-  
+
   // For different media types
   contentAdvisoryRating?: string;  // For movies/TV
   shortDescription?: string;
   longDescription?: string;
-  
+
   // Radio station specific
   radioStationUrl?: string;
-  
+
   // Streaming availability
   isStreamable?: boolean;
-  
+
   // Additional artwork sizes (sometimes included)
   artworkUrl30?: string;
   artworkUrl512?: string;
   artworkUrl600?: string;
-  
+
   // Genre IDs
   genreIds?: string[];
   genres?: string[];
 }
+
 /**dropdownItem definition */
 interface DropdownItem {
   title: string;
@@ -105,17 +106,42 @@ interface ITunesSearchResponse {
   results: ITunesTrack[];
 }
 
-/**
- * Type guard for songs with preview URLs
- */
-function isSongWithPreview(track: ITunesTrack): track is ITunesTrack & { previewUrl: string } {
-  return track.kind === "song" && !!track.previewUrl;
+interface ITunesRSSEntry {
+  /**
+   * The reason `im` is here is because that's how the
+   * RSS XML is formatted by Apple in the response
+   */
+  id: {
+    attributes: {
+      "im:id": string;
+    };
+  };
+  "im:name": {
+    label: string; // track title
+  }
+  "im:artist": {
+    label: string; // artist name
+  }
 }
 
-/**
- * Type for explicit content ratings
- */
-type ExplicitnessRating = "explicit" | "cleaned" | "notExplicit";
+interface ITunesRSSResponse {
+  feed: {
+    entry: ITunesRSSEntry[]
+  }
+}
+
+interface currentSong {
+  preview: string
+  artist: string
+  title: string
+}
+
+interface GameState {
+  attemptsRemaining: number;
+  wrongGuesses: number;
+  maxListenTime: number;
+  hasWon: boolean;
+}
 
 /**
  * Media kinds enum for better type safety
@@ -136,17 +162,36 @@ enum ITunesMediaKind {
   Artist = "artist"
 }
 
-// allows us to use $ as shorthand for document.getElementById
-const $ = (id:string) => document.getElementById(id);
+/**
+ * Type for explicit content ratings
+ */
+type ExplicitnessRating = "explicit" | "cleaned" | "notExplicit";
 
-// fetches a json from Apple's API
-const rssTopSongs = (country: string, genre: string, limit=100) =>
+let current: currentSong | null = null;
+
+let gameState: GameState = {
+  attemptsRemaining: 5,
+  wrongGuesses: 0,
+  maxListenTime: 6,
+  hasWon: false
+};
+
+// allows us to use $ as shorthand for document.getElementById
+const $ = (id: string) => document.getElementById(id);
+
+// this just defines the string that you'll use to fetch
+const rssTopSongs = (country: string, genre: string, limit = 100): string =>
   `https://itunes.apple.com/${country}/rss/topsongs/limit=${limit}/genre=${genre}/json`;
 
-// stores the current song's arist and title info
-let current : {artist: string, title: string} | null = null;
-function normalize(s:string){ 
-  return (s||"").toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); 
+function normalize(s: string) {
+  return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+/**
+ * Type guard for songs with preview URLs
+ */
+function isSongWithPreview(track: ITunesTrack): track is ITunesTrack & { previewUrl: string } {
+  return track.kind === "song" && !!track.previewUrl;
 }
 
 /* ------------ main game: pick & play a popular track ------------ */
@@ -157,100 +202,210 @@ function normalize(s:string){
  * @param tries 
  * @returns Promise<{preview: string, artist: string, title: string}>
  */
-async function pickSongWithPreview(tries=6): Promise<{preview: string, artist: string, title: string}> {
+async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   // this are taken from the user's input on the page
   const country = ($("country") as HTMLInputElement).value;
   const genre = ($("genre") as HTMLInputElement).value;
-  
+
   ($("status") as HTMLElement).textContent = "Loading top songs…";
   ($("meta") as HTMLElement).textContent = "";
   ($("guess") as HTMLInputElement).value = "";
   ($("player") as HTMLAudioElement).src = "";
+  ($("finish") as HTMLButtonElement).classList.add("hidden");
 
   // 1) Get top songs feed
-  const feed = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
+  const feed: ITunesRSSResponse = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
   const entries = feed?.feed?.entry || [];
   if (!entries.length) throw new Error("No songs found for that genre/country.");
 
   // 2) Try up to N random entries until one has previewUrl
   for (let i = 0; i < tries; i++) {
     const chosen = entries[Math.floor(Math.random() * entries.length)];
-    const trackId = chosen?.id?.attributes?.["im:id"];
-    const fallbackArtist = chosen?.["im:artist"]?.label || "";
-    const fallbackTitle = chosen?.["im:name"]?.label || "";
+    const trackId: ITunesRSSEntry['id']['attributes']['im:id'] = chosen?.id?.attributes?.["im:id"];
+    const fallbackArtist: ITunesRSSEntry['im:artist']['label'] = chosen?.["im:artist"]?.label || "";
+    const fallbackTitle: ITunesRSSEntry['im:name']['label'] = chosen?.["im:name"]?.label || "";
     if (!trackId) continue;
 
-    const looked = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
-      .then(r => r.json()).catch(()=>null);
-    // !! x needs to be properly typed based on the API
-    const item = looked?.results?.find((x:ITunesTrack) => x.kind === "song") || looked?.results?.[0];
+    const looked: ITunesSearchResponse | null = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
+      .then(r => r.json()).catch(() => null);
+    const item: ITunesTrack | undefined = looked?.results?.find((x: ITunesTrack) => x.kind === "song") || looked?.results?.[0];
     // grabs the preview url from the result
-    const preview : string = item?.previewUrl;
-    if (preview){
+    const preview = item?.previewUrl;
+    if (preview) {
       // !! this log is just for debugging purposes
-      console.log("Picked track:", fallbackArtist, "–", fallbackTitle);
+      //console.log("Picked track:", fallbackArtist, "–", fallbackTitle);
       return { preview, artist: item?.artistName || fallbackArtist, title: item?.trackName || fallbackTitle };
     }
   }
   throw new Error("Could not find a preview for any of the picked tracks. Try again.");
 }
 
-async function pickSong(){
+/**
+ * Updates the UI to show current game state
+ */
+function updateGameStateUI(): void {
+  const attemptsEl = $("attempts");
+  const unlockedEl = $("unlocked");
+
+  if (attemptsEl) {
+    attemptsEl.textContent = `Attempts remaining: ${gameState.attemptsRemaining}/5`;
+  }
+
+  if (unlockedEl) {
+    unlockedEl.textContent = `Unlocked: ${gameState.maxListenTime} seconds`;
+  }
+}
+
+/**
+ * Sets up audio event listeners to restrict playback to unlocked time
+ */
+function setupAudioRestrictions(player: HTMLAudioElement): void {
+  // Remove any existing listeners to avoid duplicates
+  const newPlayer = player.cloneNode(true) as HTMLAudioElement;
+  player.parentNode?.replaceChild(newPlayer, player);
+
+  // timeupdate: pause and reset when reaching the time limit
+  newPlayer.addEventListener('timeupdate', () => {
+    if (!gameState.hasWon && newPlayer.currentTime >= gameState.maxListenTime) {
+      newPlayer.pause();
+      newPlayer.currentTime = 0;
+    }
+  });
+
+  // seeking: prevent seeking beyond unlocked time
+  newPlayer.addEventListener('seeking', () => {
+    if (!gameState.hasWon && newPlayer.currentTime > gameState.maxListenTime) {
+      newPlayer.currentTime = gameState.maxListenTime;
+    }
+  });
+
+  // ended: reset to beginning for replay
+  newPlayer.addEventListener('ended', () => {
+    newPlayer.currentTime = 0;
+  });
+}
+
+async function pickSong() {
   let statusElement = $("status") as HTMLElement;
   let metaElement = $("meta") as HTMLElement;
-    
+
   if (!statusElement) throw new Error("Status element not found.");
   if (!metaElement) throw new Error("Meta element not found.");
-  
-  try {
-    const info = await pickSongWithPreview();
-    current = { artist: info.artist, title: info.title };
-    const player = $("player") as HTMLAudioElement;
-    //if (player === null) throw new Error("Audio player not found.");
-    player.src = info.preview; player.load();
-    const p = player.play();
 
-    if (p && p.catch) await p.catch(()=>{statusElement.textContent="Tap ▶️ to start playback (autoplay blocked).";});
-    if (!player.paused) statusElement.textContent = "Playing preview… guess the title!";
+  try {
+    // Reset game state for new song
+    gameState = {
+      attemptsRemaining: 5,
+      wrongGuesses: 0,
+      maxListenTime: 6,
+      hasWon: false
+    };
+
+    current = await pickSongWithPreview();
+    const player = $("player") as HTMLAudioElement;
+    if (player === null) throw new Error("Audio player not found.");
+    player.src = current.preview;
+    player.load();
+
+    // Set up audio restrictions
+    setupAudioRestrictions(player);
+
+    // Get the new player element after replacement in setupAudioRestrictions
+    const restrictedPlayer = $("player") as HTMLAudioElement;
+    const p = restrictedPlayer.play();
+
+    if (p && p.catch) await p.catch(() => { statusElement.textContent = "Tap ▶️ to start playback (autoplay blocked)."; });
+    if (!restrictedPlayer.paused) statusElement.textContent = "Playing preview… guess the title!";
     metaElement.textContent = "";
-  } catch (e){
+    updateGameStateUI();
+  } catch (e) {
     statusElement.textContent = (e as Error).message || "Error fetching song.";
     metaElement.textContent = "";
   }
 }
 
-function checkGuess(){
-  if(!current) return;
+function checkGuess() {
+  if (!current) return;
   const guessInput = $("guess") as HTMLInputElement | null;
   const statusEl = $("status");
-  if (!guessInput || !statusEl) return;
-  
-  const g = normalize(guessInput.value);
-  const correct = normalize(current.title);
-  if (!g) { 
-    statusEl.textContent = "Type a guess first!"; 
-    return; 
+  const metaEl = $("meta");
+  if (!guessInput || !statusEl || !metaEl) return;
+
+  const playerGuess : currentSong['title'] = normalize(guessInput.value);
+  const correctTitle = normalize(current.title);
+  if (!playerGuess) {
+    statusEl.textContent = "Type a guess first!";
+    return;
   }
-  statusEl.textContent = (g && (correct.includes(g) || g === correct)) ? "✅ Correct!" : "❌ Not quite. Try again or Reveal.";
+
+  const isCorrect = playerGuess && (correctTitle.includes(playerGuess) || playerGuess === correctTitle);
+
+  if (isCorrect) {
+    // Correct guess!
+    gameState.hasWon = true;
+    gameState.maxListenTime = 30; // Unlock full 30-second preview
+    statusEl.textContent = "✅ Correct!";
+    metaEl.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
+    updateGameStateUI();
+  } else {
+    // Wrong guess
+    gameState.attemptsRemaining--;
+    gameState.wrongGuesses++;
+
+    // Unlock +6 more seconds (cap at 30)
+    gameState.maxListenTime = Math.min(6 + (gameState.wrongGuesses * 6), 30);
+
+    if (gameState.attemptsRemaining > 0) {
+      statusEl.textContent = `❌ Not quite. ${gameState.maxListenTime} seconds unlocked!`;
+      updateGameStateUI();
+    } else {
+      // Out of attempts - reveal the answer
+      statusEl.textContent = "❌ Out of attempts!";
+      metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+      gameState.maxListenTime = 30; // Unlock full audio after game over
+      updateGameStateUI();
+    }
+  }
+
+  // Clear the guess input
+  guessInput.value = "";
 }
-// This is not working right now
+
 function reveal(){
   if(!current) return;
   const statusEl = $("status");
   const metaEl = $("meta");
   if (!statusEl || !metaEl) return;
-  
+
   statusEl.textContent = "🔎 Revealed.";
   metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+
+  // Unlock full audio when revealed
+  gameState.maxListenTime = 30;
+  gameState.attemptsRemaining = 0;
+  updateGameStateUI();
+
+  // Unhide the Finish button (if present) and attach the redirect handler.
+  try {
+    const finishBtn = document.getElementById("finish") as HTMLButtonElement | null;
+    if (finishBtn) {
+      finishBtn.classList.remove("hidden");
+      finishBtn.onclick = () => { window.location.href = "game-completed.html" };
+    }
+  } catch (err) {
+    console.error("Could not show Finish button:", err);
+  }
 }
 
 const newBtn = $("new");
 const submitBtn = $("submit");
+const revealBtn = $("reveal");
 const guessInput = $("guess");
 
 if (newBtn) newBtn.onclick = pickSong;
 if (submitBtn) submitBtn.onclick = checkGuess;
-if (guessInput) guessInput.addEventListener("keydown", e => { if(e.key==="Enter") checkGuess(); });
+if (revealBtn) revealBtn.onclick = reveal;
+if (guessInput) guessInput.addEventListener("keydown", e => { if (e.key === "Enter") checkGuess(); });
 
 
 /* ------------ integrated dropdown on the Guess input ------------ */
@@ -270,21 +425,21 @@ function renderDD(items: DropdownItem[]): void {
   guessDD.innerHTML = "";
   items.forEach((it: DropdownItem, i: number) => {
     const el = document.createElement("div");
-    el.className = "dd-item"; el.setAttribute("role", "option"); el.dataset.idx = String(i);
-    el.innerHTML = `<img src="${it.artwork}" alt="">
-      <div><div class="dd-title">${it.title}</div><div class="muted">${it.artist}</div></div>`;
+    el.className = "flex gap-2.5 items-center px-3 py-2 cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100"; el.setAttribute("role", "option"); el.dataset.idx = String(i);
+    el.innerHTML = `<img src="${it.artwork}" alt="" class="w-10 h-10 rounded-md object-cover">
+      <div><div class="font-semibold">${it.title}</div><div class="text-gray-600">${it.artist}</div></div>`;
     el.onclick = () => selectItem(i);
     guessDD.appendChild(el);
   });
   if (!items.length) {
     const empty = document.createElement("div");
-    empty.className = "dd-item"; empty.textContent = "No songs found.";
+    empty.className = "px-3 py-2 text-gray-600"; empty.textContent = "No songs found.";
     guessDD.appendChild(empty);
   }
   showDD();
 }
 function highlight(index: number): void {
-  [...guessDD.children].forEach((c, i) => c.setAttribute("aria-selected", i === index ? "true" : "false"));
+  Array.from(guessDD.children).forEach((c, i) => c.setAttribute("aria-selected", i === index ? "true" : "false"));
   if (index >= 0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({ block: "nearest" });
 }
 
@@ -370,17 +525,17 @@ async function searchArtistSongs(query: string): Promise<void> {
 }
 
 const DEBOUNCE_MS = 180;
-let t:any = null;
+let t: any = null;
 let guessElement = $("guess") as HTMLInputElement;
 
-guessElement.addEventListener("input", (e)=>{
+guessElement.addEventListener("input", (e) => {
   const eventTarget = e.target as HTMLInputElement;
   const q = eventTarget.value.trim();
   clearTimeout(t);
   if (q.length < 2) { hideDD(); return; }
   t = setTimeout(() => searchArtistSongs(q), DEBOUNCE_MS);
 });
-guessElement.addEventListener("keydown", (e)=>{
+guessElement.addEventListener("keydown", (e) => {
   if (guessDD.classList.contains("hidden")) return;
   if (e.key === "ArrowDown") { e.preventDefault(); ddIndex = Math.min(ddIndex + 1, ddItems.length - 1); highlight(ddIndex); }
   else if (e.key === "ArrowUp") { e.preventDefault(); ddIndex = Math.max(ddIndex - 1, 0); highlight(ddIndex); }
@@ -389,8 +544,8 @@ guessElement.addEventListener("keydown", (e)=>{
 });
 
 // click outside to close
-document.addEventListener("click", (e)=>{
+document.addEventListener("click", (e) => {
   const wrap = document.querySelector(".guess-wrap")
-  if(!wrap) return;
+  if (!wrap) return;
   if (!wrap.contains(e.target as Node)) hideDD();
 });
