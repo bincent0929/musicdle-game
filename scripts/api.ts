@@ -347,6 +347,9 @@ function checkGuess() {
     statusEl.textContent = "✅ Correct!";
     metaEl.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
     updateGameStateUI();
+    
+    // Show completion popup after a short delay
+    setTimeout(() => showCompletionPopup(), 800);
   } else {
     // Wrong guess
     gameState.attemptsRemaining--;
@@ -371,8 +374,70 @@ function checkGuess() {
   guessInput.value = "";
 }
 
-function reveal() {
-  if (!current) return;
+function showCompletionPopup(): void {
+  const Popup = $("completion-Popup");
+  if (!Popup) {
+    console.error("Completion Popup not found");
+    return;
+  }
+
+  // Calculate score based on game state
+  const score = gameState.hasWon ? (6 - gameState.wrongGuesses) : 0;
+  const scoreEl = $("Popup-score");
+  if (scoreEl) {
+    scoreEl.textContent = score.toString();
+  }
+
+  // Show the Popup
+  Popup.classList.remove("hidden");
+
+  // Setup event listeners for Popup buttons
+  const yesBtn = $("Popup-yes") as HTMLButtonElement | null;
+  const noBtn = $("Popup-no") as HTMLButtonElement | null;
+  const playAgainBtn = $("Popup-play-again") as HTMLButtonElement | null;
+  const noteEl = $("Popup-note");
+
+  if (yesBtn && noteEl) {
+    yesBtn.onclick = () => {
+      // Save to localStorage
+      const saved = localStorage.getItem("musicdle-scores") || "[]";
+      const scores = JSON.parse(saved);
+      scores.push({
+        score: score,
+        date: new Date().toISOString(),
+        song: current?.title,
+        artist: current?.artist
+      });
+      localStorage.setItem("musicdle-scores", JSON.stringify(scores));
+      
+      noteEl.classList.remove("hidden");
+      if (yesBtn) yesBtn.disabled = true;
+      if (noBtn) noBtn.disabled = true;
+    };
+  }
+
+  if (noBtn && Popup) {
+    noBtn.onclick = () => {
+      Popup.classList.add("hidden");
+    };
+  }
+
+  if (playAgainBtn) {
+    playAgainBtn.onclick = () => {
+      window.location.reload();
+    };
+  }
+
+  // Close Popup when clicking outside
+  Popup.onclick = (e) => {
+    if (e.target === Popup) {
+      Popup.classList.add("hidden");
+    }
+  };
+}
+
+function reveal(){
+  if(!current) return;
   const statusEl = $("status");
   const metaEl = $("meta");
   if (!statusEl || !metaEl) return;
@@ -385,16 +450,8 @@ function reveal() {
   gameState.attemptsRemaining = 0;
   updateGameStateUI();
 
-  // Unhide the Finish button (if present) and attach the redirect handler.
-  try {
-    const finishBtn = document.getElementById("finish") as HTMLButtonElement | null;
-    if (finishBtn) {
-      finishBtn.classList.remove("hidden");
-      finishBtn.onclick = () => { window.location.href = "game-completed.html" };
-    }
-  } catch (err) {
-    console.error("Could not show Finish button:", err);
-  }
+  // Show completion Popup after a short delay
+  setTimeout(() => showCompletionPopup(), 800);
 }
 
 const newBtn = $("new");
