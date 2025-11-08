@@ -331,7 +331,7 @@ function checkGuess() {
   const metaEl = $("meta");
   if (!guessInput || !statusEl || !metaEl) return;
 
-  const playerGuess : currentSong['title'] = normalize(guessInput.value);
+  const playerGuess: currentSong['title'] = normalize(guessInput.value);
   const correctTitle = normalize(current.title);
   if (!playerGuess) {
     statusEl.textContent = "Type a guess first!";
@@ -606,3 +606,24 @@ document.addEventListener("click", (e) => {
   if (!wrap) return;
   if (!wrap.contains(e.target as Node)) hideDD();
 });
+
+// big old popup for game information
+function initGameInfoPopup(): void {
+  const popup = document.getElementById("game-info-popup");
+  const closeBtn = document.getElementById("game-info-close");
+  if (!popup || !closeBtn) return;
+
+  const hidePopup = () => {
+    popup.classList.add("hidden");
+    popup.setAttribute("aria-hidden", "true");
+  };
+
+  closeBtn.addEventListener("click", hidePopup);
+  document.addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === "Escape" && !popup.classList.contains("hidden")) {
+      hidePopup();
+    }
+  });
+}
+
+initGameInfoPopup();
