@@ -179,10 +179,6 @@ let gameState: GameState = {
 // allows us to use $ as shorthand for document.getElementById
 const $ = (id: string) => document.getElementById(id);
 
-// this just defines the string that you'll use to fetch
-const rssTopSongs = (country: string, genre: string, limit = 100): string =>
-  `https://itunes.apple.com/${country}/rss/topsongs/limit=${limit}/genre=${genre}/json`;
-
 function normalize(s: string) {
   return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 }
@@ -213,8 +209,8 @@ async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   ($("player") as HTMLAudioElement).src = "";
   ($("finish") as HTMLButtonElement).classList.add("hidden");
 
-  // 1) Get top songs feed
-  const feed: ITunesRSSResponse = await fetch(rssTopSongs(country, genre, 100)).then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
+  // 1) Get top songs feed - pulling top 1000 from US, all genres
+  const feed: ITunesRSSResponse = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=1000/genre=1/json').then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
   const entries = feed?.feed?.entry || [];
   if (!entries.length) throw new Error("No songs found for that genre/country.");
 
