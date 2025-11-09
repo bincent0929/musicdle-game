@@ -28,11 +28,14 @@
           <!-- Guess input + dropdown -->
           <div class="relative flex-1 basis-[360px] max-w-[520px]">
             <input id="guess" placeholder="Guess the song title… (type an artist to browse their songs)" size="34" autocomplete="off" class="px-3 py-2 border border-gray-300 rounded-lg text-base w-full" />
-            <div id="guessDD" class="absolute top-[calc(100%+0.25rem)] left-0 right-0 z-20 bg-white border border-gray-200 rounded-lg max-h-[260px] overflow-auto shadow-lg hidden" role="listbox" aria-label="Artist songs"></div>
+            <div id="guessDD" class="absolute top-[calc(100%+0.25rem)] left-0 right-0 z-20 bg-white border
+             border-gray-200 rounded-lg max-h-[260px] overflow-auto shadow-lg hidden" role="listbox" aria-label="Artist songs"></div>
           </div>
           <button id="submit" class="px-3 py-2 border border-gray-300 rounded-lg text-base">Submit</button>
           <!-- this reveal button is NOT working -->
-          <button id="reveal" class="px-3 py-2 border border-gray-300 rounded-lg text-base text-gray-600 mx-auto block">Reveal</button>
+          <button id="reveal" class="px-3 py-2 bg-gradient-to-bl from-red-300 via-pink-200 to-red-300 hover:from-white-300 
+          hover:via-red-400 hover:to-pink-500 active:from-purple-400 active:via-purple-300 active:to-pink-400
+           border border-black rounded-lg text-base text-black font-medium shadow-md transition mx-auto block">Reveal</button>
         </div>
         <div id="bottom-info" class="text-center">
           <div id="status" class="mt-2 font-semibold"></div>
@@ -42,7 +45,6 @@
             <div id="unlocked" class="font-medium"></div>
           </div>
         </div>
-        <button id="finish" class="hidden mx-auto block px-3 py-2 bg-gradient-to-bl from-red-300 via-pink-200 to-red-300 hover:from-white-300 hover:via-red-400 hover:to-pink-500 border border-black rounded-lg text-base text-black font-medium shadow-md transition">Finish</button>
       </div>
 
       <script src="scripts/api.js"></script>
