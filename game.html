@@ -15,6 +15,25 @@
   </head>
 
   <body class="bg-gray-50 font-sans flex items-center justify-center min-h-screen">
+    <div id="game-info-popup" aria-hidden="false" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6">
+      <div role="dialog" aria-labelledby="game-info-title" aria-describedby="game-info-text" class="relative w-full max-w-2xl">
+        <button id="game-info-close" aria-label="Close hints" class="absolute -top-4 -left-2 flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/80 text-2xl font-semibold text-gray-800 shadow-md transition hover:bg-white">
+          &larr;
+        </button>
+        <div class="bg-white rounded-[18px] shadow-2xl px-6 sm:px-10 py-8 text-center">
+          <h1 id="game-info-title" class="text-3xl sm:text-4xl font-extrabold mb-2">How <span class="text-red-500">To Play</span></h1>
+          <p id="game-info-text" class="text-lg text-gray-600 mb-6">A quick goon before you dive into today&rsquo;s track.</p>
+          <div class="space-y-3 text-left text-gray-700 text-base leading-relaxed">
+            <p><span class="font-semibold">🎧 Unlock time:</span> You start with 6 seconds of audio. Every wrong guess grants +6 seconds (max 30s).</p>
+            <p><span class="font-semibold">🎯 Smarter guesses:</span> Type an artist&rsquo;s name to browse their songs in the dropdown, then tap the best match.</p>
+            <p><span class="font-semibold">🪄 Reveal:</span> Stuck? Reveal shows the answer but ends the round&mdash;save it for when you really need it.</p>
+            <p><span class="font-semibold">🏁 Finish later:</span> The Finish button appears after a reveal so you can review or restart.</p>
+          </div>
+          <hr class="my-6 border-gray-200" />
+          <p class="text-gray-700 text-sm">Tap the arrow to start playing. You can reopen these tips with a refresh.</p>
+        </div>
+      </div>
+    </div>
     <div class="max-w-4xl px-4">
       <h2 class="text-2xl font-bold text-center mb-4">Guess the Music!</h2>
       <div class="border border-gray-400 rounded-2xl p-4 mt-4">
@@ -46,10 +65,31 @@
           </div>
         </div>
       </div>
-
-      <button id="finish" class="hidden mx-auto block px-3 py-2 bg-gradient-to-bl from-red-300 via-pink-200 to-red-300 hover:from-white-300 hover:via-red-400 hover:to-pink-500 border border-black rounded-lg text-base text-black font-medium shadow-md transition">Finish</button>
-
       <script src="scripts/api.js"></script>
+    </div>
+    <!-- pop up when the game completes -->
+    <div id="completion-Popup" class="fixed inset-0 flex items-center justify-center z-50 hidden" style="background-color: rgba(0, 0, 0, 0.75);">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-11/12 p-8 text-center">
+        <h1 class="text-4xl font-bold mb-2">Game <span class="text-blue-600">Completed</span>!</h1>
+        <p class="text-xl mb-6">
+          <strong>Score:</strong>
+          <span id="Popup-score">0</span>
+        </p>
+        <p class="mb-4">
+          <span aria-hidden="true" class="text-2xl">💾</span>
+          <span class="ml-2">Do you want to save your progress?</span>
+        </p>
+        <div class="flex justify-center gap-3 mb-3">
+          <button id="Popup-yes" class="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition">Yes</button>
+          <button id="Popup-no" class="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">No</button>
+        </div>
+        <p id="Popup-note" class="text-gray-600 mb-0 hidden">Saved! This run has been added to your device.</p>
+        <hr class="my-6 border-gray-300" />
+        <div class="flex justify-center gap-4">
+          <button id="Popup-play-again" class="text-blue-600 font-bold hover:underline">Play again</button>
+          <a href="index.html" class="text-blue-600 font-bold hover:underline">Home</a>
+        </div>
+      </div>
     </div>
   </body>
 </html>

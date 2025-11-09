@@ -327,7 +327,7 @@ function checkGuess() {
   const metaEl = $("meta");
   if (!guessInput || !statusEl || !metaEl) return;
 
-  const playerGuess : currentSong['title'] = normalize(guessInput.value);
+  const playerGuess: currentSong['title'] = normalize(guessInput.value);
   const correctTitle = normalize(current.title);
   if (!playerGuess) {
     statusEl.textContent = "Type a guess first!";
@@ -343,6 +343,9 @@ function checkGuess() {
     statusEl.textContent = "✅ Correct!";
     metaEl.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
     updateGameStateUI();
+    
+    // Show completion popup after a short delay
+    setTimeout(() => showCompletionPopup(), 800);
   } else {
     // Wrong guess
     gameState.attemptsRemaining--;
@@ -367,6 +370,68 @@ function checkGuess() {
   guessInput.value = "";
 }
 
+function showCompletionPopup(): void {
+  const Popup = $("completion-Popup");
+  if (!Popup) {
+    console.error("Completion Popup not found");
+    return;
+  }
+
+  // Calculate score based on game state
+  const score = gameState.hasWon ? (6 - gameState.wrongGuesses) : 0;
+  const scoreEl = $("Popup-score");
+  if (scoreEl) {
+    scoreEl.textContent = score.toString();
+  }
+
+  // Show the Popup
+  Popup.classList.remove("hidden");
+
+  // Setup event listeners for Popup buttons
+  const yesBtn = $("Popup-yes") as HTMLButtonElement | null;
+  const noBtn = $("Popup-no") as HTMLButtonElement | null;
+  const playAgainBtn = $("Popup-play-again") as HTMLButtonElement | null;
+  const noteEl = $("Popup-note");
+
+  if (yesBtn && noteEl) {
+    yesBtn.onclick = () => {
+      // Save to localStorage
+      const saved = localStorage.getItem("musicdle-scores") || "[]";
+      const scores = JSON.parse(saved);
+      scores.push({
+        score: score,
+        date: new Date().toISOString(),
+        song: current?.title,
+        artist: current?.artist
+      });
+      localStorage.setItem("musicdle-scores", JSON.stringify(scores));
+      
+      noteEl.classList.remove("hidden");
+      if (yesBtn) yesBtn.disabled = true;
+      if (noBtn) noBtn.disabled = true;
+    };
+  }
+
+  if (noBtn && Popup) {
+    noBtn.onclick = () => {
+      Popup.classList.add("hidden");
+    };
+  }
+
+  if (playAgainBtn) {
+    playAgainBtn.onclick = () => {
+      window.location.reload();
+    };
+  }
+
+  // Close Popup when clicking outside
+  Popup.onclick = (e) => {
+    if (e.target === Popup) {
+      Popup.classList.add("hidden");
+    }
+  };
+}
+
 function reveal(){
   if(!current) return;
   const statusEl = $("status");
@@ -381,16 +446,8 @@ function reveal(){
   gameState.attemptsRemaining = 0;
   updateGameStateUI();
 
-  // Unhide the Finish button (if present) and attach the redirect handler.
-  try {
-    const finishBtn = document.getElementById("finish") as HTMLButtonElement | null;
-    if (finishBtn) {
-      finishBtn.classList.remove("hidden");
-      finishBtn.onclick = () => { window.location.href = "game-completed.html" };
-    }
-  } catch (err) {
-    console.error("Could not show Finish button:", err);
-  }
+  // Show completion Popup after a short delay
+  setTimeout(() => showCompletionPopup(), 800);
 }
 
 const newBtn = $("new");
@@ -545,3 +602,24 @@ document.addEventListener("click", (e) => {
   if (!wrap) return;
   if (!wrap.contains(e.target as Node)) hideDD();
 });
+
+// big old popup for game information
+function initGameInfoPopup(): void {
+  const popup = document.getElementById("game-info-popup");
+  const closeBtn = document.getElementById("game-info-close");
+  if (!popup || !closeBtn) return;
+
+  const hidePopup = () => {
+    popup.classList.add("hidden");
+    popup.setAttribute("aria-hidden", "true");
+  };
+
+  closeBtn.addEventListener("click", hidePopup);
+  document.addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === "Escape" && !popup.classList.contains("hidden")) {
+      hidePopup();
+    }
+  });
+}
+
+initGameInfoPopup();
