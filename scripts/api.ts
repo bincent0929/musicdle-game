@@ -207,7 +207,6 @@ async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   ($("meta") as HTMLElement).textContent = "";
   ($("guess") as HTMLInputElement).value = "";
   ($("player") as HTMLAudioElement).src = "";
-  ($("finish") as HTMLButtonElement).classList.add("hidden");
 
   // the max amount of songs you can get is 200 from iTunes
   const feed: ITunesRSSResponse = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json').then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
