@@ -17,38 +17,12 @@
   <body class="bg-gray-50 font-sans flex items-center justify-center min-h-screen">
     <div class="max-w-4xl px-4">
       <h2 class="text-2xl font-bold text-center mb-4">Guess the Music!</h2>
-      <div class="flex gap-2.5 flex-wrap items-center">
-        <!-- need to remove the genre selection -->
-        <label>Genre:
-          <select id="genre" class="px-3 py-2 border border-gray-300 rounded-lg text-base">
-            <option value="14">Pop</option>
-            <option value="18">Hip-Hop/Rap</option>
-            <option value="21">Rock</option>
-            <option value="6">Country</option>
-            <option value="15">R&B/Soul</option>
-            <option value="20">Alternative</option>
-            <option value="17">Dance</option>
-            <option value="11">Jazz</option>
-            <option value="12">Latin</option>
-            <option value="7">Electronic</option>
-          </select>
-        </label>
-        <!-- need to remove the country selection -->
-        <label>Country:
-          <select id="country" class="px-3 py-2 border border-gray-300 rounded-lg text-base">
-            <option value="us">US</option>
-            <option value="gb">UK</option>
-            <option value="ca">CA</option>
-            <option value="au">AU</option>
-            <option value="de">DE</option>
-            <option value="jp">JP</option>
-          </select>
-        </label>
-        <button id="new" class="px-3 py-2 border border-gray-300 rounded-lg text-base">Play a top song</button>
-      </div>
-
-      <div class="border border-gray-200 rounded-2xl p-4 mt-4">
-        <audio id="player" controls preload="none" class="mx-auto block"></audio>
+      <div class="border border-gray-400 rounded-2xl p-4 mt-4">
+        
+        <div class="flex gap-2.5 items-center justify-center flex-wrap">
+          <button id="new" class="px-3 py-2 border border-gray-300 rounded-lg text-base">Play a top song</button>
+          <audio id="player" controls preload="none"></audio>
+        </div>
 
         <div class="flex gap-2.5 flex-wrap items-center mt-2.5">
           <!-- Guess input + dropdown -->

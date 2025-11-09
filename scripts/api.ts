@@ -200,8 +200,8 @@ function isSongWithPreview(track: ITunesTrack): track is ITunesTrack & { preview
  */
 async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   // this are taken from the user's input on the page
-  const country = ($("country") as HTMLInputElement).value;
-  const genre = ($("genre") as HTMLInputElement).value;
+  //const country = ($("country") as HTMLInputElement).value;
+  //const genre = ($("genre") as HTMLInputElement).value;
 
   ($("status") as HTMLElement).textContent = "Loading top songs…";
   ($("meta") as HTMLElement).textContent = "";
@@ -209,8 +209,8 @@ async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   ($("player") as HTMLAudioElement).src = "";
   ($("finish") as HTMLButtonElement).classList.add("hidden");
 
-  // 1) Get top songs feed - pulling top 1000 from US, all genres
-  const feed: ITunesRSSResponse = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=1000/genre=1/json').then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
+  // the max amount of songs you can get is 200 from iTunes
+  const feed: ITunesRSSResponse = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json').then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
   const entries = feed?.feed?.entry || [];
   if (!entries.length) throw new Error("No songs found for that genre/country.");
 
