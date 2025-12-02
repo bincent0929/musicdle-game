@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+      crossorigin="anonymous"
+    ></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Completed • Musicdle</title>
+
+    <!--<link rel="stylesheet" href="style.css" />-->
+  </head>
+  <body class="bg-light">
+    <main class="d-flex flex-column justify-content-center align-items-center text-center vh-100">
+      <div class="card shadow-sm" style="max-width:560px;width:92vw;border-radius:18px;">
+        <div class="card-body">
+          <h1 class="display-4 mb-2">Game <span class="text-primary">Completed</span>!</h1>
+
+          <p class="lead mb-4">
+            <strong>Score:</strong>
+            <span id="gc-score">0</span>
+          </p>
+
+          <p class="mb-3">
+            <span aria-hidden="true" style="font-size:1.35rem">💾</span>
+            <span class="ml-2">Do you want to save your progress?</span>
+          </p>
+
+          <div class="d-flex justify-content-center mb-2">
+            <button id="gc-yes" class="btn btn-dark mr-2">Yes</button>
+            <button id="gc-no"  class="btn btn-light">No</button>
+          </div>
+
+          <p id="gc-note" class="text-muted mb-0" hidden>Saved! This run has been added to your device.</p>
+
+          <hr />
+          <div>
+            <a id="gc-play-again" class="btn btn-link font-weight-bold" href="game.html">Play again</a>
+            <a class="btn btn-link font-weight-bold" href="index.html">Home</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!--<script src="game-completed.js" type="module"></script>-->
+  </body>
+</html>
