@@ -1,5 +1,0 @@
-*.js
-.env
-styles/compiled-styles.css
-# stryker temp files
-.stryker-tmp
