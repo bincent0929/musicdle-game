@@ -1,7 +1,6 @@
 API_TSC = tsc scripts/api.ts --outDir scripts --target ES2017 --lib ES2017,DOM
 # not needed yet
-#TSC3 = tsc minor_html/stats.ts --lib ES2015,DOM
-
+TSC_STATS = tsc minor_html/stats.ts --lib ES2015,DOM
 CADDY = caddy run
 TAILWIND = tailwindcss -o styles/compiled-styles.css
 TAILWIND_WATCH = tailwindcss -o styles/compiled-styles.css --watch
@@ -14,6 +13,7 @@ BACKEND = python3 backend.py
 run:
 	@echo "convert ts"
 	$(API_TSC)
+	$(TSC_STATS)
 	@echo "tailwind to css"
 	$(TAILWIND)
 	@echo "start caddy"
@@ -22,6 +22,7 @@ run:
 start:
 	@echo "Converting TypeScript..."
 	$(API_TSC)
+	$(TSC_STATS)
 	@echo "Starting caddy in tmux session 'caddy'..."
 	tmux new-session -d -s caddy '$(CADDY)'
 	@echo "Starting tailwind watch in tmux session 'tailwind'..."
