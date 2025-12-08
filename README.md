@@ -1,6 +1,12 @@
 # For Building The Website
 
-For getting the site running, you'll want to compile the typescript to javascript `tsc scripts/game.ts` and run tailwind to output into the css `tailwindcss -o styles/compiled-styles.css` add `--watch` if you're currently working on the styling. It will update the styles as you add classes to the HTML. Then start the python backend using `python music_file_backend_webserver.py` and run `caddy run`. Now the website should be up.
+1. Open the folder in a devcontainer
+2. Use either `make run` or `make start` in the terminal to get a local version of the game started.
+
+- Use `make run` to get the website running.
+- Using `make start` to get the website going for coding it.
+
+- Not matter what, the Typescript would need to be recompiled after **every** edit.
 
 # MusicDle
 ## September 17th:

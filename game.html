@@ -1,9 +1,3 @@
-<!--
-  This is VERY close to becoming the new game.html.
-  We just need to get the game finished functionality working,
-  the reveal button working, and the meta button working or removed.
--->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -22,14 +16,14 @@
         </button>
         <div class="bg-white rounded-[18px] shadow-2xl px-6 sm:px-10 py-8 text-center">
           <h1 id="game-info-title" class="text-3xl sm:text-4xl font-extrabold mb-2">How <span class="text-red-500">To Play</span></h1>
-          <p id="game-info-text" class="text-lg text-gray-600 mb-6">A quick goon before you dive into today&rsquo;s track.</p>
+          <p id="game-info-text" class="text-lg text-gray-600 mb-6">Here's some info about the game before you start.</p>
           <div class="space-y-3 text-left text-gray-700 text-base leading-relaxed">
-            <p><span class="font-semibold">🎧 Unlock time:</span> You start with 6 seconds of audio. Every wrong guess grants +6 seconds (max 30s).</p>
-            <p><span class="font-semibold">🎯 Smarter guesses:</span> Type an artist&rsquo;s name to browse their songs in the dropdown, then tap the best match.</p>
-            <p><span class="font-semibold">🪄 Reveal:</span> Stuck? Reveal shows the answer but ends the round&mdash;save it for when you really need it.</p>
+            <p><span class="font-semibold">🎧 More song with every guess:</span> You start with 6 seconds of audio. Every guess grants +6 seconds for you to guess the song. (max 30s).</p>
+            <p><span class="font-semibold">🎯 Smarter guesses:</span> Type an artist&rsquo;s name or the name of the song in the search bar, and you'll see a variety of choices.</p>
+            <p><span class="font-semibold">🪄 If you just don't know it:</span> <b>Reveal</b> shows the answer but you lose the game. You should only use it when you really aren't sure what it is.</p>
           </div>
           <hr class="my-6 border-gray-200" />
-          <p class="text-gray-700 text-sm">Tap the arrow to start playing. You can reopen these tips with a refresh.</p>
+          <p class="text-gray-700 text-sm">Press the arrow to start playing. Refresh the page to get these tips again.</p>
         </div>
       </div>
     </div>
@@ -45,7 +39,7 @@
         <div class="flex gap-2.5 flex-wrap items-center mt-2.5">
           <!-- Guess input + dropdown -->
           <div class="relative flex-1 basis-[360px] max-w-[520px]">
-            <input id="guess" placeholder="Guess the song title… (type an artist to browse their songs)" size="34" autocomplete="off" class="px-3 py-2 border border-gray-300 rounded-lg text-base w-full" />
+            <input id="guess" placeholder="Guess the song…" size="34" autocomplete="off" class="px-3 py-2 border border-gray-300 rounded-lg text-base w-full" />
             <div id="guessDD" class="absolute top-[calc(100%+0.25rem)] left-0 right-0 z-20 bg-white border
              border-gray-200 rounded-lg max-h-[260px] overflow-auto shadow-lg hidden" role="listbox" aria-label="Artist songs"></div>
           </div>
