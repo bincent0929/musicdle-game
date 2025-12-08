@@ -551,7 +551,7 @@ async function checkGuess() {
         if (hintState.album.revealed) revealed.push("album");
         
         if (revealed.length > 0) {
-          feedback += ` ✓ Revealed: ${revealed.join(", ")}!`;
+          feedback += ` Revealed: ${revealed.join(", ")}`;
         }
         
         statusEl.textContent = feedback;
