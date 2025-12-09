@@ -72,9 +72,20 @@
     <div id="completion-Popup" class="fixed inset-0 flex items-center justify-center z-50 hidden" style="background-color: rgba(0, 0, 0, 0.75);">
       <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-11/12 p-8 text-center">
         <h1 class="text-4xl font-bold mb-2">Game <span class="text-blue-600">Completed</span>!</h1>
-        <p class="text-xl mb-6">
+        
+        <!-- Song Info Section -->
+        <div class="mb-6 mt-4">
+          <img id="Popup-album-art" src="" alt="Album artwork" class="w-32 h-32 mx-auto rounded-lg shadow-lg mb-3" />
+          <h2 id="Popup-song-title" class="text-2xl font-bold text-gray-800 mb-1"></h2>
+          <p id="Popup-artist-name" class="text-lg text-gray-600"></p>
+        </div>
+        
+        <p class="text-xl mb-2">
           <strong>Score:</strong>
           <span id="Popup-score">0</span>
+        </p>
+        <p class="text-lg text-gray-600 mb-6">
+          Guesses made: <span id="Popup-guesses" class="font-semibold">0</span>/5
         </p>
         <p class="mb-4">
           <span aria-hidden="true" class="text-2xl">💾</span>

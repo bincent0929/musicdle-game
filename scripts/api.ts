@@ -598,6 +598,33 @@ function showCompletionPopup(): void {
   if (scoreEl) {
     scoreEl.textContent = score.toString();
   }
+  
+  // Show number of guesses made
+  const guessesEl = $("Popup-guesses");
+  if (guessesEl) {
+    const guessesMade = gameState.wrongGuesses + (gameState.hasWon ? 1 : 0);
+    guessesEl.textContent = guessesMade.toString();
+  }
+
+  // Populate song information
+  if (current) {
+    const songTitleEl = $("Popup-song-title");
+    const artistNameEl = $("Popup-artist-name");
+    const albumArtEl = $("Popup-album-art") as HTMLImageElement | null;
+    
+    if (songTitleEl) {
+      songTitleEl.textContent = current.title;
+    }
+    if (artistNameEl) {
+      artistNameEl.textContent = current.artist;
+    }
+    if (albumArtEl && current.fullTrack) {
+      const artworkUrl = current.fullTrack.artworkUrl100 || current.fullTrack.artworkUrl60 || "";
+      const highResArtwork = artworkUrl.replace("100x100bb", "300x300bb").replace("60x60bb", "300x300bb");
+      albumArtEl.src = highResArtwork;
+      albumArtEl.alt = `${current.albumName} album artwork`;
+    }
+  }
 
   // Show the Popup
   Popup.classList.remove("hidden");
