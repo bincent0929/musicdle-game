@@ -17,6 +17,27 @@ let gameState: GameState = {
 //let current: currentSong | null = null;
 let current: currentSong | null = null;
 
+// big old popup for game information
+function initGameInfoPopup(): void {
+  const popup = $("game-info-popup");
+  const closeBtn = $("game-info-close");
+  if (!popup || !closeBtn) return;
+
+  const hidePopup = () => {
+    popup.classList.add("hidden");
+    popup.setAttribute("aria-hidden", "true");
+  };
+
+  closeBtn.addEventListener("click", hidePopup);
+  document.addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === "Escape" && !popup.classList.contains("hidden")) {
+      hidePopup();
+    }
+  });
+}
+
+initGameInfoPopup();
+
 async function pickSong() {
   let statusElement = $("status") as HTMLElement;
   let metaElement = $("meta") as HTMLElement;
@@ -477,24 +498,3 @@ document.addEventListener("click", (e) => {
   if (!wrap) return;
   if (!wrap.contains(e.target as Node)) hideDD();
 });
-
-// big old popup for game information
-function initGameInfoPopup(): void {
-  const popup = document.getElementById("game-info-popup");
-  const closeBtn = document.getElementById("game-info-close");
-  if (!popup || !closeBtn) return;
-
-  const hidePopup = () => {
-    popup.classList.add("hidden");
-    popup.setAttribute("aria-hidden", "true");
-  };
-
-  closeBtn.addEventListener("click", hidePopup);
-  document.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Escape" && !popup.classList.contains("hidden")) {
-      hidePopup();
-    }
-  });
-}
-
-initGameInfoPopup();

@@ -1,4 +1,4 @@
-API_TSC = tsc scripts/api.ts --outDir scripts --target ES2017 --lib ES2017,DOM
+API_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
 # not needed yet
 TSC_STATS = tsc minor_html/stats.ts --lib ES2015,DOM
 CADDY = caddy run

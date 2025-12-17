@@ -3,6 +3,7 @@ import { normalize } from "./additional-functions";
 import { ITunesTrack } from "./api-types";
 import { extractYear } from "./api";
 import type { currentSong } from "./game-logic-types";
+import { $ } from "./additional-functions";
 
 let hintState: HintState;
 
@@ -17,11 +18,11 @@ export function initializeHintBoxes(): void {
         album: { value: "", revealed: false }
     };
 
-    let hintContainer = document.getElementById("hint-container");
+    let hintContainer = $("hint-container");
   
     if (!hintContainer) {
     // Create the container if it doesn't exist
-    const bottomInfo = document.getElementById("bottom-info");
+    const bottomInfo = $("bottom-info");
     if (!bottomInfo) return;
         hintContainer = document.createElement("div");
         hintContainer.id = "hint-container";
@@ -57,7 +58,7 @@ export function initializeHintBoxes(): void {
  * Update a specific hint box with correct info
  */
 function updateHintBox(boxId: string, value: string, shouldReveal: boolean): void {
-    const box = document.getElementById(boxId);
+    const box = $(boxId);
     if (!box) return;
 
     const valueEl = box.querySelector(".text-sm");
