@@ -1,7 +1,8 @@
 import type { HintState } from "./hints-types";
 import { normalize } from "./additional-functions";
-import { currentSong, ITunesTrack } from "./api-types";
+import { ITunesTrack } from "./api-types";
 import { extractYear } from "./api";
+import type { currentSong } from "./game-logic-types";
 
 let hintState: HintState;
 
