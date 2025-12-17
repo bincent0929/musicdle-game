@@ -10,41 +10,45 @@ document.addEventListener('DOMContentLoaded', function(): void {
             info for the bar graph's stats and colors
             */
 
-            const xBar = ["1", "2", "3", "4", "5+"];
-            const yBar = [10, 8, 6, 4, 2];
-            const barColors = ["red", "green","blue","orange","brown"];
+            const xLine = ["1", "2", "3", "4", "5+"];
+            const yLine = [7, 15, 10, 12, 3];
 
             const bar = document.getElementById('barChart');
 
 
-
+            (document.getElementById("currStreak") as HTMLElement).textContent = getCurrStreak();
             (document.getElementById("maxStreak") as HTMLElement).textContent = getMaxStreak();
             (document.getElementById("topGenre") as HTMLElement).textContent = getTopGenre();
             (document.getElementById("topSong") as HTMLElement).textContent = getTopSong();
 
 
             //functions for retrieving info from the current user
+            function getCurrStreak(){ 
+
+                return "3";
+            }
             function getMaxStreak(){ 
 
-                return "idk";
+                return "7";
             }
 
             function getTopGenre(){
 
-                return "irdk";
+                return "Pop";
             }
             function getTopSong(){
                     
-                return "irrrdk";
+                return "Blinding Lights";
             }
             
             new Chart(bar, {
-            type: "bar",
+            type: "line",
             data: {
-                labels: xBar,
+                labels: xLine,
                 datasets: [{
-                backgroundColor: barColors,
-                    data: yBar
+                borderColor : "black",
+                backgroundColor: "black",
+                    data: yLine
                     }]
                     },
         options: {
@@ -52,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function(): void {
             legend: {display: false},
             title: {
                 display: true,
-                text: "Global Song Guessing Streak",
+                text: "Your Song Guessing Streaks",
                 font: {size: 20}
             }
             }

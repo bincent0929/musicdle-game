@@ -2,74 +2,38 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
-      crossorigin="anonymous"
-    />
-    <script
-      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-      crossorigin="anonymous"
-    ></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Musicdle</title>
-    <link rel="stylesheet" href="stats.css" />
+    <link rel="stylesheet" href="../styles/compiled-styles.css" />
+    <h1 class="text-center text-8xl font-extrabold mb-16">Stats</h1>
+
+    <!--<script src="scripts/script.js"></script>-->
   </head>
+  <body class="bg-gray-50">
+     <div class="font-bold absolute top-0 right-0 p-4">
+      <select     class="px-3 py-3  border-2 border-black text-lg"  onchange="location.href=this.value">
+        <option value = "stats.html"> Stats Page</option>
+        <option value = "../index.html">Home Page</option>
+      </select>
 
-  <body>
-
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand d-flex align-items-center" href="stats.html">
-        <img
-          src="musicnote.png"
-          width="40"
-          height="35"
-          class="d-inline-block align-top mr-2"
-          alt="Logo"
-        />
-        MusicDle</a
-      >
-      <div class="dropdown ml-auto">
-        <button
-          class="navbar-toggler"
-          type="button"
-          id="menuButton"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="false"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div
-          class="dropdown-menu dropdown-menu-right"
-          aria-labelledby="menuButton"
-        >
-          <a class="dropdown-item" href="hint_mode/hintmode.html">Hint mode</a>
-          <a class="dropdown-item" href="minor_html/about.html">About</a>
-          <a class="dropdown-item" href="minor_html/contact.html">Contact</a>
-        </div>
-      </div>
-    </nav>
+     </div>
+  
+      <link rel="stylesheet" href="stats.css" />
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0"></script>
-    <p align="center">
-          <canvas id="barChart" style="height:100%;max-height:2000px;width:100%;max-width:900px"></canvas> 
-            Your max win streak is <span id ="maxStreak"></span> <br>
-            The top genre played is <span id ="topGenre"></span><br>
-            The top song guessed is <span id ="topSong"></span>
-    </p>
+    <div class="stats-container">
+      <div class="chart-wrapper">        
+        <canvas id="barChart"></canvas>       
+      </div>
+      <div class="stats-text font-sans">
+        <p>Your current streak is <span id="currStreak"></span> days</p>
+        <p>Your highest streak is <span id="maxStreak"></span> days</p>
+        <p>Your top genre played is <span id="topGenre"></span></p>
+        <p>Your top song guessed is <span id="topSong"></span></p>
+      </div>
+
+    </div>
+
     <script src="stats.js"></script>
   </body>
 </html>
