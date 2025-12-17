@@ -2,7 +2,7 @@ import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSRespon
 
 import { ITunesMediaKind } from "./api-types";
 
-import { initializeHintBoxes, renderHintBoxes, checkGuessAgainstCurrent } from "./hints";
+import { initializeHintBoxes, renderHintBoxes, checkGuessAgainstCurrent, updateHintState, revealedStateUpdate } from "./hints";
 
 import { normalize } from "./additional-functions";
 
@@ -41,7 +41,7 @@ const $ = (id: string) => document.getElementById(id);
 /**
  * Extract year from release date string
  */
-function extractYear(releaseDate?: string): string {
+export function extractYear(releaseDate?: string): string {
   if (!releaseDate) return "Unknown";
   return new Date(releaseDate).getFullYear().toString();
 }
@@ -221,19 +221,12 @@ async function checkGuess() {
     if (!guessedTrack) guessedTrack = data.results[0];
 
     // Check the guess and update hints
-    const isCorrect = checkGuessAgainstCurrent(guessedTrack);
+    const isCorrect = checkGuessAgainstCurrent(guessedTrack, current);
     renderHintBoxes();
 
     if (isCorrect) {
       // CORRECT - reveal all remaining hints
-      hintState.artist.value = current.artist;
-      hintState.artist.revealed = true;
-      hintState.genre.value = current.genre;
-      hintState.genre.revealed = true;
-      hintState.year.value = current.releaseYear;
-      hintState.year.revealed = true;
-      hintState.album.value = current.albumName;
-      hintState.album.revealed = true;
+      updateHintState(current);
       renderHintBoxes();
 
       gameState.hasWon = true;
@@ -253,11 +246,9 @@ async function checkGuess() {
       if (gameState.attemptsRemaining > 0) {
         // Give feedback based on what was revealed
         let feedback = "❌ Not quite.";
-        const revealed = [];
-        if (hintState.artist.revealed) revealed.push("artist");
-        if (hintState.genre.revealed) revealed.push("genre");
-        if (hintState.year.revealed) revealed.push("year");
-        if (hintState.album.revealed) revealed.push("album");
+        const revealed : Array<string> = [];
+        revealedStateUpdate(revealed);
+        
         
         if (revealed.length > 0) {
           feedback += ` Revealed: ${revealed.join(", ")}`;
@@ -267,14 +258,7 @@ async function checkGuess() {
         updateGameStateUI();
       } else {
         // Out of attempts - reveal everything
-        hintState.artist.value = current.artist;
-        hintState.artist.revealed = true;
-        hintState.genre.value = current.genre;
-        hintState.genre.revealed = true;
-        hintState.year.value = current.releaseYear;
-        hintState.year.revealed = true;
-        hintState.album.value = current.albumName;
-        hintState.album.revealed = true;
+        updateHintState(current);
         renderHintBoxes();
 
         statusEl.textContent = "❌ Out of attempts!";
@@ -390,14 +374,7 @@ function reveal(){
   if (!statusEl || !metaEl) return;
 
   // Reveal all hints
-  hintState.artist.value = current.artist;
-  hintState.artist.revealed = true;
-  hintState.genre.value = current.genre;
-  hintState.genre.revealed = true;
-  hintState.year.value = current.releaseYear;
-  hintState.year.revealed = true;
-  hintState.album.value = current.albumName;
-  hintState.album.revealed = true;
+  updateHintState(current);
   renderHintBoxes();
   
   statusEl.textContent = "🔎 Revealed.";

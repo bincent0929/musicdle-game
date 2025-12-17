@@ -1,5 +1,7 @@
 import type { HintState } from "./hints-types";
 import { normalize } from "./additional-functions";
+import { currentSong, ITunesTrack } from "./api-types";
+import { extractYear } from "./api";
 
 let hintState: HintState;
 
@@ -84,7 +86,7 @@ export function renderHintBoxes(): void {
 /**
  * Check a guess and update hint state
  */
-export function checkGuessAgainstCurrent(guessedTrack: ITunesTrack): boolean {
+export function checkGuessAgainstCurrent(guessedTrack: ITunesTrack, current: currentSong): boolean {
     if (!current) return false;
 
     // Check artist
@@ -115,4 +117,22 @@ export function checkGuessAgainstCurrent(guessedTrack: ITunesTrack): boolean {
     const isCorrect = normalize(guessedTrack.trackName) === normalize(current.title);
 
     return isCorrect;
+}
+
+export function updateHintState(current: currentSong): void {
+    hintState.artist.value = current.artist;
+    hintState.artist.revealed = true;
+    hintState.genre.value = current.genre;
+    hintState.genre.revealed = true;
+    hintState.year.value = current.releaseYear;
+    hintState.year.revealed = true;
+    hintState.album.value = current.albumName;
+    hintState.album.revealed = true;
+}
+
+export function revealedStateUpdate(revealed : Array<string>): void {
+    if (hintState.artist.revealed) revealed.push("artist");
+    if (hintState.genre.revealed) revealed.push("genre");
+    if (hintState.year.revealed) revealed.push("year");
+    if (hintState.album.revealed) revealed.push("album");
 }
