@@ -24,6 +24,14 @@ async function pickSong() {
   if (!statusElement) throw new Error("Status element not found.");
   if (!metaElement) throw new Error("Meta element not found.");
 
+  // this are taken from the user's input on the page
+  //const country = ($("country") as HTMLInputElement).value;
+  //const genre = ($("genre") as HTMLInputElement).value;
+  ($("status") as HTMLElement).textContent = "Loading top songs…";
+  ($("meta") as HTMLElement).textContent = "";
+  ($("guess") as HTMLInputElement).value = "";
+  ($("player") as HTMLAudioElement).src = "";
+
   try {
     // Reset game state AND hint state for new song
     gameState = {
@@ -105,6 +113,12 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
   });
 }
 
+/**
+ * This needs to be refactored to not use the iTunes Search.
+ * It should just pull from the data that the API grabbed when it was queried in
+ * pickSongWithPreview.
+ * Have it pull from entries that was created in pickSongWithPreview.
+ */
 async function checkGuess() {
   if (!current) return;
   const guessInput = $("guess") as HTMLInputElement | null;
