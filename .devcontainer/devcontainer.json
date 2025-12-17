@@ -22,7 +22,8 @@
 		"vscode": {
 			"extensions": [
 				"ms-vsliveshare.vsliveshare",
-				"Anthropic.claude-code"
+				"Anthropic.claude-code",
+				"ms-python.python"
 			]
 		}
 	}
