@@ -2,7 +2,7 @@ import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSRespon
 
 import { ITunesMediaKind } from "./api-types";
 
-import { hintState, initializeHintBoxes, renderHintBoxes, checkGuessAgainstCurrent } from "./hints";
+import { initializeHintBoxes, renderHintBoxes, checkGuessAgainstCurrent } from "./hints";
 
 import { normalize } from "./additional-functions";
 
@@ -140,7 +140,6 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
   });
 }
 
-
 async function pickSong() {
   let statusElement = $("status") as HTMLElement;
   let metaElement = $("meta") as HTMLElement;
@@ -155,13 +154,6 @@ async function pickSong() {
       wrongGuesses: 0,
       maxListenTime: 6,
       hasWon: false
-    };
-    
-    hintState = {
-      artist: { value: "", revealed: false },
-      genre: { value: "", revealed: false },
-      year: { value: "", revealed: false },
-      album: { value: "", revealed: false }
     };
 
     // Initialize hint boxes
