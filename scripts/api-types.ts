@@ -1,3 +1,17 @@
+/**
+ * Look at https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/index.html#//apple_ref/doc/uid/TP40017632-CH3-SW1
+ * for the iTunes Search API documentation.
+ */
+/**
+ * iTunes Search API Track Result
+ * Based on Apple's official documentation
+ */
+
+
+/**
+ * I had Claude go ahead and write up an interface (kind of like a structure)
+ * for the return type of the iTunes API.
+ */
 export interface ITunesTrack {
   // Core identification
   wrapperType: "track" | "collection" | "artist";
@@ -76,4 +90,65 @@ export interface ITunesTrack {
   // Genre IDs
   genreIds?: string[];
   genres?: string[];
+}
+
+/**
+ * iTunes API Response wrapper
+ */
+export interface ITunesSearchResponse {
+  resultCount: number;
+  results: ITunesTrack[];
+}
+
+export interface ITunesRSSEntry {
+  /**
+   * The reason `im` is here is because that's how the
+   * RSS XML is formatted by Apple in the response
+   */
+  id: {
+    attributes: {
+      "im:id": string;
+    };
+  };
+  "im:name": {
+    label: string; // track title
+  }
+  "im:artist": {
+    label: string; // artist name
+  }
+}
+
+export interface ITunesRSSResponse {
+  feed: {
+    entry: ITunesRSSEntry[]
+  }
+}
+
+/**
+ * Media kinds enum for better type safety
+ */
+export enum ITunesMediaKind {
+  Book = "book",
+  Album = "album",
+  CoachedAudio = "coached-audio",
+  FeatureMovie = "feature-movie",
+  InteractiveBooklet = "interactive-booklet",
+  MusicVideo = "music-video",
+  PDF = "pdf",
+  Podcast = "podcast",
+  PodcastEpisode = "podcast-episode",
+  SoftwarePackage = "software-package",
+  Song = "song",
+  TVEpisode = "tv-episode",
+  Artist = "artist"
+}
+
+export interface currentSong {
+  preview: string
+  artist: string
+  title: string
+  genre: string;
+  releaseYear: string;
+  albumName: string;
+  fullTrack: ITunesTrack;
 }

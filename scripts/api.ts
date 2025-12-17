@@ -1,62 +1,12 @@
-/**
- * Look at https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/iTuneSearchAPI/index.html#//apple_ref/doc/uid/TP40017632-CH3-SW1
- * for the iTunes Search API documentation.
- */
-/**
- * iTunes Search API Track Result
- * Based on Apple's official documentation
- */
+import { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse, currentSong } from "./api-types";
 
-/**
- * I had Claude go ahead and write up an interface (kind of like a structure)
- * for the return type of the iTunes API.
- */
-
-import { ITunesTrack } from "./api-types";
+import { ITunesMediaKind } from "./api-types";
 
 /**dropdownItem definition */
 interface DropdownItem {
   title: string;
   artist: string;
   artwork: string;
-}
-
-/**
- * iTunes API Response wrapper
- */
-interface ITunesSearchResponse {
-  resultCount: number;
-  results: ITunesTrack[];
-}
-
-interface ITunesRSSEntry {
-  /**
-   * The reason `im` is here is because that's how the
-   * RSS XML is formatted by Apple in the response
-   */
-  id: {
-    attributes: {
-      "im:id": string;
-    };
-  };
-  "im:name": {
-    label: string; // track title
-  }
-  "im:artist": {
-    label: string; // artist name
-  }
-}
-
-interface ITunesRSSResponse {
-  feed: {
-    entry: ITunesRSSEntry[]
-  }
-}
-
-interface currentSong {
-  preview: string
-  artist: string
-  title: string
 }
 
 interface GameState {
@@ -73,38 +23,13 @@ interface HintState {
   album: { value: string; revealed: boolean };
 }
 
-interface EnhancedCurrentSong extends currentSong {
-  genre: string;
-  releaseYear: string;
-  albumName: string;
-  fullTrack: ITunesTrack;
-}
-/**
- * Media kinds enum for better type safety
- */
-enum ITunesMediaKind {
-  Book = "book",
-  Album = "album",
-  CoachedAudio = "coached-audio",
-  FeatureMovie = "feature-movie",
-  InteractiveBooklet = "interactive-booklet",
-  MusicVideo = "music-video",
-  PDF = "pdf",
-  Podcast = "podcast",
-  PodcastEpisode = "podcast-episode",
-  SoftwarePackage = "software-package",
-  Song = "song",
-  TVEpisode = "tv-episode",
-  Artist = "artist"
-}
-
 /**
  * Type for explicit content ratings
  */
 type ExplicitnessRating = "explicit" | "cleaned" | "notExplicit";
 
 //let current: currentSong | null = null;
-let current: EnhancedCurrentSong | null = null;
+let current: currentSong | null = null;
 
 let hintState: HintState = {
   artist: { value: "", revealed: false },
@@ -260,7 +185,7 @@ function checkGuessAgainstCurrent(guessedTrack: ITunesTrack): boolean {
  */
 
 
-async function pickSongWithPreview(tries = 6): Promise<EnhancedCurrentSong> {
+async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   // this are taken from the user's input on the page
   //const country = ($("country") as HTMLInputElement).value;
   //const genre = ($("genre") as HTMLInputElement).value;
