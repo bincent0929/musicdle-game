@@ -55,6 +55,8 @@ stop:
 	tmux kill-session -t tailwind 2>/dev/null || echo "Tailwind session not running"
 	@echo "Stopping backend tmux session..."
 	tmux kill-session -t backend 2>/dev/null || echo "Backend session not running"
+	@echo "Removing the transpiled scripts"
+	rm ./scripts/*.js
 
 # New: Stop backend only
 stop-backend:
