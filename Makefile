@@ -1,6 +1,6 @@
 API_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
 # not needed yet
-TSC_STATS = tsc minor_html/stats.ts --lib ES2015,DOM
+TSC_STATS = tsc scripts/stats.ts --lib ES2015,DOM
 CADDY = caddy run
 TAILWIND = tailwindcss -o styles/compiled-styles.css
 TAILWIND_WATCH = tailwindcss -o styles/compiled-styles.css --watch

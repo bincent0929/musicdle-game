@@ -1,4 +1,4 @@
-import { $ } from "../scripts/additional-functions";
+import { $ } from "./additional-functions.js";
 
 declare const Chart: any; //was having issue with Chart object in Typescript, this seemed to fix it
 
