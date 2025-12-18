@@ -1,5 +1,3 @@
-import { $ } from "./additional-functions.js";
-
 declare const Chart: any; //was having issue with Chart object in Typescript, this seemed to fix it
 
 document.addEventListener('DOMContentLoaded', function(): void {
@@ -18,10 +16,11 @@ document.addEventListener('DOMContentLoaded', function(): void {
             const bar = document.getElementById('barChart');
 
 
-            ($("currStreak") as HTMLElement).textContent = getCurrStreak();
-            ($("maxStreak") as HTMLElement).textContent = getMaxStreak();
-            ($("topGenre") as HTMLElement).textContent = getTopGenre();
-            ($("topSong") as HTMLElement).textContent = getTopSong();
+            (document.getElementById("currStreak") as HTMLElement).textContent = getCurrStreak();
+            (document.getElementById("maxStreak") as HTMLElement).textContent = getMaxStreak();
+            (document.getElementById("topGenre") as HTMLElement).textContent = getTopGenre();
+            (document.getElementById("topSong") as HTMLElement).textContent = getTopSong();
+
 
 
             //functions for retrieving info from the current user
