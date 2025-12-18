@@ -1,11 +1,11 @@
-import type { currentSong, GameState, DropdownItem } from "./game-logic-types";
-import type { ITunesTrack, ITunesSearchResponse } from "./api-types";
+import type { currentSong, GameState, DropdownItem } from "./game-logic-types.js";
+import type { ITunesTrack, ITunesSearchResponse } from "./api-types.js";
 
-import { $, normalize } from "./additional-functions";
+import { $, normalize } from "./additional-functions.js";
 
-import { pickSongWithPreview } from "./api";
+import { pickSongWithPreview } from "./api.js";
 
-import { initializeHintBoxes, renderHintBoxes, checkGuessAgainstCurrent, updateHintState, revealedStateUpdate } from "./hints";
+import { initializeHintBoxes, renderHintBoxes, checkGuessAgainstCurrent, updateHintState, revealedStateUpdate } from "./hints.js";
 
 let gameState: GameState = {
   attemptsRemaining: 5,
@@ -498,3 +498,22 @@ document.addEventListener("click", (e) => {
   if (!wrap) return;
   if (!wrap.contains(e.target as Node)) hideDD();
 });
+
+// Expose functions for debugging
+(window as any).gameDebug = {
+    initGameInfoPopup,
+    pickSong,
+    updateGameStateUI,
+    setupAudioRestrictions,
+    checkGuess,
+    showCompletionPopup,
+    reveal,
+    hideDD,
+    searchArtistSongs,
+    // Imported from hints
+    initializeHintBoxes,
+    renderHintBoxes,
+    checkGuessAgainstCurrent,
+    updateHintState,
+    revealedStateUpdate
+};

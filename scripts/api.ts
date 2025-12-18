@@ -1,8 +1,8 @@
-import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "./api-types";
+import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "./api-types.js";
 
-import type { currentSong } from "./game-logic-types";
+import type { currentSong } from "./game-logic-types.js";
 
-import { $ } from "./additional-functions";
+import { $ } from "./additional-functions.js";
 
 /**
  * Extract year from release date string
