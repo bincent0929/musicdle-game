@@ -142,13 +142,3 @@ export enum ITunesMediaKind {
   TVEpisode = "tv-episode",
   Artist = "artist"
 }
-
-export interface currentSong {
-  preview: string
-  artist: string
-  title: string
-  genre: string;
-  releaseYear: string;
-  albumName: string;
-  fullTrack: ITunesTrack;
-}

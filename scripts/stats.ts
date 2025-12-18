@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function(): void {
             (document.getElementById("topSong") as HTMLElement).textContent = getTopSong();
 
 
+
             //functions for retrieving info from the current user
             function getCurrStreak(){ 
 
