@@ -1,10 +1,9 @@
 musicdle.xyz {
 	encode gzip
-	root * srv
 
 	# removes html extensions and index.html from URLs
 	handle {
-		root * ./
+		root * srv
 
 		@stripIndex path_regexp idx ^(.*/)?index\.html$
 		redir @stripIndex {http.regexp.idx.1} 301
