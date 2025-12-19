@@ -5,22 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Musicdle</title>
     <link rel="stylesheet" href="../styles/compiled-styles.css" />
-    <h1 class="text-center text-8xl font-extrabold mb-16">Stats</h1>
+    <link rel="stylesheet" href="../styles/top-bar.css" />
 
     <!--<script src="scripts/script.js"></script>-->
   </head>
-  <body class="bg-gray-50">
-     <div class="font-bold absolute top-0 right-0 p-4">
-      <select     class="px-3 py-3  border-2 border-black text-lg"  onchange="location.href=this.value">
-        <option value = "stats.html"> Stats Page</option>
-        <option value = "../index.html">Home Page</option>
-      </select>
-
-     </div>
+  <body class="bg-gray-50 musicdle-body">
+     <header class="musicdle-topbar">
+      <div class="musicdle-topbar-inner">
+        <nav class="musicdle-topbar-nav">
+          <a class="musicdle-topbar-link" href="../index.html">Home</a>
+          <a class="musicdle-topbar-link" href="stats.html">Stats</a>
+        </nav>
+        <span class="musicdle-topbar-title">Musicdle</span>
+      </div>
+     </header>
   
       <link rel="stylesheet" href="stats.css" />
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0"></script>
+    <h1 class="text-center text-8xl font-extrabold mb-16">Stats</h1>
     <div class="stats-container">
       <div class="chart-wrapper">        
         <canvas id="barChart"></canvas>       

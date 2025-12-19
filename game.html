@@ -6,9 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Musicdle</title>
     <link rel="stylesheet" href="/styles/compiled-styles.css" />
+    <link rel="stylesheet" href="/styles/top-bar.css" />
   </head>
+    <body class="bg-gray-50 font-sans flex items-center justify-center min-h-screen musicdle-body">
+      
+      <!--Black Banner at top-->
+      <header class="musicdle-topbar">
+        <div class="musicdle-topbar-inner">
+          <nav class="musicdle-topbar-nav">
+            <a class="musicdle-topbar-link" href="index.html">Home</a>
+            <a class="musicdle-topbar-link" href="minor_html/stats.html">Stats</a>
+          </nav>
+          <span class="musicdle-topbar-title">MUSICDLE</span>
+        </div>
+      </header>
 
-  <body class="bg-gray-50 font-sans flex items-center justify-center min-h-screen">
     <div id="game-info-popup" aria-hidden="false" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6">
       <div role="dialog" aria-labelledby="game-info-title" aria-describedby="game-info-text" class="relative w-full max-w-2xl">
         <button id="game-info-close" aria-label="Close hints" 
