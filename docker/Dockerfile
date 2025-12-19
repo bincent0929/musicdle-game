@@ -4,9 +4,9 @@ WORKDIR /game-website
 
 RUN apt update -y
 
-RUN apt install caddy
+RUN apt install -y caddy
 
-RUN apt install npm \
+RUN apt install -y npm \
     && npm install typescript --save-dev \
     && npm install tailwindcss
 
