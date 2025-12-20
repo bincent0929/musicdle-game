@@ -8,7 +8,7 @@ RUN apt install -y caddy
 
 RUN apt install -y npm \
     && npm install typescript --save-dev \
-    && npm install tailwindcss
+    && npm install tailwindcss @tailwindcss/cli
 
 COPY . .
 
