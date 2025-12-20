@@ -20,4 +20,4 @@ RUN npx tailwindcss -o styles/compiled-styles.css
 EXPOSE 80
 EXPOSE 443
 
-RUN caddy run deployment.caddyfile
+CMD ["caddy", "run", "--config", "Caddyfiles/deployment.caddyfile"]
