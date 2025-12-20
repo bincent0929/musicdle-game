@@ -3,7 +3,7 @@ musicdle.xyz {
 
 	# removes html extensions and index.html from URLs
 	handle {
-		root * ../
+		root * .
 
 		@stripIndex path_regexp idx ^(.*/)?index\.html$
 		redir @stripIndex {http.regexp.idx.1} 301
