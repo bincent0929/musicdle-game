@@ -23,14 +23,22 @@ function initGameInfoPopup(): void {
   const closeBtn = $("game-info-close");
   if (!popup || !closeBtn) return;
 
+  const showPopup = () => {
+    popup.classList.add("is-visible");
+    popup.setAttribute("aria-hidden", "false");
+  };
+
   const hidePopup = () => {
-    popup.classList.add("hidden");
+    popup.classList.remove("is-visible");
     popup.setAttribute("aria-hidden", "true");
   };
 
+  // fade-in on load
+  requestAnimationFrame(showPopup);
+
   closeBtn.addEventListener("click", hidePopup);
   document.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Escape" && !popup.classList.contains("hidden")) {
+    if (event.key === "Escape" && popup.classList.contains("is-visible")) {
       hidePopup();
     }
   });

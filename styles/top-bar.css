@@ -4,13 +4,37 @@
   left: 0;
   right: 0;
   z-index: 1050;
-  height: 40px;
-  background: #000;
-  color: #fff;
+  height: 56px;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.06), transparent 28%),
+              radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.04), transparent 25%),
+              linear-gradient(135deg, #111418 0%, #0d1115 40%, #0a0d11 100%);
+  color: #e9eef5;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(8px);
 }
 
 .musicdle-body {
-  padding-top: 40px;
+  padding-top: 56px;
+  background-color: #0c0f13;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.07), transparent 30%),
+    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.05), transparent 24%),
+    radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.04), transparent 26%),
+    linear-gradient(145deg, #0a0d10, #11161b 55%, #0c1015 100%);
+  color: #e9eef5;
+  min-height: 100vh;
+}
+
+.musicdle-surface {
+  background-color: #0c0f13;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.07), transparent 30%),
+    radial-gradient(circle at 80% 0%, rgba(255, 255, 255, 0.05), transparent 24%),
+    radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.04), transparent 26%),
+    linear-gradient(145deg, #212b35, #1b232c 55%, #1c2530 100%);
+  color: #e9eef5;
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .musicdle-topbar-inner {
@@ -32,10 +56,11 @@
 }
 
 .musicdle-topbar-title {
-  font-weight: 700;
+  font-weight: 900;
   letter-spacing: 0.08em;
-  font-size: 0.9rem;
+  font-size: 1rem;
   margin-left: auto;
+  color: #f6f7fb;
 }
 
 .musicdle-topbar-nav {
@@ -49,17 +74,32 @@
   align-items: center;
   justify-content: center;
   padding: 6px 12px;
-  background: #111;
-  color: #fff;
-  border: 1px solid #333;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f6f7fb;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: 0.88rem;
+  font-weight: 800;
   text-decoration: none;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
 
 .musicdle-topbar-link:hover {
-  background: #222;
-  border-color: #444;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+}
+
+/* Game info popup fade */
+#game-info-popup {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 1000ms ease, visibility 1000ms ease;
+}
+
+#game-info-popup.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
