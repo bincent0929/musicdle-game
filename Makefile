@@ -1,7 +1,7 @@
 API_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
 # not needed yet
-TSC_STATS = tsc minor_html/stats.ts --lib ES2015,DOM
-CADDY = caddy run
+TSC_STATS = tsc scripts/stats.ts --lib ES2015,DOM
+CADDY = caddy run --config local.caddyfile
 TAILWIND = tailwindcss -o styles/compiled-styles.css
 TAILWIND_WATCH = tailwindcss -o styles/compiled-styles.css --watch
 
@@ -54,7 +54,11 @@ stop:
 	@echo "Stopping tailwind tmux session..."
 	tmux kill-session -t tailwind 2>/dev/null || echo "Tailwind session not running"
 	@echo "Stopping backend tmux session..."
+	@echo "removed the compiled-styles"
+	rm ./styles/compiled-styles.css
 	tmux kill-session -t backend 2>/dev/null || echo "Backend session not running"
+	@echo "Removing the transpiled scripts"
+	rm ./scripts/*.js
 
 # New: Stop backend only
 stop-backend:

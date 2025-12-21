@@ -150,9 +150,11 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
  */
 async function checkGuess() {
   if (!current) return;
+
   const guessInput = $("guess") as HTMLInputElement | null;
   const statusEl = $("status");
   const metaEl = $("meta");
+  
   if (!guessInput || !statusEl || !metaEl) return;
 
   const playerGuessText: string = guessInput.value.trim();
@@ -212,7 +214,6 @@ async function checkGuess() {
         let feedback = "❌ Not quite.";
         const revealed : Array<string> = [];
         revealedStateUpdate(revealed);
-        
         
         if (revealed.length > 0) {
           feedback += ` Revealed: ${revealed.join(", ")}`;

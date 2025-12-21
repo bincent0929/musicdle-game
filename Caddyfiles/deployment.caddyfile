@@ -1,0 +1,18 @@
+musicdle.xyz {
+	encode gzip
+
+	# removes html extensions and index.html from URLs
+	handle {
+		root * .
+
+		@stripIndex path_regexp idx ^(.*/)?index\.html$
+		redir @stripIndex {http.regexp.idx.1} 301
+
+		# Redirect any *.html request → extension-less URL
+		@stripHtml path_regexp strip ^/(.*)\.html$
+		redir @stripHtml /{http.regexp.strip.1} 301
+
+		try_files {path} {path}.html {path}/index.html =404
+		file_server
+	}
+}
