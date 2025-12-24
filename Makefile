@@ -1,9 +1,8 @@
 API_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
-# not needed yet
 TSC_STATS = tsc scripts/stats.ts --lib ES2015,DOM
-CADDY = caddy run --config local.caddyfile
-TAILWIND = tailwindcss -o styles/compiled-styles.css
-TAILWIND_WATCH = tailwindcss -o styles/compiled-styles.css --watch
+CADDY = caddy run --config Caddyfiles/local.caddyfile
+TAILWIND = tailwindcss -i styles/top-bar.css -o styles/compiled-styles.css
+TAILWIND_WATCH = tailwindcss -i styles/top-bar.css -o styles/compiled-styles.css --watch
 
 # New: Python backend
 BACKEND = python3 backend.py
