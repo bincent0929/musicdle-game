@@ -22,24 +22,63 @@ run:
 	$(TAILWIND)
 	@echo "Done."
 	
-	@echo "start caddy"
+	@echo "Starting Caddy in the background..."
 	tmux new-session -d -s caddy '$(CADDY)'
 	@echo "Done."
 
 	@echo "The site is now running!"
 
-clean:
+stop-run:
 	@echo "Stopping your site..."
 	
 	@echo "Stopping Caddy..."
-	tmux kill-session -t caddy 2>/dev/null || echo "Caddy session not running"
+	tmux kill-session -t caddy
 	@echo "Done."
 
-	@echo "removing the Tailwind compiled styles"
+	@echo "Removing the Tailwind compiled styles..."
 	rm ./styles/$(TAILWIND-OUTPUT-FILE)
 	@echo "Done."
 	
-	@echo "Removing the transpiled scripts"
+	@echo "Removing the transpiled scripts..."
+	rm ./scripts/*.js
+	@echo "Done."
+
+	@echo "The site is down and your filesystem was cleaned."
+
+start:
+	@echo "Starting the site..."
+
+	@echo "Transpiling the Typescript..."
+	$(API_TSC)
+	$(TSC_STATS)
+	@echo "Done."
+	
+	@echo "Starting Tailwind compiler watch in the background..."
+	tmux new-session -d -s tailwind '$(TAILWIND_WATCH)'
+	@echo "Done."
+	
+	@echo "Starting Caddy in the background..."
+	tmux new-session -d -s caddy '$(CADDY)'
+	@echo "Done."
+
+	@echo "The site is now running, and you can edit your styles and they'll update!"
+
+stop-start:
+	@echo "Stopping your site..."
+	
+	@echo "Stopping Caddy..."
+	tmux kill-session -t caddy
+	@echo "Done."
+
+	@echo "Stopping the Tailwind compiler..."
+	tmux kill-session -t tailwind
+	@echo "Done."
+
+	@echo "Removing the Tailwind compiled styles..."
+	rm ./styles/$(TAILWIND-OUTPUT-FILE)
+	@echo "Done."
+	
+	@echo "Removing the transpiled scripts..."
 	rm ./scripts/*.js
 	@echo "Done."
 
