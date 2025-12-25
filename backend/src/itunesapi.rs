@@ -2,6 +2,10 @@
  * 
  */
 
+use std::error::Error;
+use rand::seq::SliceRandom;
+use api_types::{ITunesRSSResponse, ITunesSearchResponse, CurrentSong, Entry};
+
 mod api_types;
 
 pub fn extract_year(release_date: Option<&str>) -> String {
@@ -12,7 +16,7 @@ pub fn extract_year(release_date: Option<&str>) -> String {
 }
 
 async fn fetch_songs() {
-    let rss_url = "https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json";
+    let rss_url: &str = "https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json";
 
     let feed_response = reqwest::get(rss_url).await?;
 
