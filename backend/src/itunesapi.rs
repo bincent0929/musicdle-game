@@ -4,7 +4,9 @@
 
 use std::error::Error;
 use rand::seq::SliceRandom;
-use api_types::{ITunesRSSResponse, ITunesSearchResponse, CurrentSong, Entry};
+use api_types::{ITunesRSSResponse, ITunesSearchResponse, ITunesRSSEntry};
+
+use crate::itunesapi::api_types::ITunesTrack;
 
 mod api_types;
 
@@ -18,12 +20,12 @@ pub fn extract_year(release_date: Option<&str>) -> String {
 async fn fetch_songs() {
     let rss_url: &str = "https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json";
 
-    let feed_response = reqwest::get(rss_url).await?;
+    let feed_response: ITunesRSSResponse = reqwest::get(rss_url).await?;
 
-    let feed_data: ITunesRSSResponse = feed_response.json().await
+    let feed_data: ITunesTrack = feed_response.json().await
         .map_err(|_| "Failed to parse RSS feed")?;
 
-    let entries = feed_data.feed.entry.ok_or("No songs found for that genre/country.")?;
+    let entries: ITunesRSSEntry = feed_data.feed.entry.ok_or("No songs found for that genre/country.")?;
     if entries.is_empty() {
         return Err("No songs found for that genre/country.".into());
     }
@@ -31,10 +33,10 @@ async fn fetch_songs() {
 }
 
 pub async fn pick_song_with_preview(tries: usize) {
-    let mut rng = rand::thread_rng();
+    let mut rng_val: rand::prelude::ThreadRng = rand::rng();
 
     for _ in 0..tries {
-        if let Some(chosen) = entries.choose(&mut rng) {
+        if let Some(chosen) = entries.choose(&mut rng_val) {
             let track_id = &chosen.id.attributes.im_id;
 
             let lookup_url = format!("https://itunes.apple.com/lookup?id={}&entity=song", track_id);
