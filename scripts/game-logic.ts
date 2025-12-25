@@ -95,6 +95,7 @@ async function pickSong() {
 function updateGameStateUI(): void {
   const attemptsEl = $("attempts");
   const unlockedEl = $("unlocked");
+  const unlockedBar = $("unlocked-bar");
 
   if (attemptsEl) {
     attemptsEl.textContent = `Attempts remaining: ${gameState.attemptsRemaining}/5`;
@@ -102,6 +103,12 @@ function updateGameStateUI(): void {
 
   if (unlockedEl) {
     unlockedEl.textContent = `Unlocked: ${gameState.maxListenTime} seconds`;
+  }
+
+  if (unlockedBar) {
+    // Assuming 30s is the standard preview length
+    const percentage = Math.min((gameState.maxListenTime / 30) * 100, 100);
+    unlockedBar.style.width = `${percentage}%`;
   }
 }
 
@@ -113,11 +120,41 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
   const newPlayer = player.cloneNode(true) as HTMLAudioElement;
   player.parentNode?.replaceChild(newPlayer, player);
 
-  // timeupdate: pause and reset when reaching the time limit
+  // --- Custom Player Elements ---
+  const playBtn = $("play-btn");
+  const playIcon = $("play-icon");
+  const pauseIcon = $("pause-icon");
+  const progressContainer = $("progress-container");
+  const progressBar = $("progress-bar");
+  const timeDisplay = $("current-time");
+
+  // Helper to format time
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  // --- Audio Events ---
+
+  // timeupdate: pause and reset when reaching the time limit + Update UI
   newPlayer.addEventListener('timeupdate', () => {
-    if (!gameState.hasWon && newPlayer.currentTime >= gameState.maxListenTime) {
+    const currentTime = newPlayer.currentTime;
+    
+    // Restriction Logic
+    if (!gameState.hasWon && currentTime >= gameState.maxListenTime) {
       newPlayer.pause();
       newPlayer.currentTime = 0;
+    }
+
+    // UI Update
+    if (progressBar) {
+        const duration = newPlayer.duration || 30; 
+        const pct = (currentTime / duration) * 100;
+        progressBar.style.width = `${pct}%`;
+    }
+    if (timeDisplay) {
+        timeDisplay.textContent = formatTime(currentTime);
     }
   });
 
@@ -131,7 +168,63 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
   // ended: reset to beginning for replay
   newPlayer.addEventListener('ended', () => {
     newPlayer.currentTime = 0;
+    if (playIcon && pauseIcon) {
+        playIcon.classList.remove("hidden");
+        pauseIcon.classList.add("hidden");
+    }
   });
+
+  newPlayer.addEventListener('play', () => {
+      if (playIcon && pauseIcon) {
+          playIcon.classList.add("hidden");
+          pauseIcon.classList.remove("hidden");
+      }
+  });
+
+  newPlayer.addEventListener('pause', () => {
+      if (playIcon && pauseIcon) {
+          playIcon.classList.remove("hidden");
+          pauseIcon.classList.add("hidden");
+      }
+  });
+
+  // --- UI Interaction Events ---
+  
+  // Re-bind Play Button
+  if (playBtn) {
+      const newBtn = playBtn.cloneNode(true) as HTMLElement;
+      playBtn.parentNode?.replaceChild(newBtn, playBtn);
+      
+      newBtn.addEventListener("click", () => {
+          if (newPlayer.paused) {
+              newPlayer.play();
+          } else {
+              newPlayer.pause();
+          }
+      });
+  }
+
+  // Re-bind Progress Bar Click
+  if (progressContainer) {
+      const newContainer = progressContainer.cloneNode(true) as HTMLElement;
+      progressContainer.parentNode?.replaceChild(newContainer, progressContainer);
+
+      newContainer.addEventListener("click", (e) => {
+          const rect = newContainer.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const width = rect.width;
+          const pct = Math.max(0, Math.min(1, x / width));
+          const duration = newPlayer.duration || 30;
+          let targetTime = pct * duration;
+
+          // Clamp to unlocked time
+          if (!gameState.hasWon && targetTime > gameState.maxListenTime) {
+              targetTime = gameState.maxListenTime;
+          }
+
+          newPlayer.currentTime = targetTime;
+      });
+  }
 }
 
 /**
