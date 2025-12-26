@@ -17,19 +17,17 @@ pub fn extract_year(release_date: Option<&str>) -> String {
     }
 }
 
-async fn fetch_songs() {
+async fn fetch_songs() -> Result<Vec<ITunesRSSEntry>, Box<dyn Error>> {
     let rss_url: &str = "https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json";
 
-    let feed_response: ITunesRSSResponse = reqwest::get(rss_url).await?;
+    let feed_response: reqwest::Response = reqwest::get(rss_url).await?;
 
-    let feed_data: ITunesTrack = feed_response.json().await
+    let feed_data: ITunesRSSResponse = feed_response.json().await   
         .map_err(|_| "Failed to parse RSS feed")?;
 
-    let entries: ITunesRSSEntry = feed_data.feed.entry.ok_or("No songs found for that genre/country.")?;
-    if entries.is_empty() {
-        return Err("No songs found for that genre/country.".into());
-    }
-    return entries;
+    let entries: Vec<ITunesRSSEntry> = feed_data.feed.entry;
+    
+    return Ok(entries);
 }
 
 pub async fn pick_song_with_preview(tries: usize) {
