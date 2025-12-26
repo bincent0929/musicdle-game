@@ -10,6 +10,17 @@ export function extractYear(releaseDate?: string): string {
   return new Date(releaseDate).getFullYear().toString();
 }
 
+async function song_fetch(): Promise<ITunesRSSEntry[]> {
+  // the max amount of songs you can get is 200 from iTunes
+  const feed: ITunesRSSResponse = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json')
+    .then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
+  
+  const entries = feed?.feed?.entry || [];
+  if (!entries.length) throw new Error("No songs found for that genre/country.");
+  
+  return entries;
+}
+
 /* ------------ main game: pick & play a popular track ------------ */
 /**
  * 1. pulls from the itunes API for the top songs.
@@ -20,17 +31,9 @@ export function extractYear(releaseDate?: string): string {
  */
 export async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   
-  //////////////////////////// change this to fetch from a backend that caches the iTunes response
-  // the max amount of songs you can get is 200 from iTunes
-  const feed: ITunesRSSResponse = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json')
-    .then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
-  
-  // entries should also be returned to be used in checkGuess
-  const entries = feed?.feed?.entry || [];
-  if (!entries.length) throw new Error("No songs found for that genre/country.");
-  // ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  const entries: ITunesRSSEntry[] = await song_fetch();
 
-  // 2) Try up to N random entries until one has previewUrl
+  // We need to try multiple times in case the song doesn't have a preview
   for (let i = 0; i < tries; i++) {
     const chosen = entries[Math.floor(Math.random() * entries.length)];
     const trackId: ITunesRSSEntry['id']['attributes']['im:id'] = chosen?.id?.attributes?.["im:id"];
