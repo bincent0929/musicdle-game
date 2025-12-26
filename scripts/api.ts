@@ -58,3 +58,15 @@ export async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   }
   throw new Error("Could not find a preview for any of the picked tracks. Try again.");
 }
+
+/** Example of how of function to call from frontend
+ * // Call the backend server instead of the iTunes API directly
+  const response = await fetch(`http://localhost:3000/api/pick-song?tries=${tries}`);
+  
+  if (!response.ok) {
+    throw new Error("Failed to fetch song from server");
+  }
+
+  const song: currentSong = await response.json();
+  return song;
+ */

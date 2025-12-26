@@ -6,3 +6,7 @@ styles/compiled-styles.css
 target/
 **/*.rs.bk
 Cargo.lock
+
+# Node.js
+node_modules/
+package-lock.json
