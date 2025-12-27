@@ -1,5 +1,5 @@
 # Typescript
-API_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
+GAME_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
 TSC_STATS = tsc scripts/stats.ts --lib ES2015,DOM
 BACKEND_TSC = tsc server/main-server.ts --outDir server --target ES2017 --lib ES2017,DOM
 # Tailwind
@@ -15,7 +15,7 @@ run:
 	@echo "Starting the site..."
 
 	@echo "Transpiling the Typescript..."
-	$(API_TSC)
+	$(GAME_TSC)
 	$(TSC_STATS)
 	@echo "Done."
 	
@@ -53,7 +53,7 @@ start:
 	@echo "Starting the site..."
 
 	@echo "Transpiling the Typescript..."
-	$(API_TSC)
+	$(GAME_TSC)
 	$(TSC_STATS)
 	@echo "Done."
 	

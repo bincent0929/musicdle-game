@@ -6,6 +6,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    // This is what's causing everything to go into the dist folder
     "outDir": "./dist"
   },
   "include": ["./**/*.ts"],
