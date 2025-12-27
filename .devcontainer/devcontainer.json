@@ -24,7 +24,8 @@
 				"Anthropic.claude-code",
 				"ms-python.python",
 				"ms-azuretools.vscode-docker",
-				"matthewpi.caddyfile-support"
+				"matthewpi.caddyfile-support",
+				"ms-vscode.makefile-tools"
 			]
 		}
 	}

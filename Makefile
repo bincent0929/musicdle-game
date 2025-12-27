@@ -1,6 +1,7 @@
 # Typescript
 API_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
 TSC_STATS = tsc scripts/stats.ts --lib ES2015,DOM
+BACKEND_TSC = tsc server/main-server.ts --outDir server --target ES2017 --lib ES2017,DOM
 # Tailwind
 TAILWIND-OUTPUT-FILE = compiled-styles.css
 TAILWIND = tailwindcss -o styles/$(TAILWIND-OUTPUT-FILE)
