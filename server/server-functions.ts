@@ -94,3 +94,8 @@ async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   }
   throw new Error("Could not find a preview for any of the picked tracks. Try again.");
 }
+
+export async function dailyPick(): Promise<currentSong> {
+    const dailysong: currentSong = await pickSongWithPreview();
+    return dailysong;
+}
