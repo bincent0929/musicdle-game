@@ -1,6 +1,15 @@
 import { pickSongWithPreview } from './server-functions.js';
 import { currentSong } from '../scripts/game-logic-types.js';
 
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+
+const app = express();
+const port = 3000;
+
+app.use(cors());
+app.use(express.json());
+
 let currentDaily: currentSong | null = null;
 
 async function updateDailySong() {
@@ -41,3 +50,15 @@ function scheduleNextUpdate() {
 }
 
 scheduleNextUpdate();
+
+app.get('/api/daily-song', (req: Request, res: Response) => {
+  if (currentDaily) {
+    res.json(currentDaily);
+  } else {
+    res.status(503).json({ error: "Daily song not available yet. Please try again later." });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});

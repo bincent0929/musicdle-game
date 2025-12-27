@@ -1,66 +1,19 @@
-import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "./api-types.js";
+//import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "./api-types.js";
 
 import type { currentSong } from "./game-logic-types.js";
 
-import { extractYear } from "./additional-functions.js";
+//import { extractYear } from "./additional-functions.js";
 
-async function song_fetch(): Promise<ITunesRSSEntry[]> {
-  // the max amount of songs you can get is 200 from iTunes
-  const feed: ITunesRSSResponse = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json')
-    .then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
-  
-  const entries = feed?.feed?.entry || [];
-  if (!entries.length) throw new Error("No songs found for that genre/country.");
-  
-  return entries;
-}
-
-/* ------------ main game: pick & play a popular track ------------ */
-/**
- * 1. pulls from the itunes API for the top songs.
- * 2. randomly picks one songs from the fetched songs.
- * 3. pulls the artist name, preview, and title from the lookup API.
- * @param tries 
- * @returns Promise<{preview: string, artist: string, title: string}>
- */
-export async function pickSongWithPreview(tries = 6): Promise<currentSong> {
-  
-  const entries: ITunesRSSEntry[] = await song_fetch();
-
-  // We need to try multiple times in case the song doesn't have a preview
-  for (let i = 0; i < tries; i++) {
-    const chosen = entries[Math.floor(Math.random() * entries.length)];
-    const trackId: ITunesRSSEntry['id']['attributes']['im:id'] = chosen?.id?.attributes?.["im:id"];
-    if (!trackId) continue;
-
-    const looked: ITunesSearchResponse | null = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
-      .then(r => r.json()).catch(() => null);
-    const item: ITunesTrack | undefined = looked?.results?.find((x: ITunesTrack) => x.kind === "song") || looked?.results?.[0];
-    
-    const preview = item?.previewUrl;
-    if (preview && item) {
-      return {
-        preview,
-        artist: item.artistName,
-        title: item.trackName,
-        genre: item.primaryGenreName,
-        releaseYear: extractYear(item.releaseDate),
-        albumName: item.collectionName,
-        fullTrack: item
-      };
+export async function daily_fetch(): Promise<currentSong> {
+  try {
+    const response = await fetch('http://localhost:3000/api/daily-song');
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
     }
+    const song: currentSong = await response.json();
+    return song;
+  } catch (error) {
+    console.error("Failed to fetch daily song:", error);
+    throw error;
   }
-  throw new Error("Could not find a preview for any of the picked tracks. Try again.");
 }
-
-/** Example of how of function to call from frontend
- * // Call the backend server instead of the iTunes API directly
-  const response = await fetch(`http://localhost:3000/api/pick-song?tries=${tries}`);
-  
-  if (!response.ok) {
-    throw new Error("Failed to fetch song from server");
-  }
-
-  const song: currentSong = await response.json();
-  return song;
- */

@@ -3,7 +3,7 @@ import type { ITunesTrack, ITunesSearchResponse } from "./api-types.js";
 
 import { $, normalize } from "./additional-functions.js";
 
-import { pickSongWithPreview } from "./api.js";
+import { daily_fetch } from "./api.js";
 
 import { initializeHintBoxes, renderHintBoxes, checkGuessAgainstCurrent, updateHintState, revealedStateUpdate } from "./hints.js";
 
@@ -66,7 +66,9 @@ async function pickSong() {
     initializeHintBoxes();
     renderHintBoxes();
 
-    current = await pickSongWithPreview();
+    // this needs to be changed to
+    // not specifically be the daily
+    current = await daily_fetch();
     const player = $("player") as HTMLAudioElement;
     if (player === null) throw new Error("Audio player not found.");
     player.src = current.preview;
