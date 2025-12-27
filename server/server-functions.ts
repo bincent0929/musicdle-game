@@ -4,48 +4,6 @@ import type { currentSong } from "../scripts/game-logic-types.js";
 
 import { extractYear } from "../scripts/additional-functions.js";
 
-import { randomUUID } from "crypto";
-
-// --- Game State Management ---
-
-// Store active games in memory: SessionID -> Song Data
-const activeGames = new Map<string, currentSong>();
-
-export function startNewGame(song: currentSong): string {
-  const sessionId = randomUUID();
-  activeGames.set(sessionId, song);
-  return sessionId;
-}
-
-export function getGame(sessionId: string): currentSong | undefined {
-  return activeGames.get(sessionId);
-}
-
-export function removeGame(sessionId: string): boolean {
-  return activeGames.delete(sessionId);
-}
-
-/**
- * Compares a user's guess against the stored song for a session.
- * Returns true if the guess matches the song title or artist (fuzzy match).
- */
-export function checkGuess(sessionId: string, guess: string): { correct: boolean; song?: currentSong } {
-  const song = activeGames.get(sessionId);
-  if (!song) {
-    throw new Error("Session not found or expired.");
-  }
-
-  const normalizedGuess = guess.toLowerCase().trim();
-  const normalizedTitle = song.title.toLowerCase().trim();
-  const normalizedArtist = song.artist.toLowerCase().trim();
-
-  // Simple check: if guess is in title or artist, or vice versa
-  // You might want more robust fuzzy matching here
-  const isCorrect = normalizedTitle.includes(normalizedGuess) || normalizedArtist.includes(normalizedGuess) || normalizedGuess === normalizedTitle;
-
-  return { correct: isCorrect, song: isCorrect ? song : undefined };
-}
-
 async function song_fetch(): Promise<ITunesRSSEntry[]> {
   // the max amount of songs you can get is 200 from iTunes
   const feed: ITunesRSSResponse = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json')
@@ -65,7 +23,7 @@ async function song_fetch(): Promise<ITunesRSSEntry[]> {
  * @param tries 
  * @returns Promise<{preview: string, artist: string, title: string}>
  */
-async function pickSongWithPreview(tries = 6): Promise<currentSong> {
+export async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   
   const entries: ITunesRSSEntry[] = await song_fetch();
 
@@ -93,9 +51,4 @@ async function pickSongWithPreview(tries = 6): Promise<currentSong> {
     }
   }
   throw new Error("Could not find a preview for any of the picked tracks. Try again.");
-}
-
-export async function dailyPick(): Promise<currentSong> {
-    const dailysong: currentSong = await pickSongWithPreview();
-    return dailysong;
 }
