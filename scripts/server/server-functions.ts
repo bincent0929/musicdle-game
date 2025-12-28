@@ -1,8 +1,8 @@
-import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "../api-types.js";
+import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "../api-types";
 
-import type { currentSong } from "../game-logic-types.js";
+import type { currentSong } from "../game-logic-types";
 
-import { extractYear } from "../additional-functions.js";
+import { extractYear } from "../additional-functions";
 
 async function song_fetch(): Promise<ITunesRSSEntry[]> {
   // the max amount of songs you can get is 200 from iTunes
