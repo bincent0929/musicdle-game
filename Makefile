@@ -1,7 +1,7 @@
-# Typescript
-GAME_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
-TSC_STATS = tsc scripts/stats.ts --lib ES2015,DOM
-BACKEND_TSC = tsc server/main-server.ts --outDir server --target ES2017 --lib ES2017,DOM
+# Client Typescript
+TS_COMPILE = tsc --build scripts/tsconfig.json
+# Backend
+
 # Tailwind
 TAILWIND-OUTPUT-FILE = compiled-styles.css
 TAILWIND = tailwindcss -o styles/$(TAILWIND-OUTPUT-FILE)
@@ -15,12 +15,17 @@ run:
 	@echo "Starting the site..."
 
 	@echo "Transpiling the Typescript..."
-	$(GAME_TSC)
-	$(TSC_STATS)
+	$(TS_COMPILE)
 	@echo "Done."
 	
 	@echo "Compiling the classes to Tailwind"
 	$(TAILWIND)
+	@echo "Done."
+
+	@echo "Starting the backend..."
+	cd scripts/server
+	tmux new-session -d -s game-backend 'npm start'
+	cd ../..
 	@echo "Done."
 	
 	@echo "Starting Caddy in the background..."
@@ -34,6 +39,10 @@ stop-run:
 	
 	@echo "Stopping Caddy..."
 	tmux kill-session -t caddy
+	@echo "Done."
+
+	@echo "Stopping the backend..."
+	tmux kill-session -t game-backend
 	@echo "Done."
 
 	@echo "Removing the Tailwind compiled styles..."
