@@ -10,6 +10,7 @@ RUN apt install -y npm \
 
 COPY . .
 
+RUN cd scripts/server && npm install && cd ../..
 RUN npx tsc --build scripts/tsconfig.json
 
 RUN npx tailwindcss -o styles/compiled-styles.css
