@@ -12,7 +12,7 @@ CADDY = caddy run --config Caddyfiles/local.caddyfile
 # To run the site locally.
 # This will compile the Typescript and Tailwind once. Updates won't be watched for.
 
-
+# !!!!!!!!!!!!!!!!!!! The node modules have to be installed for the backend !!!!!!!!!!!!!!!!!!!
 
 run:
 	@echo "Starting the site..."
