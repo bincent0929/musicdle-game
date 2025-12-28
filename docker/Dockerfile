@@ -12,8 +12,11 @@ RUN apt install -y npm \
 
 COPY . .
 
-RUN npx tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
-RUN npx tsc scripts/stats.ts --lib ES2015,DOM
+RUN cd scripts/server \
+    && tmux new-session -d -s game-backend 'npm start' \
+    && cd ../..
+
+RUN npx tsc --build scripts/tsconfig.json
 
 RUN npx tailwindcss -o styles/compiled-styles.css
 
