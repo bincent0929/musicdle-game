@@ -6,7 +6,7 @@ import type { currentSong } from "./game-logic-types.js";
 
 export async function daily_fetch(): Promise<currentSong> {
   try {
-    const response = await fetch('http://localhost:3000/api/daily-song');
+    const response = await fetch('https://backend.musicdle.xyz/api/daily-song');
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
     }
