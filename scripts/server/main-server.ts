@@ -22,9 +22,6 @@ async function updateDailySong() {
   }
 }
 
-// Initial fetch on server start
-updateDailySong();
-
 function scheduleNextUpdate() {
   const now = new Date();
   const target = new Date(now);
@@ -49,7 +46,12 @@ function scheduleNextUpdate() {
   }, msUntilTarget);
 }
 
-scheduleNextUpdate();
+// ==Initial fetch and then schedule==
+// avoids issue where the scheduled next update call is finished
+// before the daily song is updated on server start
+updateDailySong().then(() => {
+  scheduleNextUpdate();
+});
 
 app.get('/api/daily-song', (req: Request, res: Response) => {
   if (currentDaily) {
