@@ -4,7 +4,7 @@
   "description": "Backend for Musicdle",
   "main": "main-server.ts",
   "scripts": {
-    "start": "ts-node server/main-server.ts",
+    "start": "ts-node main-server.ts",
     "build": "tsc"
   },
   "dependencies": {
