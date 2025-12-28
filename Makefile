@@ -56,6 +56,7 @@ stop-run:
 
 	@echo "The site is down and your filesystem was cleaned."
 
+# !!!!!!!!!!!!!!!!!!!! This doesn't work the backend needs to be added rq !!!!!!!!!!!!!!!!!!!!
 # To run the site locally with dynamic CSS updates
 # The same as `run` but you can also change the classes in your Tailwind or its input CSS file
 # to have it update while your site is started.
