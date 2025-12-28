@@ -11,6 +11,9 @@ CADDY = caddy run --config Caddyfiles/local.caddyfile
 
 # To run the site locally.
 # This will compile the Typescript and Tailwind once. Updates won't be watched for.
+
+
+
 run:
 	@echo "Starting the site..."
 
@@ -23,11 +26,9 @@ run:
 	@echo "Done."
 
 	@echo "Starting the backend..."
-	cd scripts/server
-	tmux new-session -d -s game-backend 'npm start'
-	cd ../..
+	cd scripts/server && tmux new-session -d -s game-backend 'npm start'
 	@echo "Done."
-	
+
 	@echo "Starting Caddy in the background..."
 	tmux new-session -d -s caddy '$(CADDY)'
 	@echo "Done."

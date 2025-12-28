@@ -1,13 +1,11 @@
 {
   "compilerOptions": {
     "target": "es2017",
-    "module": "commonjs",
+    "lib": ["es2017", "dom"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    // This is what's causing everything to go into the dist folder
-    "outDir": "./"
+    "forceConsistentCasingInFileNames": true
   },
   "include": ["./**/*.ts"],
   "exclude": ["node_modules", "server"]
