@@ -1,5 +1,5 @@
 import { pickSongWithPreview } from './server-functions.js';
-import { currentSong } from '../scripts/game-logic-types.js';
+import { currentSong } from '../game-logic-types.js';
 
 import express, { Request, Response } from 'express';
 import cors from 'cors';
