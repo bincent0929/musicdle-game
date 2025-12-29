@@ -14,6 +14,12 @@ let gameState: GameState = {
   hasWon: false
 };
 
+const formatTime = (s: number) => {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+};
+
 //let current: currentSong | null = null;
 let current: currentSong | null = null;
 
@@ -96,6 +102,13 @@ function updateGameStateUI(): void {
   const attemptsEl = $("attempts");
   const unlockedEl = $("unlocked");
   const unlockedBar = $("unlocked-bar");
+  const totalTimeEl = $("total-time");
+  const player = $("player") as HTMLAudioElement | null;
+
+  const fallbackDuration = 30;
+  const rawDuration = player?.duration ?? fallbackDuration;
+  const duration = Number.isFinite(rawDuration) && rawDuration > 0 ? rawDuration : fallbackDuration;
+  const allowedTime = gameState.hasWon ? duration : Math.min(gameState.maxListenTime, duration);
 
   if (attemptsEl) {
     attemptsEl.textContent = `Attempts remaining: ${gameState.attemptsRemaining}/5`;
@@ -110,6 +123,10 @@ function updateGameStateUI(): void {
     const percentage = Math.min((gameState.maxListenTime / 30) * 100, 100);
     unlockedBar.style.width = `${percentage}%`;
   }
+
+  if (totalTimeEl) {
+    totalTimeEl.textContent = formatTime(allowedTime);
+  }
 }
 
 /**
@@ -122,18 +139,33 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
 
   // --- Custom Player Elements ---
   const playBtn = $("play-btn");
-  const playIcon = $("play-icon");
-  const pauseIcon = $("pause-icon");
+  let playIcon = $("play-icon");
+  let pauseIcon = $("pause-icon");
   const progressContainer = $("progress-container");
-  const progressBar = $("progress-bar");
+  let progressBar = $("progress-bar");
   const timeDisplay = $("current-time");
+  const totalTimeDisplay = $("total-time");
 
-  // Helper to format time
-  const formatTime = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return `${m}:${sec.toString().padStart(2, '0')}`;
+  const toggleIcons = (isPlaying: boolean) => {
+    if (!playIcon || !pauseIcon) return;
+    if (isPlaying) {
+      playIcon.classList.add("hidden");
+      pauseIcon.classList.remove("hidden");
+    } else {
+      playIcon.classList.remove("hidden");
+      pauseIcon.classList.add("hidden");
+    }
   };
+
+  // Ensure icons start in a paused state
+  toggleIcons(false);
+
+  const getDuration = () => {
+    const raw = newPlayer.duration;
+    return Number.isFinite(raw) && raw > 0 ? raw : 30;
+  };
+
+  const getAllowedTime = () => gameState.hasWon ? getDuration() : Math.min(gameState.maxListenTime, getDuration());
 
   // --- Audio Events ---
 
@@ -149,43 +181,39 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
 
     // UI Update
     if (progressBar) {
-        const duration = newPlayer.duration || 30; 
-        const pct = (currentTime / duration) * 100;
+        const duration = getDuration();
+        const pct = duration ? Math.min((currentTime / duration) * 100, 100) : 0;
         progressBar.style.width = `${pct}%`;
     }
     if (timeDisplay) {
-        timeDisplay.textContent = formatTime(currentTime);
+        const allowedTime = getAllowedTime();
+        timeDisplay.textContent = formatTime(Math.min(currentTime, allowedTime));
+    }
+    if (totalTimeDisplay) {
+        totalTimeDisplay.textContent = formatTime(getAllowedTime());
     }
   });
 
   // seeking: prevent seeking beyond unlocked time
   newPlayer.addEventListener('seeking', () => {
-    if (!gameState.hasWon && newPlayer.currentTime > gameState.maxListenTime) {
-      newPlayer.currentTime = gameState.maxListenTime;
+    const allowedTime = getAllowedTime();
+    if (!gameState.hasWon && newPlayer.currentTime > allowedTime) {
+      newPlayer.currentTime = allowedTime;
     }
   });
 
   // ended: reset to beginning for replay
   newPlayer.addEventListener('ended', () => {
     newPlayer.currentTime = 0;
-    if (playIcon && pauseIcon) {
-        playIcon.classList.remove("hidden");
-        pauseIcon.classList.add("hidden");
-    }
+    toggleIcons(false);
   });
 
   newPlayer.addEventListener('play', () => {
-      if (playIcon && pauseIcon) {
-          playIcon.classList.add("hidden");
-          pauseIcon.classList.remove("hidden");
-      }
+      toggleIcons(true);
   });
 
   newPlayer.addEventListener('pause', () => {
-      if (playIcon && pauseIcon) {
-          playIcon.classList.remove("hidden");
-          pauseIcon.classList.add("hidden");
-      }
+      toggleIcons(false);
   });
 
   // --- UI Interaction Events ---
@@ -194,12 +222,17 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
   if (playBtn) {
       const newBtn = playBtn.cloneNode(true) as HTMLElement;
       playBtn.parentNode?.replaceChild(newBtn, playBtn);
+      playIcon = newBtn.querySelector("#play-icon") as HTMLElement | null;
+      pauseIcon = newBtn.querySelector("#pause-icon") as HTMLElement | null;
+      toggleIcons(!newPlayer.paused);
       
       newBtn.addEventListener("click", () => {
           if (newPlayer.paused) {
               newPlayer.play();
+              toggleIcons(true);
           } else {
               newPlayer.pause();
+              toggleIcons(false);
           }
       });
   }
@@ -208,18 +241,22 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
   if (progressContainer) {
       const newContainer = progressContainer.cloneNode(true) as HTMLElement;
       progressContainer.parentNode?.replaceChild(newContainer, progressContainer);
+      progressBar = newContainer.querySelector("#progress-bar") as HTMLElement | null;
 
       newContainer.addEventListener("click", (e) => {
           const rect = newContainer.getBoundingClientRect();
           const x = e.clientX - rect.left;
           const width = rect.width;
           const pct = Math.max(0, Math.min(1, x / width));
-          const duration = newPlayer.duration || 30;
+          const duration = getDuration();
           let targetTime = pct * duration;
 
           // Clamp to unlocked time
-          if (!gameState.hasWon && targetTime > gameState.maxListenTime) {
-              targetTime = gameState.maxListenTime;
+          if (!gameState.hasWon) {
+              const allowedTime = getAllowedTime();
+              if (targetTime > allowedTime) {
+                targetTime = allowedTime;
+              }
           }
 
           newPlayer.currentTime = targetTime;
@@ -448,6 +485,9 @@ if (newBtn) newBtn.onclick = pickSong;
 if (submitBtn) submitBtn.onclick = checkGuess;
 if (revealBtn) revealBtn.onclick = reveal;
 if (guessInput) guessInput.addEventListener("keydown", e => { if (e.key === "Enter") checkGuess(); });
+
+// Auto-start a song on load
+pickSong();
 
 
 /* ------------ integrated dropdown on the Guess input ------------ */
