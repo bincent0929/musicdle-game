@@ -53,6 +53,7 @@ updateDailySong().then(() => {
   scheduleNextUpdate();
 });
 
+// update this to only send the URL
 app.get('/api/daily-song', (req: Request, res: Response) => {
   if (currentDaily) {
     res.json(currentDaily);
@@ -62,11 +63,15 @@ app.get('/api/daily-song', (req: Request, res: Response) => {
 });
 
 // this should validate the guess
-app.post('/api/validate-guess', (req: Request, res: Response) => {
+// it should send back whether it's correct or not
+// and any correct info that relates to the correct song
+/**
+ * app.post('/api/validate-guess', (req: Request, res: Response) => {
   if (!currentDaily) {
     return res.status(503).json({ error: "Daily song not available yet. Please try again later." });
   }
 });
+ */
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
