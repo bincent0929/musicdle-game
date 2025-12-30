@@ -68,10 +68,10 @@ async function pickSong() {
 
     // this needs to be changed to
     // not specifically be the daily
-    current = await daily_fetch();
+    const current_preview = await daily_fetch();
     const player = $("player") as HTMLAudioElement;
     if (player === null) throw new Error("Audio player not found.");
-    player.src = current.preview;
+    player.src = current_preview;
     player.load();
 
     // Set up audio restrictions

@@ -4,16 +4,16 @@ import type { currentSong } from "./game-logic-types.js";
 
 //import { extractYear } from "./additional-functions.js";
 
-export async function daily_fetch(): Promise<currentSong> {
+export async function daily_fetch(): Promise<string> {
   try {
     // we need to add something here to have it call the local backend instead
     // of the cloud backend
-    const response = await fetch('https://backend.musicdle.xyz/api/daily-song');
+    const response = await fetch('http://localhost:3000/api/daily-song-url');
     if (!response.ok) {
       throw new Error(`Server error: ${response.status}`);
     }
     const song: currentSong = await response.json();
-    return song;
+    return song.preview;
   } catch (error) {
     console.error("Failed to fetch daily song:", error);
     throw error;

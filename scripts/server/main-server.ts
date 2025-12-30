@@ -53,10 +53,17 @@ updateDailySong().then(() => {
   scheduleNextUpdate();
 });
 
-// update this to only send the URL
 app.get('/api/daily-song', (req: Request, res: Response) => {
   if (currentDaily) {
     res.json(currentDaily);
+  } else {
+    res.status(503).json({ error: "Daily song not available yet. Please try again later." });
+  }
+});
+
+app.get('/api/daily-song-url', (req: Request, res: Response) => {
+  if (currentDaily) {
+    res.json({ previewUrl: currentDaily.preview });
   } else {
     res.status(503).json({ error: "Daily song not available yet. Please try again later." });
   }
