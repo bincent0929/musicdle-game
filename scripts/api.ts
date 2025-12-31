@@ -1,6 +1,6 @@
 //import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "./api-types.js";
 
-import type { currentSong } from "./game-logic-types.js";
+import type { currentSong } from "./game-scripting/game-logic-types.js";
 
 //import { extractYear } from "./additional-functions.js";
 

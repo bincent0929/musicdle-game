@@ -2,7 +2,7 @@ import type { HintState } from "./hints-types.js";
 import { normalize } from "./additional-functions.js";
 import { ITunesTrack } from "./api-types.js";
 import { extractYear } from "./additional-functions.js";
-import type { currentSong } from "./game-logic-types.js";
+import type { currentSong } from "./game-scripting/game-logic-types.js";
 import { $ } from "./additional-functions.js";
 
 let hintState: HintState;

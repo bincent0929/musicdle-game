@@ -38,20 +38,19 @@ app.post('/api/validate-guess', async (req: Request, res: Response) => {
   try {
     const { guessText, songId } : { guessText: string | null, songId: string | null } = req.body;
 
-    // Validate inputs
-    if (!guessText || typeof guessText !== 'string' || !guessText.trim()) {
-      return res.status(400).json({
-        success: false,
-        error: "EMPTY_GUESS",
-        message: "Please enter a guess."
-      });
-    }
-
     if (!currentDaily) {
       return res.status(503).json({
         success: false,
         error: "SERVICE_UNAVAILABLE",
         message: "Daily song not available yet. Please try again later."
+      });
+    }
+
+    if (!guessText || typeof guessText !== 'string' || !guessText.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: "EMPTY_GUESS",
+        message: "Please enter a guess."
       });
     }
 

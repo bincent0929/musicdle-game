@@ -1,4 +1,4 @@
-import { $ } from './additional-functions.js';
+import { $ } from '../additional-functions.js';
 
 import { initGameInfoPopup, fetchSongURL, hideDD, searchArtistSongs, checkGuess, reveal, highlight, selectItem } from './game-functions.js';
 

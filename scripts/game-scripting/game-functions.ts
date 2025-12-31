@@ -1,10 +1,10 @@
 import type { DropdownItem, GameState, currentSong } from './game-logic-types.js';
 
-import { $ } from './additional-functions.js';
+import { $ } from '../additional-functions.js';
 
-import { initializeHintBoxes, renderHintBoxes, revealedStateUpdate, updateHintsFromMatches, updateHintState } from './hints.js';
+import { initializeHintBoxes, renderHintBoxes, revealedStateUpdate, updateHintsFromMatches, updateHintState } from '../hints.js';
 
-import { ITunesSearchResponse, ITunesTrack } from './api-types.js';
+import { ITunesSearchResponse, ITunesTrack } from '../api-types.js';
 
 // big old popup for game information
 export function initGameInfoPopup(): void {
@@ -137,6 +137,8 @@ function setupAudioRestrictions(player: HTMLAudioElement, gameState: GameState):
   });
 }
 
+// VERY MUCH needs to be refactored
+// do not think this works with the updated API right now
 export async function checkGuess(gameState: GameState, current: currentSong | null, currentSongId: string | null): Promise<void> {
   if (!current || !currentSongId) return;
 
@@ -173,14 +175,11 @@ export async function checkGuess(gameState: GameState, current: currentSong | nu
       return;
     }
 
-    // Update hints based on matches from server
-    updateHintsFromMatches(result.matches, current);
-    renderHintBoxes();
-
     const isCorrect = result.isCorrect;
 
     if (isCorrect) {
-      // CORRECT - reveal all remaining hints
+      // I don't think this works to correctly reveal everything
+      // current isn't updated anywhere before this.
       updateHintState(current);
       renderHintBoxes();
 
@@ -192,6 +191,11 @@ export async function checkGuess(gameState: GameState, current: currentSong | nu
       // Show completion popup after a short delay
       setTimeout(() => showCompletionPopup(gameState, current), 800);
     } else {
+      // Update hints based on matches from server
+      // see main-server.ts for matches' non-implemented interface
+      // this will need to be added to an interface later
+      updateHintsFromMatches(result.matches, current);
+      renderHintBoxes();
       // Wrong guess
       gameState.attemptsRemaining--;
       gameState.wrongGuesses++;

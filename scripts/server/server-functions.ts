@@ -1,6 +1,6 @@
 import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "../api-types";
 
-import type { currentSong } from "../game-logic-types";
+import type { currentSong } from "../game-scripting/game-logic-types";
 
 import { normalize, extractYear } from "../additional-functions";
 

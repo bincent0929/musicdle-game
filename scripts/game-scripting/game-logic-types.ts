@@ -1,4 +1,4 @@
-import { ITunesTrack } from "./api-types";
+import { ITunesTrack } from "../api-types";
 
 export interface currentSong {
   preview: string

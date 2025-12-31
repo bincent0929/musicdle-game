@@ -1,9 +1,9 @@
 import type { currentSong, GameState, DropdownItem } from "./game-logic-types.js";
-import type { ITunesTrack, ITunesSearchResponse } from "./api-types.js";
+import type { ITunesTrack, ITunesSearchResponse } from "../api-types.js";
 
-import { $ } from "./additional-functions.js";
+import { $ } from "../additional-functions.js";
 
-import { initializeHintBoxes, renderHintBoxes, updateHintState, revealedStateUpdate, updateHintsFromMatches } from "./hints.js";
+import { initializeHintBoxes, renderHintBoxes, updateHintState, revealedStateUpdate, updateHintsFromMatches } from "../hints.js";
 
 let gameState: GameState = {
   attemptsRemaining: 5,
