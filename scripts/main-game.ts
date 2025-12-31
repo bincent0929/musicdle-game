@@ -1,6 +1,6 @@
 import { $ } from './additional-functions.js';
 
-import { initGameInfoPopup, pickSong, hideDD, searchArtistSongs, checkGuess, reveal, highlight, selectItem } from './game-functions.js';
+import { initGameInfoPopup, fetchSongURL, hideDD, searchArtistSongs, checkGuess, reveal, highlight, selectItem } from './game-functions.js';
 
 import type { GameState, currentSong, DropdownItem } from './game-logic-types.js';
 
@@ -23,7 +23,7 @@ const guessInput = $("guess");
 
 // we should have the pickSong function be called when new game starts
 // instead of when the user presses the button.
-if (newBtn) newBtn.onclick = () => pickSong(gameState, current, currentSongId);
+if (newBtn) newBtn.onclick = () => fetchSongURL(gameState, current, currentSongId);
 
 if (submitBtn) submitBtn.onclick = () => checkGuess(gameState, current, currentSongId);
 if (revealBtn) revealBtn.onclick = () => reveal(gameState, current);

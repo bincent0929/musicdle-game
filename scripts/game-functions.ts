@@ -25,7 +25,7 @@ export function initGameInfoPopup(): void {
   });
 }
 
-export async function pickSong(gameState: GameState, current: currentSong | null, currentSongId: string | null): Promise<void> {
+export async function fetchSongURL(gameState: GameState, current: currentSong | null, currentSongId: string | null): Promise<void> {
   let statusElement = $("status") as HTMLElement;
   let metaElement = $("meta") as HTMLElement;
 
@@ -49,7 +49,7 @@ export async function pickSong(gameState: GameState, current: currentSong | null
       hasWon: false
     };
 
-    // Initialize hint boxes
+    // I think that these could be moved into main-game.ts
     initializeHintBoxes();
     renderHintBoxes();
 
@@ -69,6 +69,7 @@ export async function pickSong(gameState: GameState, current: currentSong | null
       fullTrack: null
     };
 
+    // this could probably also be moved into main-game.ts
     const player = $("player") as HTMLAudioElement;
     if (player === null) throw new Error("Audio player not found.");
     player.src = current.preview;
