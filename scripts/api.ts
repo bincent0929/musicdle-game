@@ -4,7 +4,7 @@ import type { currentSong } from "./game-logic-types.js";
 
 //import { extractYear } from "./additional-functions.js";
 
-export async function daily_fetch(): Promise<string> {
+export async function daily_url_fetch(): Promise<string> {
   try {
     // we need to add something here to have it call the local backend instead
     // of the cloud backend

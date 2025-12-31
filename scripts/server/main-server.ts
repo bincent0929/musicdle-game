@@ -69,16 +69,10 @@ app.get('/api/daily-song-url', (req: Request, res: Response) => {
   }
 });
 
-// this should validate the guess
-// it should send back whether it's correct or not
-// and any correct info that relates to the correct song
-/**
- * app.post('/api/validate-guess', (req: Request, res: Response) => {
-  if (!currentDaily) {
-    return res.status(503).json({ error: "Daily song not available yet. Please try again later." });
-  }
+app.post('/api/validate-guess', (req: Request, res: Response) => {
+  
 });
- */
+
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

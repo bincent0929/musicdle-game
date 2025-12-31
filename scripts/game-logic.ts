@@ -3,7 +3,7 @@ import type { ITunesTrack, ITunesSearchResponse } from "./api-types.js";
 
 import { $, normalize } from "./additional-functions.js";
 
-import { daily_fetch } from "./api.js";
+import { daily_url_fetch } from "./api.js";
 
 import { initializeHintBoxes, renderHintBoxes, checkGuessAgainstCurrent, updateHintState, revealedStateUpdate } from "./hints.js";
 
@@ -66,12 +66,23 @@ async function pickSong() {
     initializeHintBoxes();
     renderHintBoxes();
 
+    // Initialize current object before assigning preview
+    current = {
+      preview: "",
+      artist: "",
+      title: "",
+      genre: "",
+      releaseYear: "",
+      albumName: "",
+      fullTrack: {} as ITunesTrack
+    };
+
     // this needs to be changed to
     // not specifically be the daily
-    const current_preview = await daily_fetch();
+    current.preview = await daily_url_fetch();
     const player = $("player") as HTMLAudioElement;
     if (player === null) throw new Error("Audio player not found.");
-    player.src = current_preview;
+    player.src = current.preview;
     player.load();
 
     // Set up audio restrictions
@@ -237,7 +248,9 @@ async function checkGuess() {
   }
 }
 
-function showCompletionPopup(): void {
+async function showCompletionPopup(): Promise<void> {
+  await end_of_game_fetch();
+
   const Popup = $("completion-Popup");
   if (!Popup) {
     console.error("Completion Popup not found");
@@ -326,7 +339,29 @@ function showCompletionPopup(): void {
   };
 }
 
-function reveal(){
+async function end_of_game_fetch() {
+  if (current === null) {
+    try {
+      const response = await fetch('/api/validate-guess', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ game_state: "finished" }) // special guess to trigger reveal
+      });
+      
+      if (response.ok) {
+        current = await response.json() as currentSong;
+      }
+    }
+    catch (error) {
+      console.error("Error fetching current song for reveal:", error);
+      return;
+    }
+  }
+}
+
+async function reveal(){
+  await end_of_game_fetch();
+
   if(!current) return;
   const statusEl = $("status");
   const metaEl = $("meta");
