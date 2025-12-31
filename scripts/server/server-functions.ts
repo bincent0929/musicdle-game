@@ -25,7 +25,7 @@ async function song_fetch(): Promise<ITunesRSSEntry[]> {
  * @param tries 
  * @returns Promise<{preview: string, artist: string, title: string}>
  */
-export async function pickSongWithPreview(tries = 6): Promise<currentSong> {
+async function pickSongWithPreview(tries = 6): Promise<currentSong> {
   
   const entries: ITunesRSSEntry[] = await song_fetch();
 
@@ -89,7 +89,7 @@ export function compareGuessToDaily(guessedTrack: ITunesTrack, correctSong: curr
   };
 }
 
-export function generateDailySongId(): string {
+function generateDailySongId(): string {
   const now = new Date();
   return now.toISOString().split('T')[0]; // "2024-12-31"
 }

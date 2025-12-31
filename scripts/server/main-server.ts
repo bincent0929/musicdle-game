@@ -1,4 +1,4 @@
-import {scheduleNextUpdate, updateDailySong, searchItunesTrack, compareGuessToDaily, generateDailySongId } from './server-functions';
+import {scheduleNextUpdate, updateDailySong, searchItunesTrack, compareGuessToDaily } from './server-functions';
 
 import type { DailySong } from './server-types';
 
@@ -36,7 +36,7 @@ app.get('/api/daily-song-url', (req: Request, res: Response) => {
 
 app.post('/api/validate-guess', async (req: Request, res: Response) => {
   try {
-    const { guessText, songId } = req.body;
+    const { guessText, songId } : { guessText: string | null, songId: string | null } = req.body;
 
     // Validate inputs
     if (!guessText || typeof guessText !== 'string' || !guessText.trim()) {
