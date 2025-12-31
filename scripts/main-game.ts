@@ -11,7 +11,6 @@ let gameState: GameState = {
   hasWon: false
 };
 
-//let current: currentSong | null = null;
 let current: currentSong | null = null;
 let currentSongId: string | null = null;
 
@@ -22,13 +21,14 @@ const submitBtn = $("submit");
 const revealBtn = $("reveal");
 const guessInput = $("guess");
 
+// we should have the pickSong function be called when new game starts
+// instead of when the user presses the button.
 if (newBtn) newBtn.onclick = () => pickSong(gameState, current, currentSongId);
+
 if (submitBtn) submitBtn.onclick = () => checkGuess(gameState, current, currentSongId);
 if (revealBtn) revealBtn.onclick = () => reveal(gameState, current);
 if (guessInput) guessInput.addEventListener("keydown", e => { if (e.key === "Enter") checkGuess(gameState, current, currentSongId); });
 
-
-/* ------------ integrated dropdown on the Guess input ------------ */
 const guessDD = $("guessDD") as HTMLDivElement;
 let ddIndex = -1;
 let ddItems: DropdownItem[] = [];
@@ -45,6 +45,7 @@ guessElement.addEventListener("input", (e) => {
   if (q.length < 2) { hideDD(guessDD, ddIndex, ddItems); return; }
   t = setTimeout(() => searchArtistSongs(q, aborter, guessDD, ddIndex, ddItems), DEBOUNCE_MS);
 });
+
 guessElement.addEventListener("keydown", (e) => {
   if (guessDD.classList.contains("hidden")) return;
   if (e.key === "ArrowDown") { e.preventDefault(); ddIndex = Math.min(ddIndex + 1, ddItems.length - 1); highlight(ddIndex, guessDD); }
@@ -53,7 +54,6 @@ guessElement.addEventListener("keydown", (e) => {
   else if (e.key === "Escape") { hideDD(guessDD, ddIndex, ddItems); }
 });
 
-// click outside to close
 document.addEventListener("click", (e) => {
   const wrap = document.querySelector(".guess-wrap")
   if (!wrap) return;
