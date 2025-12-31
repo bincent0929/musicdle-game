@@ -1,8 +1,10 @@
-import type { GameState, currentSong } from './game-logic-types.js';
+import type { DropdownItem, GameState, currentSong } from './game-logic-types.js';
 
 import { $ } from './additional-functions.js';
 
 import { initializeHintBoxes, renderHintBoxes, revealedStateUpdate, updateHintsFromMatches, updateHintState } from './hints.js';
+
+import { ITunesSearchResponse, ITunesTrack } from './api-types.js';
 
 // big old popup for game information
 export function initGameInfoPopup(): void {
@@ -23,7 +25,7 @@ export function initGameInfoPopup(): void {
   });
 }
 
-export async function pickSong(gameState: GameState, current: currentSong, currentSongId: string | null): Promise<void> {
+export async function pickSong(gameState: GameState, current: currentSong | null, currentSongId: string | null): Promise<void> {
   let statusElement = $("status") as HTMLElement;
   let metaElement = $("meta") as HTMLElement;
 
@@ -134,7 +136,7 @@ function setupAudioRestrictions(player: HTMLAudioElement, gameState: GameState):
   });
 }
 
-async function checkGuess(gameState: GameState, current: currentSong, currentSongId: string | null): Promise<void> {
+export async function checkGuess(gameState: GameState, current: currentSong | null, currentSongId: string | null): Promise<void> {
   if (!current || !currentSongId) return;
 
   const guessInput = $("guess") as HTMLInputElement | null;
@@ -230,7 +232,7 @@ async function checkGuess(gameState: GameState, current: currentSong, currentSon
 }
 
 async function showCompletionPopup(gameState: GameState, current: currentSong): Promise<void> {
-  await end_of_game_fetch();
+  await end_of_game_fetch(gameState, current);
 
   const Popup = $("completion-Popup");
   if (!Popup) {
@@ -320,7 +322,7 @@ async function showCompletionPopup(gameState: GameState, current: currentSong): 
   };
 }
 
-async function end_of_game_fetch(gameState: GameState, current: currentSong, currentSongId: string | null): Promise<void> {
+async function end_of_game_fetch(gameState: GameState, current: currentSong | null): Promise<void> {
   if (current === null) {
     try {
       const response = await fetch('/api/validate-guess', {
@@ -340,8 +342,8 @@ async function end_of_game_fetch(gameState: GameState, current: currentSong, cur
   }
 }
 
-async function reveal(gameState: GameState, current: currentSong, currentSongId: string | null): Promise<void> {
-  await end_of_game_fetch(gameState, current, currentSongId);
+export async function reveal(gameState: GameState, current: currentSong | null): Promise<void> {
+  await end_of_game_fetch(gameState, current);
 
   if(!current) return;
   const statusEl = $("status");
@@ -364,10 +366,10 @@ async function reveal(gameState: GameState, current: currentSong, currentSongId:
   setTimeout(() => showCompletionPopup(gameState, current), 800);
 }
 
-function hideDD() { guessDD.classList.add("hidden"); guessDD.innerHTML = ""; ddIndex = -1; ddItems = []; }
-function showDD() { guessDD.classList.remove("hidden"); }
+export function hideDD(guessDD: HTMLElement, ddIndex: number, ddItems: DropdownItem[]) { guessDD.classList.add("hidden"); guessDD.innerHTML = ""; ddIndex = -1; ddItems = []; }
+function showDD(guessDD: HTMLElement) { guessDD.classList.remove("hidden"); }
 
-function renderDD(items: DropdownItem[]): void {
+function renderDD(items: DropdownItem[], guessDD: HTMLElement): void {
   if (!guessDD) {
     console.warn(`guessDD null case`);
     return;
@@ -378,7 +380,7 @@ function renderDD(items: DropdownItem[]): void {
     el.className = "flex gap-2.5 items-center px-3 py-2 cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100"; el.setAttribute("role", "option"); el.dataset.idx = String(i);
     el.innerHTML = `<img src="${it.artwork}" alt="" class="w-10 h-10 rounded-md object-cover">
       <div><div class="font-semibold">${it.title}</div><div class="text-gray-600">${it.artist}</div></div>`;
-    el.onclick = () => selectItem(i);
+    el.onclick = () => selectItem(i, items, guessDD);
     guessDD.appendChild(el);
   });
   if (!items.length) {
@@ -386,15 +388,15 @@ function renderDD(items: DropdownItem[]): void {
     empty.className = "px-3 py-2 text-gray-600"; empty.textContent = "No songs found.";
     guessDD.appendChild(empty);
   }
-  showDD();
+  showDD(guessDD);
 }
 
-function highlight(index: number): void {
+export function highlight(index: number, guessDD: HTMLElement): void {
   Array.from(guessDD.children).forEach((c, i) => c.setAttribute("aria-selected", i === index ? "true" : "false"));
   if (index >= 0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({ block: "nearest" });
 }
 
-function selectItem(index: number): void {
+export function selectItem(index: number, ddItems: DropdownItem[], guessDD: HTMLElement): void {
   // Ensure the index is valid
   const selectedItem = ddItems?.[index];
   if (!selectedItem) {
@@ -410,7 +412,7 @@ function selectItem(index: number): void {
   // Fill the input with the selected song title
   guessInput.value = selectedItem.title;
 
-  hideDD();
+  hideDD(guessDD, index, ddItems);
   guessInput.focus();
 }
 
@@ -429,7 +431,7 @@ function dedupeByTitle(results: ITunesTrack[]): DropdownItem[] {
   return out;
 }
 
-async function searchArtistSongs(query: string): Promise<void> {
+export async function searchArtistSongs(query: string, aborter: AbortController | null, guessDD: HTMLElement, ddIndex: number, ddItems: DropdownItem[]): Promise<void> {
   // Cancel any ongoing request before starting a new one
   if (aborter) aborter.abort();
   aborter = new AbortController();
@@ -441,7 +443,7 @@ async function searchArtistSongs(query: string): Promise<void> {
 
   // Skip if the query is too short
   if (query.trim().length < 2) {
-    hideDD();
+    hideDD(guessDD, ddIndex, ddItems);
     return;
   }
 
@@ -461,17 +463,17 @@ async function searchArtistSongs(query: string): Promise<void> {
     const uniqueSongs = dedupeByTitle(data.results ?? []).slice(0, 30);
 
     ddItems = uniqueSongs;
-    renderDD(uniqueSongs);
+    renderDD(uniqueSongs, guessDD);
 
     // Select the first suggestion by default
     ddIndex = uniqueSongs.length > 0 ? 0 : -1;
-    highlight(ddIndex);
+    highlight(ddIndex, guessDD);
   } catch (error) {
     // If the user stopped typing before the request finished
     if (error instanceof DOMException && error.name === "AbortError") return;
 
     console.error("Error fetching artist songs:", error);
-    hideDD();
+    hideDD(guessDD, ddIndex, ddItems);
   }
 }
 

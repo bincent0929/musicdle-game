@@ -1,10 +1,8 @@
 import { $ } from './additional-functions.js';
 
-import { initGameInfoPopup, pickSong, updateGameStateUI, setupAudioRestrictions, checkGuess, showCompletionPopup, reveal } from './game-functions.js';
+import { initGameInfoPopup, pickSong, hideDD, searchArtistSongs, checkGuess, reveal, highlight, selectItem } from './game-functions.js';
 
 import type { GameState, currentSong, DropdownItem } from './game-logic-types.js';
-
-import { initializeHintBoxes, renderHintBoxes, updateHintState, revealedStateUpdate } from './hints.js';
 
 let gameState: GameState = {
   attemptsRemaining: 5,
@@ -25,9 +23,9 @@ const revealBtn = $("reveal");
 const guessInput = $("guess");
 
 if (newBtn) newBtn.onclick = () => pickSong(gameState, current, currentSongId);
-if (submitBtn) submitBtn.onclick = checkGuess;
-if (revealBtn) revealBtn.onclick = reveal;
-if (guessInput) guessInput.addEventListener("keydown", e => { if (e.key === "Enter") checkGuess(); });
+if (submitBtn) submitBtn.onclick = () => checkGuess(gameState, current, currentSongId);
+if (revealBtn) revealBtn.onclick = () => reveal(gameState, current);
+if (guessInput) guessInput.addEventListener("keydown", e => { if (e.key === "Enter") checkGuess(gameState, current, currentSongId); });
 
 
 /* ------------ integrated dropdown on the Guess input ------------ */
@@ -44,38 +42,20 @@ guessElement.addEventListener("input", (e) => {
   const eventTarget = e.target as HTMLInputElement;
   const q = eventTarget.value.trim();
   clearTimeout(t);
-  if (q.length < 2) { hideDD(); return; }
-  t = setTimeout(() => searchArtistSongs(q), DEBOUNCE_MS);
+  if (q.length < 2) { hideDD(guessDD, ddIndex, ddItems); return; }
+  t = setTimeout(() => searchArtistSongs(q, aborter, guessDD, ddIndex, ddItems), DEBOUNCE_MS);
 });
 guessElement.addEventListener("keydown", (e) => {
   if (guessDD.classList.contains("hidden")) return;
-  if (e.key === "ArrowDown") { e.preventDefault(); ddIndex = Math.min(ddIndex + 1, ddItems.length - 1); highlight(ddIndex); }
-  else if (e.key === "ArrowUp") { e.preventDefault(); ddIndex = Math.max(ddIndex - 1, 0); highlight(ddIndex); }
-  else if (e.key === "Enter") { if (ddIndex >= 0) { e.preventDefault(); selectItem(ddIndex); } }
-  else if (e.key === "Escape") { hideDD(); }
+  if (e.key === "ArrowDown") { e.preventDefault(); ddIndex = Math.min(ddIndex + 1, ddItems.length - 1); highlight(ddIndex, guessDD); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); ddIndex = Math.max(ddIndex - 1, 0); highlight(ddIndex, guessDD); }
+  else if (e.key === "Enter") { if (ddIndex >= 0) { e.preventDefault(); selectItem(ddIndex, ddItems, guessDD); } }
+  else if (e.key === "Escape") { hideDD(guessDD, ddIndex, ddItems); }
 });
 
 // click outside to close
 document.addEventListener("click", (e) => {
   const wrap = document.querySelector(".guess-wrap")
   if (!wrap) return;
-  if (!wrap.contains(e.target as Node)) hideDD();
+  if (!wrap.contains(e.target as Node)) hideDD(guessDD, ddIndex, ddItems);
 });
-
-// Expose functions for debugging
-(window as any).gameDebug = {
-    initGameInfoPopup,
-    pickSong,
-    updateGameStateUI,
-    setupAudioRestrictions,
-    checkGuess,
-    showCompletionPopup,
-    reveal,
-    hideDD,
-    searchArtistSongs,
-    // Imported from hints
-    initializeHintBoxes,
-    renderHintBoxes,
-    updateHintState,
-    revealedStateUpdate
-};
