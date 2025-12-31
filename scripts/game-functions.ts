@@ -1,5 +1,11 @@
+import type { GameState, currentSong } from './game-logic-types.js';
+
+import { $ } from './additional-functions.js';
+
+import { initializeHintBoxes, renderHintBoxes, revealedStateUpdate, updateHintsFromMatches, updateHintState } from './hints.js';
+
 // big old popup for game information
-function initGameInfoPopup(): void {
+export function initGameInfoPopup(): void {
   const popup = $("game-info-popup");
   const closeBtn = $("game-info-close");
   if (!popup || !closeBtn) return;
@@ -17,7 +23,7 @@ function initGameInfoPopup(): void {
   });
 }
 
-async function pickSong() {
+export async function pickSong(gameState: GameState, current: currentSong, currentSongId: string | null): Promise<void> {
   let statusElement = $("status") as HTMLElement;
   let metaElement = $("meta") as HTMLElement;
 
@@ -67,7 +73,7 @@ async function pickSong() {
     player.load();
 
     // Set up audio restrictions
-    setupAudioRestrictions(player);
+    setupAudioRestrictions(player, gameState);
 
     // Get the new player element after replacement in setupAudioRestrictions
     const restrictedPlayer = $("player") as HTMLAudioElement;
@@ -76,7 +82,7 @@ async function pickSong() {
     if (p && p.catch) await p.catch(() => { statusElement.textContent = "Tap ▶️ to start playback (autoplay blocked)."; });
     if (!restrictedPlayer.paused) statusElement.textContent = "Playing preview… guess the title!";
     metaElement.textContent = "";
-    updateGameStateUI();
+    updateGameStateUI(gameState);
   } catch (e) {
     statusElement.textContent = (e as Error).message || "Error fetching song.";
     metaElement.textContent = "";
@@ -86,7 +92,7 @@ async function pickSong() {
 /**
  * Updates the UI to show current game state
  */
-function updateGameStateUI(): void {
+function updateGameStateUI(gameState: GameState): void {
   const attemptsEl = $("attempts");
   const unlockedEl = $("unlocked");
 
@@ -102,7 +108,7 @@ function updateGameStateUI(): void {
 /**
  * Sets up audio event listeners to restrict playback to unlocked time
  */
-function setupAudioRestrictions(player: HTMLAudioElement): void {
+function setupAudioRestrictions(player: HTMLAudioElement, gameState: GameState): void {
   // Remove any existing listeners to avoid duplicates
   const newPlayer = player.cloneNode(true) as HTMLAudioElement;
   player.parentNode?.replaceChild(newPlayer, player);
@@ -128,7 +134,7 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
   });
 }
 
-async function checkGuess() {
+async function checkGuess(gameState: GameState, current: currentSong, currentSongId: string | null): Promise<void> {
   if (!current || !currentSongId) return;
 
   const guessInput = $("guess") as HTMLInputElement | null;
@@ -179,9 +185,9 @@ async function checkGuess() {
       gameState.maxListenTime = 30;// Unlock full 30-second preview
       statusEl.textContent = "✅ Correct!";
       metaEl.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
-      updateGameStateUI();
+      updateGameStateUI(gameState);
       // Show completion popup after a short delay
-      setTimeout(() => showCompletionPopup(), 800);
+      setTimeout(() => showCompletionPopup(gameState, current), 800);
     } else {
       // Wrong guess
       gameState.attemptsRemaining--;
@@ -200,7 +206,7 @@ async function checkGuess() {
         }
         
         statusEl.textContent = feedback;
-        updateGameStateUI();
+        updateGameStateUI(gameState);
       } else {
         // Out of attempts - reveal everything
         updateHintState(current);
@@ -209,8 +215,8 @@ async function checkGuess() {
         statusEl.textContent = "❌ Out of attempts!";
         metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
         gameState.maxListenTime = 30;// Unlock full audio after game over
-        updateGameStateUI();
-        setTimeout(() => showCompletionPopup(), 1500);
+        updateGameStateUI(gameState);
+        setTimeout(() => showCompletionPopup(gameState, current), 1500);
       }
     }
 
@@ -223,7 +229,7 @@ async function checkGuess() {
   }
 }
 
-async function showCompletionPopup(): Promise<void> {
+async function showCompletionPopup(gameState: GameState, current: currentSong): Promise<void> {
   await end_of_game_fetch();
 
   const Popup = $("completion-Popup");
@@ -314,7 +320,7 @@ async function showCompletionPopup(): Promise<void> {
   };
 }
 
-async function end_of_game_fetch() {
+async function end_of_game_fetch(gameState: GameState, current: currentSong, currentSongId: string | null): Promise<void> {
   if (current === null) {
     try {
       const response = await fetch('/api/validate-guess', {
@@ -334,8 +340,8 @@ async function end_of_game_fetch() {
   }
 }
 
-async function reveal(){
-  await end_of_game_fetch();
+async function reveal(gameState: GameState, current: currentSong, currentSongId: string | null): Promise<void> {
+  await end_of_game_fetch(gameState, current, currentSongId);
 
   if(!current) return;
   const statusEl = $("status");
@@ -352,10 +358,10 @@ async function reveal(){
   // Unlock full audio when revealed
   gameState.maxListenTime = 30;
   gameState.attemptsRemaining = 0;
-  updateGameStateUI();
+  updateGameStateUI(gameState);
 
   // Show completion Popup after a short delay
-  setTimeout(() => showCompletionPopup(), 800);
+  setTimeout(() => showCompletionPopup(gameState, current), 800);
 }
 
 function hideDD() { guessDD.classList.add("hidden"); guessDD.innerHTML = ""; ddIndex = -1; ddItems = []; }

@@ -1,3 +1,11 @@
+import { $ } from './additional-functions.js';
+
+import { initGameInfoPopup, pickSong, updateGameStateUI, setupAudioRestrictions, checkGuess, showCompletionPopup, reveal } from './game-functions.js';
+
+import type { GameState, currentSong, DropdownItem } from './game-logic-types.js';
+
+import { initializeHintBoxes, renderHintBoxes, updateHintState, revealedStateUpdate } from './hints.js';
+
 let gameState: GameState = {
   attemptsRemaining: 5,
   wrongGuesses: 0,
@@ -16,7 +24,7 @@ const submitBtn = $("submit");
 const revealBtn = $("reveal");
 const guessInput = $("guess");
 
-if (newBtn) newBtn.onclick = pickSong;
+if (newBtn) newBtn.onclick = () => pickSong(gameState, current, currentSongId);
 if (submitBtn) submitBtn.onclick = checkGuess;
 if (revealBtn) revealBtn.onclick = reveal;
 if (guessInput) guessInput.addEventListener("keydown", e => { if (e.key === "Enter") checkGuess(); });
