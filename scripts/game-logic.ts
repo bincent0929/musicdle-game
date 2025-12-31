@@ -1,11 +1,9 @@
 import type { currentSong, GameState, DropdownItem } from "./game-logic-types.js";
 import type { ITunesTrack, ITunesSearchResponse } from "./api-types.js";
 
-import { $, normalize } from "./additional-functions.js";
+import { $ } from "./additional-functions.js";
 
-import { daily_url_fetch } from "./api.js";
-
-import { initializeHintBoxes, renderHintBoxes, checkGuessAgainstCurrent, updateHintState, revealedStateUpdate } from "./hints.js";
+import { initializeHintBoxes, renderHintBoxes, updateHintState, revealedStateUpdate, updateHintsFromMatches } from "./hints.js";
 
 let gameState: GameState = {
   attemptsRemaining: 5,
@@ -16,6 +14,7 @@ let gameState: GameState = {
 
 //let current: currentSong | null = null;
 let current: currentSong | null = null;
+let currentSongId: string | null = null;
 
 // big old popup for game information
 function initGameInfoPopup(): void {
@@ -66,20 +65,22 @@ async function pickSong() {
     initializeHintBoxes();
     renderHintBoxes();
 
-    // Initialize current object before assigning preview
+    // Fetch preview URL and song ID
+    const urlResponse = await fetch('http://localhost:3000/api/daily-song-url');
+    const urlData = await urlResponse.json();
+
+    currentSongId = urlData.songId;
+    
     current = {
-      preview: "",
+      preview: urlData.previewUrl,
       artist: "",
       title: "",
       genre: "",
       releaseYear: "",
       albumName: "",
-      fullTrack: {} as ITunesTrack
+      fullTrack: null
     };
 
-    // this needs to be changed to
-    // not specifically be the daily
-    current.preview = await daily_url_fetch();
     const player = $("player") as HTMLAudioElement;
     if (player === null) throw new Error("Audio player not found.");
     player.src = current.preview;
@@ -147,19 +148,13 @@ function setupAudioRestrictions(player: HTMLAudioElement): void {
   });
 }
 
-/**
- * This needs to be refactored to not use the iTunes Search.
- * It should just pull from the data that the API grabbed when it was queried in
- * pickSongWithPreview.
- * Have it pull from entries that was created in pickSongWithPreview.
- */
 async function checkGuess() {
-  if (!current) return;
+  if (!current || !currentSongId) return;
 
   const guessInput = $("guess") as HTMLInputElement | null;
   const statusEl = $("status");
   const metaEl = $("meta");
-  
+
   if (!guessInput || !statusEl || !metaEl) return;
 
   const playerGuessText: string = guessInput.value.trim();
@@ -168,32 +163,32 @@ async function checkGuess() {
     return;
   }
 
-  // Search for the guessed track to get full details
   try {
     statusEl.textContent = "Checking...";
-    
-    const searchUrl = new URL("https://itunes.apple.com/search");
-    searchUrl.searchParams.set("media", "music");
-    searchUrl.searchParams.set("entity", "song");
-    searchUrl.searchParams.set("term", playerGuessText);
-    searchUrl.searchParams.set("limit", "5");
 
-    const response = await fetch(searchUrl.toString());
-    const data: ITunesSearchResponse = await response.json();
+    // Send guess to server for validation
+    const response = await fetch('http://localhost:3000/api/validate-guess', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guessText: playerGuessText,
+        songId: currentSongId
+      })
+    });
 
-    if (data.results.length === 0) {
-      statusEl.textContent = "❓ Song not found. Try selecting from the dropdown.";
+    const result = await response.json();
+
+    // Handle error responses
+    if (!result.success) {
+      statusEl.textContent = result.message || "Error processing guess.";
       return;
     }
 
-    // Find best match - prefer exact title match
-    const normalizedGuess = normalize(playerGuessText);
-    let guessedTrack = data.results.find(t => normalize(t.trackName) === normalizedGuess);
-    if (!guessedTrack) guessedTrack = data.results[0];
-
-    // Check the guess and update hints
-    const isCorrect = checkGuessAgainstCurrent(guessedTrack, current);
+    // Update hints based on matches from server
+    updateHintsFromMatches(result.matches, current);
     renderHintBoxes();
+
+    const isCorrect = result.isCorrect;
 
     if (isCorrect) {
       // CORRECT - reveal all remaining hints
@@ -551,7 +546,6 @@ document.addEventListener("click", (e) => {
     // Imported from hints
     initializeHintBoxes,
     renderHintBoxes,
-    checkGuessAgainstCurrent,
     updateHintState,
     revealedStateUpdate
 };

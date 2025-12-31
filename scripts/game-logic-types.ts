@@ -7,7 +7,7 @@ export interface currentSong {
   genre: string;
   releaseYear: string;
   albumName: string;
-  fullTrack: ITunesTrack;
+  fullTrack: ITunesTrack | null;
 }
 
 /**dropdownItem definition */

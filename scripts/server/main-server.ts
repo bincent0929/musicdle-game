@@ -1,5 +1,6 @@
-import { pickSongWithPreview } from './server-functions';
-import { currentSong } from '../game-logic-types';
+import {scheduleNextUpdate, updateDailySong, searchItunesTrack, compareGuessToDaily, generateDailySongId } from './server-functions';
+
+import type { DailySong } from './server-types';
 
 import express, { Request, Response } from 'express';
 import cors from 'cors';
@@ -10,67 +11,94 @@ const port = 3000;
 app.use(cors());
 app.use(express.json());
 
-let currentDaily: currentSong | null = null;
-
-async function updateDailySong() {
-  try {
-    const song = await pickSongWithPreview();
-    currentDaily = song;
-    console.log(`Daily song updated at ${new Date().toISOString()}`);
-  } catch (err) {
-    console.error("Error fetching daily song:", err);
-  }
-}
-
-function scheduleNextUpdate() {
-  const now = new Date();
-  const target = new Date(now);
-  
-  // Set target to 11:59:59.999 PM
-  target.setHours(23, 59, 59, 999);
-
-  // If we are already past 11:59:59.999 PM today, schedule for tomorrow
-  if (now.getTime() >= target.getTime()) {
-    target.setDate(target.getDate() + 1);
-  }
-
-  const msUntilTarget = target.getTime() - now.getTime();
-  console.log(`Next update scheduled in ${msUntilTarget}ms (at ${target.toISOString()})`);
-
-  setTimeout(() => {
-    // Update the song at 11:59:59.999 PM
-    updateDailySong();
-    
-    // Then update every 24 hours thereafter
-    setInterval(updateDailySong, 24 * 60 * 60 * 1000);
-  }, msUntilTarget);
-}
+let currentDaily: DailySong | null = null;
 
 // ==Initial fetch and then schedule==
 // avoids issue where the scheduled next update call is finished
 // before the daily song is updated on server start
-updateDailySong().then(() => {
-  scheduleNextUpdate();
-});
-
-app.get('/api/daily-song', (req: Request, res: Response) => {
-  if (currentDaily) {
-    res.json(currentDaily);
-  } else {
-    res.status(503).json({ error: "Daily song not available yet. Please try again later." });
-  }
+updateDailySong().then((song) => {
+  currentDaily = song;
+  scheduleNextUpdate((song) => {
+    currentDaily = song;
+  });
 });
 
 app.get('/api/daily-song-url', (req: Request, res: Response) => {
   if (currentDaily) {
-    res.json({ previewUrl: currentDaily.preview });
+    res.json({
+      previewUrl: currentDaily.song.preview,
+      songId: currentDaily.id
+    });
   } else {
     res.status(503).json({ error: "Daily song not available yet. Please try again later." });
   }
 });
 
-app.post('/api/validate-guess', (req: Request, res: Response) => {
-  
+app.post('/api/validate-guess', async (req: Request, res: Response) => {
+  try {
+    const { guessText, songId } = req.body;
+
+    // Validate inputs
+    if (!guessText || typeof guessText !== 'string' || !guessText.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: "EMPTY_GUESS",
+        message: "Please enter a guess."
+      });
+    }
+
+    if (!currentDaily) {
+      return res.status(503).json({
+        success: false,
+        error: "SERVICE_UNAVAILABLE",
+        message: "Daily song not available yet. Please try again later."
+      });
+    }
+
+    // Validate song ID (prevent replay attacks)
+    if (songId !== currentDaily.id) {
+      return res.status(400).json({
+        success: false,
+        error: "INVALID_SONG_ID",
+        message: "Song ID mismatch. Please refresh the page."
+      });
+    }
+
+    // Search iTunes for the guess
+    const guessedTrack = await searchItunesTrack(guessText.trim());
+
+    if (!guessedTrack) {
+      return res.status(404).json({
+        success: false,
+        error: "NO_RESULTS",
+        message: "Song not found. Try selecting from the dropdown."
+      });
+    }
+
+    // Compare guess to correct song
+    const comparison = compareGuessToDaily(guessedTrack, currentDaily.song);
+
+    // Return only matching attributes (no sensitive data)
+    return res.json({
+      success: true,
+      isCorrect: comparison.isCorrect,
+      matches: {
+        artist: comparison.artist,
+        genre: comparison.genre,
+        year: comparison.year,
+        album: comparison.album
+      },
+      message: comparison.isCorrect ? "Correct!" : undefined
+    });
+
+  } catch (error) {
+    console.error("Error validating guess:", error);
+    return res.status(502).json({
+      success: false,
+      error: "ITUNES_ERROR",
+      message: "Error searching iTunes. Please try again."
+    });
+  }
 });
 
 

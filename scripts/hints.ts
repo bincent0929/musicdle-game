@@ -138,3 +138,28 @@ export function revealedStateUpdate(revealed : Array<string>): void {
     if (hintState.year.revealed) revealed.push("year");
     if (hintState.album.revealed) revealed.push("album");
 }
+
+export function updateHintsFromMatches(matches: {
+  artist: boolean;
+  genre: boolean;
+  year: boolean;
+  album: boolean;
+}, current: currentSong): void {
+  // Only reveal hints that matched AND haven't been revealed yet
+  if (matches.artist && !hintState.artist.revealed) {
+    hintState.artist.value = current.artist;
+    hintState.artist.revealed = true;
+  }
+  if (matches.genre && !hintState.genre.revealed) {
+    hintState.genre.value = current.genre;
+    hintState.genre.revealed = true;
+  }
+  if (matches.year && !hintState.year.revealed) {
+    hintState.year.value = current.releaseYear;
+    hintState.year.revealed = true;
+  }
+  if (matches.album && !hintState.album.revealed) {
+    hintState.album.value = current.albumName;
+    hintState.album.revealed = true;
+  }
+}
