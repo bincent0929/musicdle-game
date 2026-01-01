@@ -25,35 +25,9 @@ export function initGameInfoPopup(): void {
   });
 }
 
-export async function fetchSongURL(gameState: GameState, current: currentSong | null, currentSongId: string | null): Promise<void> {
-  let statusElement = $("status") as HTMLElement;
-  let metaElement = $("meta") as HTMLElement;
-
-  if (!statusElement) throw new Error("Status element not found.");
-  if (!metaElement) throw new Error("Meta element not found.");
-
-  // this are taken from the user's input on the page
-  //const country = ($("country") as HTMLInputElement).value;
-  //const genre = ($("genre") as HTMLInputElement).value;
-  ($("status") as HTMLElement).textContent = "Loading top songs…";
-  ($("meta") as HTMLElement).textContent = "";
-  ($("guess") as HTMLInputElement).value = "";
-  ($("player") as HTMLAudioElement).src = "";
-
-  try {
-    // Reset game state AND hint state for new song
-    gameState = {
-      attemptsRemaining: 5,
-      wrongGuesses: 0,
-      maxListenTime: 6,
-      hasWon: false
-    };
-
-    // I think that these could be moved into main-game.ts
-    initializeHintBoxes();
-    renderHintBoxes();
-
-    // Fetch preview URL and song ID
+export async function fetchSongURL(current: currentSong | null, currentSongId: string | null): Promise<currentSong | null> {
+  try {  
+  // Fetch preview URL and song ID
     const urlResponse = await fetch('http://localhost:3000/api/daily-song-url');
     const urlData = await urlResponse.json();
 
@@ -61,7 +35,7 @@ export async function fetchSongURL(gameState: GameState, current: currentSong | 
     
     // this won't change the current in main-game.ts
     // needs to be updated
-    current = {
+    return current = {
       preview: urlData.previewUrl,
       artist: "",
       title: "",
@@ -70,34 +44,15 @@ export async function fetchSongURL(gameState: GameState, current: currentSong | 
       albumName: "",
       fullTrack: null
     };
-
-    // this could probably also be moved into main-game.ts
-    const player = $("player") as HTMLAudioElement;
-    if (player === null) throw new Error("Audio player not found.");
-    player.src = current.preview;
-    player.load();
-
-    // Set up audio restrictions
-    setupAudioRestrictions(player, gameState);
-
-    // Get the new player element after replacement in setupAudioRestrictions
-    const restrictedPlayer = $("player") as HTMLAudioElement;
-    const p = restrictedPlayer.play();
-
-    if (p && p.catch) await p.catch(() => { statusElement.textContent = "Tap ▶️ to start playback (autoplay blocked)."; });
-    if (!restrictedPlayer.paused) statusElement.textContent = "Playing preview… guess the title!";
-    metaElement.textContent = "";
-    updateGameStateUI(gameState);
   } catch (e) {
-    statusElement.textContent = (e as Error).message || "Error fetching song.";
-    metaElement.textContent = "";
+    return null;
   }
 }
 
 /**
  * Updates the UI to show current game state
  */
-function updateGameStateUI(gameState: GameState): void {
+export function updateGameStateUI(gameState: GameState): void {
   const attemptsEl = $("attempts");
   const unlockedEl = $("unlocked");
 
@@ -113,7 +68,7 @@ function updateGameStateUI(gameState: GameState): void {
 /**
  * Sets up audio event listeners to restrict playback to unlocked time
  */
-function setupAudioRestrictions(player: HTMLAudioElement, gameState: GameState): void {
+export function setupAudioRestrictions(player: HTMLAudioElement, gameState: GameState): void {
   // Remove any existing listeners to avoid duplicates
   const newPlayer = player.cloneNode(true) as HTMLAudioElement;
   player.parentNode?.replaceChild(newPlayer, player);

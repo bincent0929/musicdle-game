@@ -1,6 +1,7 @@
 import { $ } from '../additional-functions.js';
+import { initializeHintBoxes, renderHintBoxes } from '../hints.js';
 
-import { initGameInfoPopup, fetchSongURL, hideDD, searchArtistSongs, checkGuess, reveal, highlight, selectItem } from './game-functions.js';
+import { setupAudioRestrictions, updateGameStateUI, initGameInfoPopup, fetchSongURL, hideDD, searchArtistSongs, checkGuess, reveal, highlight, selectItem } from './game-functions.js';
 
 import type { GameState, currentSong, DropdownItem } from './game-logic-types.js';
 
@@ -23,7 +24,46 @@ const guessInput = $("guess");
 
 // we should have the pickSong function be called when new game starts
 // instead of when the user presses the button.
-if (newBtn) newBtn.onclick = () => fetchSongURL(gameState, current, currentSongId);
+//if (newBtn) newBtn.onclick = () => fetchSongURL(current, currentSongId);
+
+let statusElement = $("status") as HTMLElement;
+let metaElement = $("meta") as HTMLElement;
+
+if (!statusElement) throw new Error("Status element not found.");
+if (!metaElement) throw new Error("Meta element not found.");
+
+// this are taken from the user's input on the page
+//const country = ($("country") as HTMLInputElement).value;
+//const genre = ($("genre") as HTMLInputElement).value;
+($("status") as HTMLElement).textContent = "Loading top songs…";
+($("meta") as HTMLElement).textContent = "";
+($("guess") as HTMLInputElement).value = "";
+($("player") as HTMLAudioElement).src = "";
+
+initializeHintBoxes();
+renderHintBoxes();
+
+// this could probably also be moved into main-game.ts
+const player = $("player") as HTMLAudioElement;
+if (player === null) throw new Error("Audio player not found.");
+current = await fetchSongURL(current, currentSongId);
+
+if (current) {
+  player.src = current.preview;
+  player.load();
+}
+
+// Set up audio restrictions
+setupAudioRestrictions(player, gameState);
+
+// Get the new player element after replacement in setupAudioRestrictions
+const restrictedPlayer = $("player") as HTMLAudioElement;
+const p = restrictedPlayer.play();
+
+if (p && p.catch) await p.catch(() => { statusElement.textContent = "Tap ▶️ to start playback (autoplay blocked)."; });
+if (!restrictedPlayer.paused) statusElement.textContent = "Playing preview… guess the title!";
+metaElement.textContent = "";
+updateGameStateUI(gameState);
 
 if (submitBtn) submitBtn.onclick = () => checkGuess(gameState, current, currentSongId);
 if (revealBtn) revealBtn.onclick = () => reveal(gameState, current);
