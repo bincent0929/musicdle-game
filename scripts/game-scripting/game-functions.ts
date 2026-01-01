@@ -59,6 +59,8 @@ export async function fetchSongURL(gameState: GameState, current: currentSong | 
 
     currentSongId = urlData.songId;
     
+    // this won't change the current in main-game.ts
+    // needs to be updated
     current = {
       preview: urlData.previewUrl,
       artist: "",
