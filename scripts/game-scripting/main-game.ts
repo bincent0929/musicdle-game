@@ -1,7 +1,7 @@
 import { $ } from '../additional-functions.js';
 import { initializeHintBoxes, renderHintBoxes } from '../hints.js';
 
-import { setupAudioRestrictions, updateGameStateUI, initGameInfoPopup, fetchSongURL, hideDD, searchArtistSongs, checkGuess, reveal, highlight, selectItem } from './game-functions.js';
+import { setupAudioRestrictions, updateGameStateUI, initGameInfoPopup, fetchSongURLAndId, hideDD, searchArtistSongs, checkGuess, reveal, highlight, selectItem } from './game-functions.js';
 
 import type { GameState, currentSong, DropdownItem } from './game-logic-types.js';
 
@@ -43,9 +43,16 @@ player.src = "";
 initializeHintBoxes();
 renderHintBoxes();
 
-current = await fetchSongURL(current, currentSongId);
+const fetchedData = await fetchSongURLAndId();
 
-if (current) {
+if (fetchedData) {
+  /**
+   * It's technically not just the URL,
+   * saved into current but the rest
+   * of the values are empty or null
+   */
+  current = fetchedData.songPreviewURL;
+  currentSongId = fetchedData.songId;
   player.src = current.preview;
   player.load();
 }

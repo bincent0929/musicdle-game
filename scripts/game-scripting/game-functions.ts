@@ -2,7 +2,7 @@ import type { DropdownItem, GameState, currentSong } from './game-logic-types.js
 
 import { $ } from '../additional-functions.js';
 
-import { initializeHintBoxes, renderHintBoxes, revealedStateUpdate, updateHintsFromMatches, updateHintState } from '../hints.js';
+import { renderHintBoxes, revealedStateUpdate, updateHintsFromMatches, updateHintState } from '../hints.js';
 
 import { ITunesSearchResponse, ITunesTrack } from '../api-types.js';
 
@@ -25,26 +25,28 @@ export function initGameInfoPopup(): void {
   });
 }
 
-export async function fetchSongURL(current: currentSong | null, currentSongId: string | null): Promise<currentSong | null> {
-  try {  
-  // Fetch preview URL and song ID
+export async function fetchSongURLAndId(): Promise<{ songPreviewURL: currentSong; songId: string } | null> {
+  try {
     const urlResponse = await fetch('http://localhost:3000/api/daily-song-url');
+    if (!urlResponse.ok) {
+      throw new Error(`Error fetching daily song: ${urlResponse.statusText}`);
+    }
     const urlData = await urlResponse.json();
 
-    currentSongId = urlData.songId;
-    
-    // this won't change the current in main-game.ts
-    // needs to be updated
-    return current = {
-      preview: urlData.previewUrl,
-      artist: "",
-      title: "",
-      genre: "",
-      releaseYear: "",
-      albumName: "",
-      fullTrack: null
+    return {
+      songPreviewURL: {
+        preview: urlData.previewUrl,
+        artist: "",
+        title: "",
+        genre: "",
+        releaseYear: "",
+        albumName: "",
+        fullTrack: null
+      },
+      songId: urlData.songId
     };
   } catch (e) {
+    console.error('Failed to fetch song URL:', e instanceof Error ? e.message : String(e));
     return null;
   }
 }
