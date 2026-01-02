@@ -26,7 +26,9 @@ run:
 	@echo "Done."
 
 	@echo "Starting the backend..."
-	cd scripts/server && tmux new-session -d -s game-backend 'npm start'
+	cd scripts/server \
+	 && npm install \
+	 && tmux new-session -d -s game-backend 'npm start'
 	@echo "Done."
 
 	@echo "Starting Caddy in the background..."
@@ -51,7 +53,8 @@ stop-run:
 	@echo "Done."
 	
 	@echo "Removing the transpiled scripts..."
-	rm ./scripts/*.js
+	rm ./scripts/*.js \
+	   ./scripts/game-scripting/*.js
 	@echo "Done."
 
 	@echo "The site is down and your filesystem was cleaned."

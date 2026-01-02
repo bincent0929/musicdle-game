@@ -4,7 +4,7 @@ import type { currentSong } from "../game-scripting/game-logic-types";
 
 import { normalize, extractYear } from "../additional-functions";
 
-import type { DailySong } from './server-types';
+import type { DailySong } from './server-types.ts';
 
 async function song_fetch(): Promise<ITunesRSSEntry[]> {
   // the max amount of songs you can get is 200 from iTunes

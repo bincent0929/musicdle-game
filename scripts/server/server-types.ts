@@ -1,4 +1,4 @@
-import { currentSong } from "../game-logic-types";
+import { currentSong } from "../game-scripting/game-logic-types";
 
 // Daily song structure with ID for validation
 export interface DailySong {
