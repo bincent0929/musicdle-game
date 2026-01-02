@@ -9,7 +9,7 @@ import type { currentSong } from "../game-scripting/game-logic-types";
 
 import { normalize, extractYear } from "../additional-functions";
 
-import type { DailySong } from "./server-types.ts";
+import type { compared, DailySong } from "./server-types.ts";
 
 async function song_fetch(): Promise<ITunesRSSEntry[]> {
   // the max amount of songs you can get is 200 from iTunes
@@ -104,14 +104,32 @@ export async function searchItunesTrack(
 export function compareGuess(
   guessedTrack: ITunesTrack,
   correctSong: currentSong
-) {
-  return {
-    artist: normalize(guessedTrack.artistName) === correctSong.artist,
-    genre: normalize(guessedTrack.primaryGenreName) === correctSong.genre,
-    year: extractYear(guessedTrack.releaseDate) === correctSong.releaseYear,
-    album: normalize(guessedTrack.collectionName) === correctSong.albumName,
-    isCorrect: normalize(guessedTrack.trackName) === correctSong.title,
+): compared {
+  let compared: compared = {
+    artist: false,
+    genre: false,
+    year: false,
+    album: false,
+    isCorrect: false,
   };
+
+  if (normalize(guessedTrack.artistName) === correctSong.artist) {
+    compared.artist = correctSong.artist;
+  }
+  if (normalize(guessedTrack.primaryGenreName) === correctSong.genre) {
+    compared.genre = correctSong.genre;
+  }
+  if (extractYear(guessedTrack.releaseDate) === correctSong.releaseYear) {
+    compared.year = correctSong.releaseYear;
+  }
+  if (normalize(guessedTrack.collectionName) === correctSong.albumName) {
+    compared.album = correctSong.albumName;
+  }
+  if (normalize(guessedTrack.trackName) === correctSong.title) {
+    compared.isCorrect = true;
+  }
+
+  return compared;
 }
 
 function generateDailySongId(): string {
