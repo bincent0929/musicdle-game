@@ -1,7 +1,9 @@
 import { $ } from '../additional-functions.js';
 import { initializeHintBoxes, renderHintBoxes } from '../hints.js';
 
-import { setupAudioRestrictions, updateGameStateUI, initGameInfoPopup, fetchSongURLAndId, hideDD, searchArtistSongs, checkGuess, reveal, highlight, selectItem } from './game-functions.js';
+import { setupAudioRestrictions, updateGameStateUI, 
+  initGameInfoPopup, fetchSongURLAndId, hideDD, searchArtistSongs, 
+  checkGuess, reveal, highlight, selectItem } from './game-functions.js';
 
 import type { GameState, currentSong, DropdownItem } from './game-logic-types.js';
 

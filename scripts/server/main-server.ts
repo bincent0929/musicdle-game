@@ -1,4 +1,5 @@
-import {scheduleNextUpdate, updateDailySong, searchItunesTrack, compareGuessToDaily } from './server-functions';
+import {scheduleNextUpdate, updateDailySong, 
+  searchItunesTrack, compareGuessToDaily } from './server-functions';
 
 import type { DailySong } from './server-types';
 

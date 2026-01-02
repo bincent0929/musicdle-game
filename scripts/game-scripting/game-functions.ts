@@ -2,7 +2,8 @@ import type { DropdownItem, GameState, currentSong } from './game-logic-types.js
 
 import { $ } from '../additional-functions.js';
 
-import { renderHintBoxes, revealedStateUpdate, updateHintsFromMatches, updateHintState } from '../hints.js';
+import { renderHintBoxes, revealedStateUpdate, 
+  updateHintsFromMatches, updateHintState } from '../hints.js';
 
 import { ITunesSearchResponse, ITunesTrack } from '../api-types.js';
 
