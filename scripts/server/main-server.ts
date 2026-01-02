@@ -2,7 +2,7 @@ import {
   scheduleNextUpdate,
   updateDailySong,
   searchItunesTrack,
-  compareGuessToDaily,
+  compareGuess,
 } from "./server-functions";
 
 import type { DailySong } from "./server-types";
@@ -85,7 +85,7 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
     }
 
     // Compare guess to correct song
-    const comparison = compareGuessToDaily(guessedTrack, currentDaily.song);
+    const comparison = compareGuess(guessedTrack, currentDaily.song);
 
     // Return only matching attributes (no sensitive data)
     return res.json({
