@@ -1,11 +1,19 @@
-import type { DropdownItem, GameState, currentSong } from './game-logic-types.js';
+import type {
+  DropdownItem,
+  GameState,
+  currentSong,
+} from "./game-logic-types.js";
 
-import { $ } from '../additional-functions.js';
+import { $ } from "../additional-functions.js";
 
-import { renderHintBoxes, revealedStateUpdate, 
-  updateHintsFromMatches, updateHintState } from '../hints.js';
+import {
+  renderHintBoxes,
+  revealedStateUpdate,
+  updateHintsFromMatches,
+  updateHintState,
+} from "../hints.js";
 
-import { ITunesSearchResponse, ITunesTrack } from '../api-types.js';
+import { ITunesSearchResponse, ITunesTrack } from "../api-types.js";
 
 // big old popup for game information
 export function initGameInfoPopup(): void {
@@ -26,9 +34,12 @@ export function initGameInfoPopup(): void {
   });
 }
 
-export async function fetchSongURLAndId(): Promise<{ songPreviewURL: currentSong; songId: string } | null> {
+export async function fetchSongURLAndId(): Promise<{
+  songPreviewURL: currentSong;
+  songId: string;
+} | null> {
   try {
-    const urlResponse = await fetch('http://localhost:3000/api/daily-song-url');
+    const urlResponse = await fetch("http://localhost:3000/api/daily-song-url");
     if (!urlResponse.ok) {
       throw new Error(`Error fetching daily song: ${urlResponse.statusText}`);
     }
@@ -42,12 +53,15 @@ export async function fetchSongURLAndId(): Promise<{ songPreviewURL: currentSong
         genre: "",
         releaseYear: "",
         albumName: "",
-        fullTrack: null
+        fullTrack: null,
       },
-      songId: urlData.songId
+      songId: urlData.songId,
     };
   } catch (e) {
-    console.error('Failed to fetch song URL:', e instanceof Error ? e.message : String(e));
+    console.error(
+      "Failed to fetch song URL:",
+      e instanceof Error ? e.message : String(e)
+    );
     return null;
   }
 }
@@ -71,13 +85,16 @@ export function updateGameStateUI(gameState: GameState): void {
 /**
  * Sets up audio event listeners to restrict playback to unlocked time
  */
-export function setupAudioRestrictions(player: HTMLAudioElement, gameState: GameState): void {
+export function setupAudioRestrictions(
+  player: HTMLAudioElement,
+  gameState: GameState
+): void {
   // Remove any existing listeners to avoid duplicates
   const newPlayer = player.cloneNode(true) as HTMLAudioElement;
   player.parentNode?.replaceChild(newPlayer, player);
 
   // timeupdate: pause and reset when reaching the time limit
-  newPlayer.addEventListener('timeupdate', () => {
+  newPlayer.addEventListener("timeupdate", () => {
     if (!gameState.hasWon && newPlayer.currentTime >= gameState.maxListenTime) {
       newPlayer.pause();
       newPlayer.currentTime = 0;
@@ -85,23 +102,28 @@ export function setupAudioRestrictions(player: HTMLAudioElement, gameState: Game
   });
 
   // seeking: prevent seeking beyond unlocked time
-  newPlayer.addEventListener('seeking', () => {
+  newPlayer.addEventListener("seeking", () => {
     if (!gameState.hasWon && newPlayer.currentTime > gameState.maxListenTime) {
       newPlayer.currentTime = gameState.maxListenTime;
     }
   });
 
   // ended: reset to beginning for replay
-  newPlayer.addEventListener('ended', () => {
+  newPlayer.addEventListener("ended", () => {
     newPlayer.currentTime = 0;
   });
 }
 
 // VERY MUCH needs to be refactored
 // do not think this works with the updated API right now
-export async function checkGuess(gameState: GameState, current: currentSong | null, currentSongId: string | null, 
-  guessInput: HTMLInputElement, statusEl: HTMLElement, metaEl: HTMLElement): Promise<void> 
-  {
+export async function checkGuess(
+  gameState: GameState,
+  current: currentSong | null,
+  currentSongId: string | null,
+  guessInput: HTMLInputElement,
+  statusEl: HTMLElement,
+  metaEl: HTMLElement
+): Promise<void> {
   // maybe remove these checks
   // the main program should ensure these are valid
   if (!current || !currentSongId) return;
@@ -118,13 +140,13 @@ export async function checkGuess(gameState: GameState, current: currentSong | nu
     statusEl.textContent = "Checking...";
 
     // Send guess to server for validation
-    const response = await fetch('http://localhost:3000/api/validate-guess', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await fetch("http://localhost:3000/api/validate-guess", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         guessText: playerGuessText,
-        songId: currentSongId
-      })
+        songId: currentSongId,
+      }),
     });
 
     const result = await response.json();
@@ -144,7 +166,7 @@ export async function checkGuess(gameState: GameState, current: currentSong | nu
       renderHintBoxes();
 
       gameState.hasWon = true;
-      gameState.maxListenTime = 30;// Unlock full 30-second preview
+      gameState.maxListenTime = 30; // Unlock full 30-second preview
       statusEl.textContent = "✅ Correct!";
       metaEl.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
       updateGameStateUI(gameState);
@@ -160,18 +182,18 @@ export async function checkGuess(gameState: GameState, current: currentSong | nu
       gameState.attemptsRemaining--;
       gameState.wrongGuesses++;
       // Unlock +6 more seconds (cap at 30)
-      gameState.maxListenTime = Math.min(6 + (gameState.wrongGuesses * 6), 30);
+      gameState.maxListenTime = Math.min(6 + gameState.wrongGuesses * 6, 30);
 
       if (gameState.attemptsRemaining > 0) {
         // Give feedback based on what was revealed
         let feedback = "❌ Not quite.";
-        const revealed : Array<string> = [];
+        const revealed: Array<string> = [];
         revealedStateUpdate(revealed);
-        
+
         if (revealed.length > 0) {
           feedback += ` Revealed: ${revealed.join(", ")}`;
         }
-        
+
         statusEl.textContent = feedback;
         updateGameStateUI(gameState);
       } else {
@@ -181,7 +203,7 @@ export async function checkGuess(gameState: GameState, current: currentSong | nu
 
         statusEl.textContent = "❌ Out of attempts!";
         metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
-        gameState.maxListenTime = 30;// Unlock full audio after game over
+        gameState.maxListenTime = 30; // Unlock full audio after game over
         updateGameStateUI(gameState);
         setTimeout(() => showCompletionPopup(gameState, current), 1500);
       }
@@ -189,14 +211,16 @@ export async function checkGuess(gameState: GameState, current: currentSong | nu
 
     // Clear the guess input
     guessInput.value = "";
-
   } catch (error) {
     console.error("Error checking guess:", error);
     statusEl.textContent = "⚠️ Error processing guess. Try again.";
   }
 }
 
-async function showCompletionPopup(gameState: GameState, current: currentSong): Promise<void> {
+async function showCompletionPopup(
+  gameState: GameState,
+  current: currentSong
+): Promise<void> {
   await end_of_game_fetch(gameState, current);
 
   const Popup = $("completion-Popup");
@@ -206,12 +230,12 @@ async function showCompletionPopup(gameState: GameState, current: currentSong): 
   }
 
   // Calculate score based on game state
-  const score = gameState.hasWon ? (6 - gameState.wrongGuesses) : 0;
+  const score = gameState.hasWon ? 6 - gameState.wrongGuesses : 0;
   const scoreEl = $("Popup-score");
   if (scoreEl) {
     scoreEl.textContent = score.toString();
   }
-  
+
   // Show number of guesses made
   const guessesEl = $("Popup-guesses");
   if (guessesEl) {
@@ -224,7 +248,7 @@ async function showCompletionPopup(gameState: GameState, current: currentSong): 
     const songTitleEl = $("Popup-song-title");
     const artistNameEl = $("Popup-artist-name");
     const albumArtEl = $("Popup-album-art") as HTMLImageElement | null;
-    
+
     if (songTitleEl) {
       songTitleEl.textContent = current.title;
     }
@@ -232,8 +256,11 @@ async function showCompletionPopup(gameState: GameState, current: currentSong): 
       artistNameEl.textContent = current.artist;
     }
     if (albumArtEl && current.fullTrack) {
-      const artworkUrl = current.fullTrack.artworkUrl100 || current.fullTrack.artworkUrl60 || "";
-      const highResArtwork = artworkUrl.replace("100x100bb", "300x300bb").replace("60x60bb", "300x300bb");
+      const artworkUrl =
+        current.fullTrack.artworkUrl100 || current.fullTrack.artworkUrl60 || "";
+      const highResArtwork = artworkUrl
+        .replace("100x100bb", "300x300bb")
+        .replace("60x60bb", "300x300bb");
       albumArtEl.src = highResArtwork;
       albumArtEl.alt = `${current.albumName} album artwork`;
     }
@@ -257,10 +284,10 @@ async function showCompletionPopup(gameState: GameState, current: currentSong): 
         score: score,
         date: new Date().toISOString(),
         song: current?.title,
-        artist: current?.artist
+        artist: current?.artist,
       });
       localStorage.setItem("musicdle-scores", JSON.stringify(scores));
-      
+
       noteEl.classList.remove("hidden");
       if (yesBtn) yesBtn.disabled = true;
       if (noBtn) noBtn.disabled = true;
@@ -287,30 +314,35 @@ async function showCompletionPopup(gameState: GameState, current: currentSong): 
   };
 }
 
-async function end_of_game_fetch(gameState: GameState, current: currentSong | null): Promise<void> {
+async function end_of_game_fetch(
+  gameState: GameState,
+  current: currentSong | null
+): Promise<void> {
   if (current === null) {
     try {
-      const response = await fetch('/api/validate-guess', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ game_state: "finished" }) // special guess to trigger reveal
+      const response = await fetch("/api/validate-guess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ game_state: "finished" }), // special guess to trigger reveal
       });
-      
+
       if (response.ok) {
-        current = await response.json() as currentSong;
+        current = (await response.json()) as currentSong;
       }
-    }
-    catch (error) {
+    } catch (error) {
       console.error("Error fetching current song for reveal:", error);
       return;
     }
   }
 }
 
-export async function reveal(gameState: GameState, current: currentSong | null): Promise<void> {
+export async function reveal(
+  gameState: GameState,
+  current: currentSong | null
+): Promise<void> {
   await end_of_game_fetch(gameState, current);
 
-  if(!current) return;
+  if (!current) return;
   const statusEl = $("status");
   const metaEl = $("meta");
   if (!statusEl || !metaEl) return;
@@ -318,7 +350,7 @@ export async function reveal(gameState: GameState, current: currentSong | null):
   // Reveal all hints
   updateHintState(current);
   renderHintBoxes();
-  
+
   statusEl.textContent = "🔎 Revealed.";
   metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
 
@@ -331,8 +363,19 @@ export async function reveal(gameState: GameState, current: currentSong | null):
   setTimeout(() => showCompletionPopup(gameState, current), 800);
 }
 
-export function hideDD(guessDD: HTMLElement, ddIndex: number, ddItems: DropdownItem[]) { guessDD.classList.add("hidden"); guessDD.innerHTML = ""; ddIndex = -1; ddItems = []; }
-function showDD(guessDD: HTMLElement) { guessDD.classList.remove("hidden"); }
+export function hideDD(
+  guessDD: HTMLElement,
+  ddIndex: number,
+  ddItems: DropdownItem[]
+) {
+  guessDD.classList.add("hidden");
+  guessDD.innerHTML = "";
+  ddIndex = -1;
+  ddItems = [];
+}
+function showDD(guessDD: HTMLElement) {
+  guessDD.classList.remove("hidden");
+}
 
 function renderDD(items: DropdownItem[], guessDD: HTMLElement): void {
   if (!guessDD) {
@@ -342,7 +385,10 @@ function renderDD(items: DropdownItem[], guessDD: HTMLElement): void {
   guessDD.innerHTML = "";
   items.forEach((it: DropdownItem, i: number) => {
     const el = document.createElement("div");
-    el.className = "flex gap-2.5 items-center px-3 py-2 cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100"; el.setAttribute("role", "option"); el.dataset.idx = String(i);
+    el.className =
+      "flex gap-2.5 items-center px-3 py-2 cursor-pointer hover:bg-gray-100 aria-selected:bg-gray-100";
+    el.setAttribute("role", "option");
+    el.dataset.idx = String(i);
     el.innerHTML = `<img src="${it.artwork}" alt="" class="w-10 h-10 rounded-md object-cover">
       <div><div class="font-semibold">${it.title}</div><div class="text-gray-600">${it.artist}</div></div>`;
     el.onclick = () => selectItem(i, items, guessDD);
@@ -350,18 +396,26 @@ function renderDD(items: DropdownItem[], guessDD: HTMLElement): void {
   });
   if (!items.length) {
     const empty = document.createElement("div");
-    empty.className = "px-3 py-2 text-gray-600"; empty.textContent = "No songs found.";
+    empty.className = "px-3 py-2 text-gray-600";
+    empty.textContent = "No songs found.";
     guessDD.appendChild(empty);
   }
   showDD(guessDD);
 }
 
 export function highlight(index: number, guessDD: HTMLElement): void {
-  Array.from(guessDD.children).forEach((c, i) => c.setAttribute("aria-selected", i === index ? "true" : "false"));
-  if (index >= 0 && guessDD.children[index]) guessDD.children[index].scrollIntoView({ block: "nearest" });
+  Array.from(guessDD.children).forEach((c, i) =>
+    c.setAttribute("aria-selected", i === index ? "true" : "false")
+  );
+  if (index >= 0 && guessDD.children[index])
+    guessDD.children[index].scrollIntoView({ block: "nearest" });
 }
 
-export function selectItem(index: number, ddItems: DropdownItem[], guessDD: HTMLElement): void {
+export function selectItem(
+  index: number,
+  ddItems: DropdownItem[],
+  guessDD: HTMLElement
+): void {
   // Ensure the index is valid
   const selectedItem = ddItems?.[index];
   if (!selectedItem) {
@@ -382,21 +436,28 @@ export function selectItem(index: number, ddItems: DropdownItem[], guessDD: HTML
 }
 
 function dedupeByTitle(results: ITunesTrack[]): DropdownItem[] {
-  const seen = new Set(); const out = [];
+  const seen = new Set();
+  const out = [];
   for (const r of results) {
     const key = (r.trackName || "").toLowerCase();
-    if (!key || seen.has(key) || !r.previewUrl) continue;  // require preview
+    if (!key || seen.has(key) || !r.previewUrl) continue; // require preview
     seen.add(key);
     out.push({
       title: r.trackName,
       artist: r.artistName,
-      artwork: (r.artworkUrl100 || "").replace("100x100bb", "60x60bb")
+      artwork: (r.artworkUrl100 || "").replace("100x100bb", "60x60bb"),
     });
   }
   return out;
 }
 
-export async function searchArtistSongs(query: string, aborter: AbortController | null, guessDD: HTMLElement, ddIndex: number, ddItems: DropdownItem[]): Promise<void> {
+export async function searchArtistSongs(
+  query: string,
+  aborter: AbortController | null,
+  guessDD: HTMLElement,
+  ddIndex: number,
+  ddItems: DropdownItem[]
+): Promise<void> {
   // Cancel any ongoing request before starting a new one
   if (aborter) aborter.abort();
   aborter = new AbortController();
@@ -441,4 +502,3 @@ export async function searchArtistSongs(query: string, aborter: AbortController 
     hideDD(guessDD, ddIndex, ddItems);
   }
 }
-

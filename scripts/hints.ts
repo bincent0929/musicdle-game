@@ -15,19 +15,23 @@ export function initializeHintBoxes(): void {
     artist: { value: "", revealed: false },
     genre: { value: "", revealed: false },
     year: { value: "", revealed: false },
-    album: { value: "", revealed: false }
+    album: { value: "", revealed: false },
   };
 
   let hintContainer = $("hint-container");
 
   if (!hintContainer) {
-  // Create the container if it doesn't exist
-  const bottomInfo = $("bottom-info");
-  if (!bottomInfo) return;
+    // Create the container if it doesn't exist
+    const bottomInfo = $("bottom-info");
+    if (!bottomInfo) return;
     hintContainer = document.createElement("div");
     hintContainer.id = "hint-container";
-    hintContainer.className = "mt-6 p-4 bg-white border border-gray-200 rounded-xl";
-    bottomInfo.parentElement?.insertBefore(hintContainer, bottomInfo.nextSibling);
+    hintContainer.className =
+      "mt-6 p-4 bg-white border border-gray-200 rounded-xl";
+    bottomInfo.parentElement?.insertBefore(
+      hintContainer,
+      bottomInfo.nextSibling
+    );
   }
 
   // Create the hint boxes
@@ -57,7 +61,11 @@ export function initializeHintBoxes(): void {
 /**
  * Update a specific hint box with correct info
  */
-function updateHintBox(boxId: string, value: string, shouldReveal: boolean): void {
+function updateHintBox(
+  boxId: string,
+  value: string,
+  shouldReveal: boolean
+): void {
   const box = $(boxId);
   if (!box) return;
 
@@ -66,11 +74,13 @@ function updateHintBox(boxId: string, value: string, shouldReveal: boolean): voi
 
   if (shouldReveal) {
     // Reveal the correct answer with green styling
-    box.className = "hint-box px-3 py-2 rounded-md border-2 min-w-[100px] bg-green-100 border-green-500 text-green-800 transition-all duration-300";
+    box.className =
+      "hint-box px-3 py-2 rounded-md border-2 min-w-[100px] bg-green-100 border-green-500 text-green-800 transition-all duration-300";
     valueEl.textContent = value;
   } else {
     // Keep it hidden
-    box.className = "hint-box px-3 py-2 rounded-md border-2 min-w-[100px] bg-gray-100 border-gray-300 text-gray-600";
+    box.className =
+      "hint-box px-3 py-2 rounded-md border-2 min-w-[100px] bg-gray-100 border-gray-300 text-gray-600";
     valueEl.textContent = "???";
   }
 }
@@ -79,7 +89,11 @@ function updateHintBox(boxId: string, value: string, shouldReveal: boolean): voi
  * Update all hint boxes based on current hint state
  */
 export function renderHintBoxes(): void {
-  updateHintBox("hint-artist", hintState.artist.value, hintState.artist.revealed);
+  updateHintBox(
+    "hint-artist",
+    hintState.artist.value,
+    hintState.artist.revealed
+  );
   updateHintBox("hint-genre", hintState.genre.value, hintState.genre.revealed);
   updateHintBox("hint-year", hintState.year.value, hintState.year.revealed);
   updateHintBox("hint-album", hintState.album.value, hintState.album.revealed);
@@ -88,35 +102,51 @@ export function renderHintBoxes(): void {
 /**
  * Check a guess and update hint state
  */
-export function checkGuessAgainstCurrent(guessedTrack: ITunesTrack, current: currentSong): boolean {
+export function checkGuessAgainstCurrent(
+  guessedTrack: ITunesTrack,
+  current: currentSong
+): boolean {
   if (!current) return false;
 
   // Check artist
-  if (!hintState.artist.revealed && normalize(guessedTrack.artistName) === normalize(current.artist)) {
-  hintState.artist.value = current.artist;
-  hintState.artist.revealed = true;
+  if (
+    !hintState.artist.revealed &&
+    normalize(guessedTrack.artistName) === normalize(current.artist)
+  ) {
+    hintState.artist.value = current.artist;
+    hintState.artist.revealed = true;
   }
 
   // Check genre
-  if (!hintState.genre.revealed && normalize(guessedTrack.primaryGenreName) === normalize(current.genre)) {
-  hintState.genre.value = current.genre;
-  hintState.genre.revealed = true;
+  if (
+    !hintState.genre.revealed &&
+    normalize(guessedTrack.primaryGenreName) === normalize(current.genre)
+  ) {
+    hintState.genre.value = current.genre;
+    hintState.genre.revealed = true;
   }
 
   // Check year
-  if (!hintState.year.revealed && extractYear(guessedTrack.releaseDate) === current.releaseYear) {
-  hintState.year.value = current.releaseYear;
-  hintState.year.revealed = true;
+  if (
+    !hintState.year.revealed &&
+    extractYear(guessedTrack.releaseDate) === current.releaseYear
+  ) {
+    hintState.year.value = current.releaseYear;
+    hintState.year.revealed = true;
   }
 
   // Check album
-  if (!hintState.album.revealed && normalize(guessedTrack.collectionName) === normalize(current.albumName)) {
-  hintState.album.value = current.albumName;
-  hintState.album.revealed = true;
+  if (
+    !hintState.album.revealed &&
+    normalize(guessedTrack.collectionName) === normalize(current.albumName)
+  ) {
+    hintState.album.value = current.albumName;
+    hintState.album.revealed = true;
   }
 
   // Check if exact match
-  const isCorrect = normalize(guessedTrack.trackName) === normalize(current.title);
+  const isCorrect =
+    normalize(guessedTrack.trackName) === normalize(current.title);
 
   return isCorrect;
 }
@@ -132,19 +162,22 @@ export function updateHintState(current: currentSong): void {
   hintState.album.revealed = true;
 }
 
-export function revealedStateUpdate(revealed : Array<string>): void {
+export function revealedStateUpdate(revealed: Array<string>): void {
   if (hintState.artist.revealed) revealed.push("artist");
   if (hintState.genre.revealed) revealed.push("genre");
   if (hintState.year.revealed) revealed.push("year");
   if (hintState.album.revealed) revealed.push("album");
 }
 
-export function updateHintsFromMatches(matches: {
-  artist: boolean;
-  genre: boolean;
-  year: boolean;
-  album: boolean;
-}, current: currentSong): void {
+export function updateHintsFromMatches(
+  matches: {
+    artist: boolean;
+    genre: boolean;
+    year: boolean;
+    album: boolean;
+  },
+  current: currentSong
+): void {
   // Only reveal hints that matched AND haven't been revealed yet
   if (matches.artist && !hintState.artist.revealed) {
     hintState.artist.value = current.artist;

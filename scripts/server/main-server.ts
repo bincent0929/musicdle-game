@@ -1,10 +1,14 @@
-import {scheduleNextUpdate, updateDailySong,
-  searchItunesTrack, compareGuessToDaily } from './server-functions';
+import {
+  scheduleNextUpdate,
+  updateDailySong,
+  searchItunesTrack,
+  compareGuessToDaily,
+} from "./server-functions";
 
-import type { DailySong } from './server-types';
+import type { DailySong } from "./server-types";
 
-import express, { Request, Response } from 'express';
-import cors from 'cors';
+import express, { Request, Response } from "express";
+import cors from "cors";
 
 const app = express();
 const port = 3000;
@@ -24,34 +28,39 @@ updateDailySong().then((song) => {
   });
 });
 
-app.get('/api/daily-song-url', (req: Request, res: Response) => {
+app.get("/api/daily-song-url", (req: Request, res: Response) => {
   if (currentDaily) {
     res.json({
       previewUrl: currentDaily.song.preview,
-      songId: currentDaily.id
+      songId: currentDaily.id,
     });
   } else {
-    res.status(503).json({ error: "Daily song not available yet. Please try again later." });
+    res
+      .status(503)
+      .json({ error: "Daily song not available yet. Please try again later." });
   }
 });
 
-app.post('/api/validate-guess', async (req: Request, res: Response) => {
+app.post("/api/validate-guess", async (req: Request, res: Response) => {
   try {
-    const { guessText, songId } : { guessText: string | null, songId: string | null } = req.body;
+    const {
+      guessText,
+      songId,
+    }: { guessText: string | null; songId: string | null } = req.body;
 
     if (!currentDaily) {
       return res.status(503).json({
         success: false,
         error: "SERVICE_UNAVAILABLE",
-        message: "Daily song not available yet. Please try again later."
+        message: "Daily song not available yet. Please try again later.",
       });
     }
 
-    if (!guessText || typeof guessText !== 'string' || !guessText.trim()) {
+    if (!guessText || typeof guessText !== "string" || !guessText.trim()) {
       return res.status(400).json({
         success: false,
         error: "EMPTY_GUESS",
-        message: "Please enter a guess."
+        message: "Please enter a guess.",
       });
     }
 
@@ -60,7 +69,7 @@ app.post('/api/validate-guess', async (req: Request, res: Response) => {
       return res.status(400).json({
         success: false,
         error: "INVALID_SONG_ID",
-        message: "Song ID mismatch. Please refresh the page."
+        message: "Song ID mismatch. Please refresh the page.",
       });
     }
 
@@ -71,7 +80,7 @@ app.post('/api/validate-guess', async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         error: "NO_RESULTS",
-        message: "Song not found. Try selecting from the dropdown."
+        message: "Song not found. Try selecting from the dropdown.",
       });
     }
 
@@ -86,21 +95,19 @@ app.post('/api/validate-guess', async (req: Request, res: Response) => {
         artist: comparison.artist,
         genre: comparison.genre,
         year: comparison.year,
-        album: comparison.album
+        album: comparison.album,
       },
-      message: comparison.isCorrect ? "Correct!" : undefined
+      message: comparison.isCorrect ? "Correct!" : undefined,
     });
-
   } catch (error) {
     console.error("Error validating guess:", error);
     return res.status(502).json({
       success: false,
       error: "ITUNES_ERROR",
-      message: "Error searching iTunes. Please try again."
+      message: "Error searching iTunes. Please try again.",
     });
   }
 });
-
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);

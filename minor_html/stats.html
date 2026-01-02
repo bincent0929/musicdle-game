@@ -8,20 +8,22 @@
     <h1 class="text-center text-8xl font-extrabold mb-16">Stats</h1>
   </head>
   <body class="bg-gray-50">
-     <div class="font-bold absolute top-0 right-0 p-4">
-      <select     class="px-3 py-3  border-2 border-black text-lg"  onchange="location.href=this.value">
-        <option value = "stats.html"> Stats Page</option>
-        <option value = "../index.html">Home Page</option>
+    <div class="font-bold absolute top-0 right-0 p-4">
+      <select
+        class="px-3 py-3 border-2 border-black text-lg"
+        onchange="location.href=this.value"
+      >
+        <option value="stats.html">Stats Page</option>
+        <option value="../index.html">Home Page</option>
       </select>
+    </div>
 
-     </div>
-  
-      <link rel="stylesheet" href="stats.css" />
+    <link rel="stylesheet" href="stats.css" />
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0"></script>
     <div class="stats-container">
-      <div class="chart-wrapper">        
-        <canvas id="barChart"></canvas>       
+      <div class="chart-wrapper">
+        <canvas id="barChart"></canvas>
       </div>
       <div class="stats-text font-sans">
         <p>Your current streak is <span id="currStreak"></span> days</p>
@@ -29,7 +31,6 @@
         <p>Your top genre played is <span id="topGenre"></span></p>
         <p>Your top song guessed is <span id="topSong"></span></p>
       </div>
-
     </div>
 
     <script src="../scripts/stats.js"></script>
