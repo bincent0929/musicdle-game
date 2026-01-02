@@ -2,7 +2,10 @@
 export const $ = (id: string) => document.getElementById(id);
 
 export function normalize(s: string) {
-  return (s || "").toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+  return (s || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 /**
