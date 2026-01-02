@@ -77,11 +77,15 @@ updateGameStateUI(gameState);
  * It needs to be updated to grab the info from the guessed
  * song and put it into the info.
  */
-if (submitBtn) submitBtn.onclick = () => checkGuess(gameState, current, currentSongId);
+if (submitBtn) submitBtn.onclick = () => 
+  checkGuess(gameState, current, currentSongId, guessInput, statusElement, metaElement);
 
-if (revealBtn) revealBtn.onclick = () => reveal(gameState, current);
+if (revealBtn) revealBtn.onclick = () => 
+  reveal(gameState, current);
+
 if (guessInput) guessInput.addEventListener("keydown", e =>
-   { if (e.key === "Enter") checkGuess(gameState, current, currentSongId); });
+   { if (e.key === "Enter") 
+    checkGuess(gameState, current, currentSongId, guessInput, statusElement, metaElement); });
 
 const guessDD = $("guessDD") as HTMLDivElement;
 let ddIndex = -1;

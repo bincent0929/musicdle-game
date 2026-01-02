@@ -99,12 +99,12 @@ export function setupAudioRestrictions(player: HTMLAudioElement, gameState: Game
 
 // VERY MUCH needs to be refactored
 // do not think this works with the updated API right now
-export async function checkGuess(gameState: GameState, current: currentSong | null, currentSongId: string | null): Promise<void> {
+export async function checkGuess(gameState: GameState, current: currentSong | null, currentSongId: string | null, 
+  guessInput: HTMLInputElement, statusEl: HTMLElement, metaEl: HTMLElement): Promise<void> 
+  {
+  // maybe remove these checks
+  // the main program should ensure these are valid
   if (!current || !currentSongId) return;
-
-  const guessInput = $("guess") as HTMLInputElement | null;
-  const statusEl = $("status");
-  const metaEl = $("meta");
 
   if (!guessInput || !statusEl || !metaEl) return;
 
