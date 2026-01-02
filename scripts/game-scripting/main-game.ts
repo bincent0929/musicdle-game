@@ -17,35 +17,32 @@ let currentSongId: string | null = null;
 
 initGameInfoPopup();
 
-const newBtn = $("new");
 const submitBtn = $("submit");
+if (submitBtn === null) throw new Error("Submit button not found.");
 const revealBtn = $("reveal");
-const guessInput = $("guess");
+if (revealBtn === null) throw new Error("Reveal button not found.");
+const guessInput = $("guess") as HTMLInputElement;
+if (guessInput === null) throw new Error("Guess input not found.");
+const player = $("player") as HTMLAudioElement;
+if (player === null) throw new Error("Audio player not found.");
 
-// we should have the pickSong function be called when new game starts
-// instead of when the user presses the button.
-//if (newBtn) newBtn.onclick = () => fetchSongURL(current, currentSongId);
+// if (newBtn) newBtn.onclick = () => fetchSongURL(current, currentSongId);
+// indicates where the button would've been checked to be pressed for fetching the daily song
 
 let statusElement = $("status") as HTMLElement;
-let metaElement = $("meta") as HTMLElement;
-
 if (!statusElement) throw new Error("Status element not found.");
+let metaElement = $("meta") as HTMLElement;
 if (!metaElement) throw new Error("Meta element not found.");
 
 // this are taken from the user's input on the page
-//const country = ($("country") as HTMLInputElement).value;
-//const genre = ($("genre") as HTMLInputElement).value;
-($("status") as HTMLElement).textContent = "Loading top songs…";
-($("meta") as HTMLElement).textContent = "";
-($("guess") as HTMLInputElement).value = "";
-($("player") as HTMLAudioElement).src = "";
+statusElement.textContent = "Loading top songs…";
+metaElement.textContent = "";
+guessInput.value = "";
+player.src = "";
 
 initializeHintBoxes();
 renderHintBoxes();
 
-// this could probably also be moved into main-game.ts
-const player = $("player") as HTMLAudioElement;
-if (player === null) throw new Error("Audio player not found.");
 current = await fetchSongURL(current, currentSongId);
 
 if (current) {
@@ -53,21 +50,22 @@ if (current) {
   player.load();
 }
 
-// Set up audio restrictions
 setupAudioRestrictions(player, gameState);
 
 // Get the new player element after replacement in setupAudioRestrictions
-const restrictedPlayer = $("player") as HTMLAudioElement;
+const restrictedPlayer = player;
 const p = restrictedPlayer.play();
 
-if (p && p.catch) await p.catch(() => { statusElement.textContent = "Tap ▶️ to start playback (autoplay blocked)."; });
+if (p && p.catch) await p.catch(() => 
+  { statusElement.textContent = "Tap ▶️ to start playback (autoplay blocked)."; });
 if (!restrictedPlayer.paused) statusElement.textContent = "Playing preview… guess the title!";
 metaElement.textContent = "";
 updateGameStateUI(gameState);
 
 if (submitBtn) submitBtn.onclick = () => checkGuess(gameState, current, currentSongId);
 if (revealBtn) revealBtn.onclick = () => reveal(gameState, current);
-if (guessInput) guessInput.addEventListener("keydown", e => { if (e.key === "Enter") checkGuess(gameState, current, currentSongId); });
+if (guessInput) guessInput.addEventListener("keydown", e =>
+   { if (e.key === "Enter") checkGuess(gameState, current, currentSongId); });
 
 const guessDD = $("guessDD") as HTMLDivElement;
 let ddIndex = -1;
