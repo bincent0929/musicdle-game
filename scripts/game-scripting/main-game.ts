@@ -104,7 +104,9 @@ if (submitBtn)
       metaElement
     );
 
-if (revealBtn) revealBtn.onclick = () => reveal(gameState, current);
+if (revealBtn)
+  revealBtn.onclick = () =>
+    reveal(gameState, current, statusElement, metaElement);
 
 if (guessInput)
   guessInput.addEventListener("keydown", (e) => {

@@ -146,6 +146,7 @@ export async function checkGuess(
       body: JSON.stringify({
         guessText: playerGuessText,
         songId: currentSongId,
+        gameOver: false,
       }),
     });
 
@@ -162,6 +163,12 @@ export async function checkGuess(
     if (isCorrect) {
       // I don't think this works to correctly reveal everything
       // current isn't updated anywhere before this.
+
+      current.artist = result.matches.artist;
+      current.genre = result.matches.genre;
+      current.releaseYear = result.matches.year;
+      current.albumName = result.matches.album;
+
       updateHintState(current);
       renderHintBoxes();
 
@@ -171,7 +178,7 @@ export async function checkGuess(
       metaEl.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
       updateGameStateUI(gameState);
       // Show completion popup after a short delay
-      setTimeout(() => showCompletionPopup(gameState, current), 800);
+      setTimeout(() => showCompletionPopup(gameState, current, statusEl), 800);
     } else {
       // Update hints based on matches from server
       // see main-server.ts for matches' non-implemented interface
@@ -205,7 +212,10 @@ export async function checkGuess(
         metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
         gameState.maxListenTime = 30; // Unlock full audio after game over
         updateGameStateUI(gameState);
-        setTimeout(() => showCompletionPopup(gameState, current), 1500);
+        setTimeout(
+          () => showCompletionPopup(gameState, current, statusEl),
+          1500
+        );
       }
     }
 
@@ -219,9 +229,10 @@ export async function checkGuess(
 
 async function showCompletionPopup(
   gameState: GameState,
-  current: currentSong
+  current: currentSong,
+  statusEl: HTMLElement
 ): Promise<void> {
-  await end_of_game_fetch(gameState, current);
+  await end_of_game_fetch(current, statusEl);
 
   const Popup = $("completion-Popup");
   if (!Popup) {
@@ -315,37 +326,42 @@ async function showCompletionPopup(
 }
 
 async function end_of_game_fetch(
-  gameState: GameState,
-  current: currentSong | null
+  current: currentSong,
+  statusEl: HTMLElement
 ): Promise<void> {
-  if (current === null) {
-    try {
-      const response = await fetch("/api/validate-guess", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ game_state: "finished" }), // special guess to trigger reveal
-      });
+  const response = await fetch("http://localhost:3000/api/validate-guess", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      guessText: null,
+      songId: null,
+      gameOver: true,
+    }),
+  });
 
-      if (response.ok) {
-        current = (await response.json()) as currentSong;
-      }
-    } catch (error) {
-      console.error("Error fetching current song for reveal:", error);
-      return;
-    }
+  const result = await response.json();
+
+  // Handle error responses
+  if (!result.success) {
+    statusEl.textContent = result.message || "Error processing guess.";
+    return;
   }
+
+  current.artist = result.matches.artist;
+  current.genre = result.matches.genre;
+  current.releaseYear = result.matches.year;
+  current.albumName = result.matches.album;
 }
 
 export async function reveal(
   gameState: GameState,
-  current: currentSong | null
+  current: currentSong | null,
+  statusEl: HTMLElement,
+  metaEl: HTMLElement
 ): Promise<void> {
-  await end_of_game_fetch(gameState, current);
-
   if (!current) return;
-  const statusEl = $("status");
-  const metaEl = $("meta");
-  if (!statusEl || !metaEl) return;
+
+  await end_of_game_fetch(current, statusEl);
 
   // Reveal all hints
   updateHintState(current);
@@ -360,7 +376,7 @@ export async function reveal(
   updateGameStateUI(gameState);
 
   // Show completion Popup after a short delay
-  setTimeout(() => showCompletionPopup(gameState, current), 800);
+  setTimeout(() => showCompletionPopup(gameState, current, statusEl), 800);
 }
 
 export function hideDD(

@@ -5,7 +5,7 @@ import {
   compareGuess,
 } from "./server-functions";
 
-import type { DailySong } from "./server-types";
+import type { compared, DailySong } from "./server-types";
 
 import express, { Request, Response } from "express";
 import cors from "cors";
@@ -46,7 +46,12 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
     const {
       guessText,
       songId,
-    }: { guessText: string | null; songId: string | null } = req.body;
+      gameOver,
+    }: {
+      guessText: string | null;
+      songId: string | null;
+      gameOver: boolean | null;
+    } = req.body;
 
     if (!currentDaily) {
       return res.status(503).json({
@@ -56,38 +61,58 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
       });
     }
 
-    if (!guessText || typeof guessText !== "string" || !guessText.trim()) {
+    if (gameOver === null || typeof gameOver !== "boolean") {
       return res.status(400).json({
         success: false,
-        error: "EMPTY_GUESS",
-        message: "Please enter a guess.",
+        error: "INVALID_GAME_OVER_FLAG",
+        message: "Invalid game over flag.",
       });
     }
 
-    // Validate song ID (prevent replay attacks)
-    if (songId !== currentDaily.id) {
-      return res.status(400).json({
-        success: false,
-        error: "INVALID_SONG_ID",
-        message: "Song ID mismatch. Please refresh the page.",
-      });
+    let comparison: compared;
+    if (!gameOver) {
+      if (!guessText || typeof guessText !== "string" || !guessText.trim()) {
+        return res.status(400).json({
+          success: false,
+          error: "EMPTY_GUESS",
+          message: "Please enter a guess.",
+        });
+      }
+
+      // Validate song ID (prevent replay attacks)
+      if (songId !== currentDaily.id) {
+        return res.status(400).json({
+          success: false,
+          error: "INVALID_SONG_ID",
+          message: "Song ID mismatch. Please refresh the page.",
+        });
+      }
+
+      // Search iTunes for the guess
+      const guessedTrack = await searchItunesTrack(guessText.trim());
+
+      if (!guessedTrack) {
+        return res.status(404).json({
+          success: false,
+          error: "NO_RESULTS",
+          message: "Song not found. Try selecting from the dropdown.",
+        });
+      }
+
+      // Compare guess to correct song
+      comparison = compareGuess(guessedTrack, currentDaily.song);
+    } else {
+      comparison = {
+        artist: currentDaily.song.artist,
+        genre: currentDaily.song.genre,
+        year: currentDaily.song.releaseYear,
+        album: currentDaily.song.albumName,
+        isCorrect: true,
+      };
     }
 
-    // Search iTunes for the guess
-    const guessedTrack = await searchItunesTrack(guessText.trim());
-
-    if (!guessedTrack) {
-      return res.status(404).json({
-        success: false,
-        error: "NO_RESULTS",
-        message: "Song not found. Try selecting from the dropdown.",
-      });
-    }
-
-    // Compare guess to correct song
-    const comparison = compareGuess(guessedTrack, currentDaily.song);
-
-    // Return only matching attributes (no sensitive data)
+    // I think I might want this to return an object
+    // that uses the already establish currentSong type
     return res.json({
       success: true,
       isCorrect: comparison.isCorrect,
