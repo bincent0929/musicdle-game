@@ -69,6 +69,7 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
       });
     }
 
+    let songTitle: string | null = null;
     let comparison: compared;
     if (!gameOver) {
       if (!guessText || typeof guessText !== "string" || !guessText.trim()) {
@@ -101,6 +102,9 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
 
       // Compare guess to correct song
       comparison = compareGuess(guessedTrack, currentDaily.song);
+      if (comparison.isCorrect) {
+        songTitle = currentDaily.song.title;
+      }
     } else {
       comparison = {
         artist: currentDaily.song.artist,
@@ -109,6 +113,7 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
         album: currentDaily.song.albumName,
         isCorrect: true,
       };
+      songTitle = currentDaily.song.title;
     }
 
     // I think I might want this to return an object
@@ -116,6 +121,7 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
     return res.json({
       success: true,
       isCorrect: comparison.isCorrect,
+      songTitle: songTitle,
       matches: {
         artist: comparison.artist,
         genre: comparison.genre,

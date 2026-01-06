@@ -168,6 +168,7 @@ export async function checkGuess(
       current.genre = result.matches.genre;
       current.releaseYear = result.matches.year;
       current.albumName = result.matches.album;
+      current.title = result.songTitle;
 
       updateHintState(current);
       renderHintBoxes();
@@ -351,6 +352,7 @@ async function end_of_game_fetch(
   current.genre = result.matches.genre;
   current.releaseYear = result.matches.year;
   current.albumName = result.matches.album;
+  current.title = result.songTitle;
 }
 
 export async function reveal(
