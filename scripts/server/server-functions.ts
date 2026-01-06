@@ -59,11 +59,11 @@ async function pickSongWithPreview(tries = 6): Promise<currentSong> {
     if (preview && item) {
       return {
         preview,
-        artist: normalize(item.artistName),
-        title: normalize(item.trackName),
-        genre: normalize(item.primaryGenreName),
+        artist: item.artistName,
+        title: item.trackName,
+        genre: item.primaryGenreName,
         releaseYear: extractYear(item.releaseDate),
-        albumName: normalize(item.collectionName),
+        albumName: item.collectionName,
         fullTrack: item,
       };
     }
@@ -113,19 +113,23 @@ export function compareGuess(
     isCorrect: false,
   };
 
-  if (normalize(guessedTrack.artistName) === correctSong.artist) {
+  if (normalize(guessedTrack.artistName) === normalize(correctSong.artist)) {
     compared.artist = correctSong.artist;
   }
-  if (normalize(guessedTrack.primaryGenreName) === correctSong.genre) {
+  if (
+    normalize(guessedTrack.primaryGenreName) === normalize(correctSong.genre)
+  ) {
     compared.genre = correctSong.genre;
   }
   if (extractYear(guessedTrack.releaseDate) === correctSong.releaseYear) {
     compared.year = correctSong.releaseYear;
   }
-  if (normalize(guessedTrack.collectionName) === correctSong.albumName) {
+  if (
+    normalize(guessedTrack.collectionName) === normalize(correctSong.albumName)
+  ) {
     compared.album = correctSong.albumName;
   }
-  if (normalize(guessedTrack.trackName) === correctSong.title) {
+  if (normalize(guessedTrack.trackName) === normalize(correctSong.title)) {
     compared.isCorrect = true;
   }
 

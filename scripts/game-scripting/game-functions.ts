@@ -389,6 +389,7 @@ export function hideDD(
   ddIndex = -1;
   ddItems = [];
 }
+
 function showDD(guessDD: HTMLElement) {
   guessDD.classList.remove("hidden");
 }
