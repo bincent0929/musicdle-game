@@ -9,6 +9,7 @@ import type { compared, DailySong } from "./server-types";
 
 import express, { Request, Response } from "express";
 import cors from "cors";
+import { ITunesTrack } from "../api-types";
 
 const app = express();
 const port = 3000;
@@ -69,7 +70,7 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
       });
     }
 
-    let songTitle: string | null = null;
+    let dailyFullTrack: ITunesTrack | null = null;
     let comparison: compared;
     if (!gameOver) {
       if (!guessText || typeof guessText !== "string" || !guessText.trim()) {
@@ -103,7 +104,7 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
       // Compare guess to correct song
       comparison = compareGuess(guessedTrack, currentDaily.song);
       if (comparison.isCorrect) {
-        songTitle = currentDaily.song.title;
+        dailyFullTrack = currentDaily.song.fullTrack;
       }
     } else {
       comparison = {
@@ -113,7 +114,7 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
         album: currentDaily.song.albumName,
         isCorrect: true,
       };
-      songTitle = currentDaily.song.title;
+      dailyFullTrack = currentDaily.song.fullTrack;
     }
 
     // I think I might want this to return an object
@@ -121,7 +122,7 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
     return res.json({
       success: true,
       isCorrect: comparison.isCorrect,
-      songTitle: songTitle,
+      trackData: dailyFullTrack,
       matches: {
         artist: comparison.artist,
         genre: comparison.genre,

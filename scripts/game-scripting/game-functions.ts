@@ -261,8 +261,8 @@ async function showCompletionPopup(
     const artistNameEl = $("Popup-artist-name");
     const albumArtEl = $("Popup-album-art") as HTMLImageElement | null;
 
-    if (songTitleEl) {
-      songTitleEl.textContent = current.title;
+    if (songTitleEl && current.fullTrack) {
+      songTitleEl.textContent = current.fullTrack?.trackName;
     }
     if (artistNameEl) {
       artistNameEl.textContent = current.artist;
@@ -352,7 +352,7 @@ async function end_of_game_fetch(
   current.genre = result.matches.genre;
   current.releaseYear = result.matches.year;
   current.albumName = result.matches.album;
-  current.title = result.songTitle;
+  current.fullTrack = result.trackData;
 }
 
 export async function reveal(

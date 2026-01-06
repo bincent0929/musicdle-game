@@ -129,7 +129,7 @@ export function compareGuess(
   ) {
     compared.album = correctSong.albumName;
   }
-  if (normalize(guessedTrack.trackName) === normalize(correctSong.title)) {
+  if (guessedTrack.trackId === correctSong.fullTrack?.trackId) {
     compared.isCorrect = true;
   }
 

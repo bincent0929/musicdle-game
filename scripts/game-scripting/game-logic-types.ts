@@ -1,9 +1,9 @@
 import { ITunesTrack } from "../api-types";
 
 export interface currentSong {
-  preview: string
-  artist: string
-  title: string
+  preview: string;
+  artist: string;
+  title: string;
   genre: string;
   releaseYear: string;
   albumName: string;
