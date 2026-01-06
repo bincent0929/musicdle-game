@@ -158,7 +158,7 @@ export async function checkGuess(
       return;
     }
 
-    const isCorrect = result.isCorrect;
+    const isCorrect: boolean = result.isCorrect;
 
     if (isCorrect) {
       // I don't think this works to correctly reveal everything
