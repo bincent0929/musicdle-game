@@ -35,7 +35,6 @@ let gameState: GameState = {
 };
 
 let current: currentSong | null = null;
-let currentSongId: string | null = null;
 
 initGameInfoPopup();
 
