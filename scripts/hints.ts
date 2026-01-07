@@ -1,11 +1,13 @@
 import type { HintState } from "./hints-types.js";
-import { normalize } from "./additional-functions.js";
+import { normalize, $ } from "./additional-functions.js";
 import { ITunesTrack } from "./api-types.js";
 import { extractYear } from "./additional-functions.js";
 import type { currentSong } from "./game-scripting/game-logic-types.js";
-import { $ } from "./additional-functions.js";
+import { HintElements } from "./dom/game-elements.js";
+import ElementManager from "./dom/element-manager.js";
 
 let hintState: HintState;
+let hintElements: HintElements | null = null;
 
 /**
  * Initialize or update the hint boxes in the DOM
@@ -56,30 +58,38 @@ export function initializeHintBoxes(): void {
       </div>
   </div>
   `;
+
+  // Register dynamically created elements with ElementManager
+  const manager = ElementManager.getInstance();
+  manager.replace("hint-container", hintContainer);
+  manager.replace("hint-artist", document.getElementById("hint-artist")!);
+  manager.replace("hint-genre", document.getElementById("hint-genre")!);
+  manager.replace("hint-year", document.getElementById("hint-year")!);
+  manager.replace("hint-album", document.getElementById("hint-album")!);
+
+  // Now we can use HintElements accessor
+  hintElements = new HintElements();
 }
 
 /**
  * Update a specific hint box with correct info
  */
 function updateHintBox(
-  boxId: string,
+  element: HTMLElement,
   value: string,
   shouldReveal: boolean
 ): void {
-  const box = $(boxId);
-  if (!box) return;
-
-  const valueEl = box.querySelector(".text-sm");
+  const valueEl = element.querySelector(".text-sm");
   if (!valueEl) return;
 
   if (shouldReveal) {
     // Reveal the correct answer with green styling
-    box.className =
+    element.className =
       "hint-box px-3 py-2 rounded-md border-2 min-w-[100px] bg-green-100 border-green-500 text-green-800 transition-all duration-300";
     valueEl.textContent = value;
   } else {
     // Keep it hidden
-    box.className =
+    element.className =
       "hint-box px-3 py-2 rounded-md border-2 min-w-[100px] bg-gray-100 border-gray-300 text-gray-600";
     valueEl.textContent = "???";
   }
@@ -89,14 +99,28 @@ function updateHintBox(
  * Update all hint boxes based on current hint state
  */
 export function renderHintBoxes(): void {
+  if (!hintElements) return;
+
   updateHintBox(
-    "hint-artist",
+    hintElements.artistBox,
     hintState.artist.value,
     hintState.artist.revealed
   );
-  updateHintBox("hint-genre", hintState.genre.value, hintState.genre.revealed);
-  updateHintBox("hint-year", hintState.year.value, hintState.year.revealed);
-  updateHintBox("hint-album", hintState.album.value, hintState.album.revealed);
+  updateHintBox(
+    hintElements.genreBox,
+    hintState.genre.value,
+    hintState.genre.revealed
+  );
+  updateHintBox(
+    hintElements.yearBox,
+    hintState.year.value,
+    hintState.year.revealed
+  );
+  updateHintBox(
+    hintElements.albumBox,
+    hintState.album.value,
+    hintState.album.revealed
+  );
 }
 
 /**

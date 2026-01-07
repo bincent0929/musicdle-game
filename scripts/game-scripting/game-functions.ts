@@ -5,6 +5,7 @@ import type {
 } from "./game-logic-types.js";
 
 import { $ } from "../additional-functions.js";
+import { GameElements } from "../dom/game-elements.js";
 
 import {
   renderHintBoxes,
@@ -67,29 +68,29 @@ export async function fetchSongURL(): Promise<{
 /**
  * Updates the UI to show current game state
  */
-export function updateGameStateUI(gameState: GameState): void {
-  const attemptsEl = $("attempts");
-  const unlockedEl = $("unlocked");
-
-  if (attemptsEl) {
-    attemptsEl.textContent = `Attempts remaining: ${gameState.attemptsRemaining}/5`;
-  }
-
-  if (unlockedEl) {
-    unlockedEl.textContent = `Unlocked: ${gameState.maxListenTime} seconds`;
-  }
+export function updateGameStateUI(
+  gameState: GameState,
+  elements: GameElements
+): void {
+  elements.attemptsElement.textContent = `Attempts remaining: ${gameState.attemptsRemaining}/5`;
+  elements.unlockedElement.textContent = `Unlocked: ${gameState.maxListenTime} seconds`;
 }
 
 /**
  * Sets up audio event listeners to restrict playback to unlocked time
  */
 export function setupAudioRestrictions(
-  player: HTMLAudioElement,
-  gameState: GameState
+  gameState: GameState,
+  elements: GameElements
 ): void {
+  const player = elements.audioPlayer;
+
   // Remove any existing listeners to avoid duplicates
   const newPlayer = player.cloneNode(true) as HTMLAudioElement;
   player.parentNode?.replaceChild(newPlayer, player);
+
+  // CRITICAL: Update the cached reference in ElementManager
+  elements.updateAudioPlayer(newPlayer);
 
   // timeupdate: pause and reset when reaching the time limit
   newPlayer.addEventListener("timeupdate", () => {
@@ -118,24 +119,20 @@ export async function checkGuess(
   gameState: GameState,
   current: currentSong | null,
   currentSongId: string | null,
-  guessInput: HTMLInputElement,
-  statusEl: HTMLElement,
-  metaEl: HTMLElement
+  elements: GameElements
 ): Promise<void> {
   // maybe remove these checks
   // the main program should ensure these are valid
   if (!current || !currentSongId) return;
 
-  if (!guessInput || !statusEl || !metaEl) return;
-
-  const playerGuessText: string = guessInput.value.trim();
+  const playerGuessText: string = elements.guessInput.value.trim();
   if (!playerGuessText) {
-    statusEl.textContent = "Type a guess first!";
+    elements.statusElement.textContent = "Type a guess first!";
     return;
   }
 
   try {
-    statusEl.textContent = "Checking...";
+    elements.statusElement.textContent = "Checking...";
 
     // Send guess to server for validation
     const response = await fetch("http://localhost:3000/api/validate-guess", {
@@ -152,7 +149,7 @@ export async function checkGuess(
 
     // Handle error responses
     if (!result.success) {
-      statusEl.textContent = result.message || "Error processing guess.";
+      elements.statusElement.textContent = result.message || "Error processing guess.";
       return;
     }
 
@@ -173,11 +170,11 @@ export async function checkGuess(
 
       gameState.hasWon = true;
       gameState.maxListenTime = 30; // Unlock full 30-second preview
-      statusEl.textContent = "✅ Correct!";
-      metaEl.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
-      updateGameStateUI(gameState);
+      elements.statusElement.textContent = "✅ Correct!";
+      elements.metaElement.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
+      updateGameStateUI(gameState, elements);
       // Show completion popup after a short delay
-      setTimeout(() => showCompletionPopup(gameState, current, statusEl), 800);
+      setTimeout(() => showCompletionPopup(gameState, current, elements), 800);
     } else {
       // Update hints based on matches from server
       // see main-server.ts for matches' non-implemented interface
@@ -200,54 +197,50 @@ export async function checkGuess(
           feedback += ` Revealed: ${revealed.join(", ")}`;
         }
 
-        statusEl.textContent = feedback;
-        updateGameStateUI(gameState);
+        elements.statusElement.textContent = feedback;
+        updateGameStateUI(gameState, elements);
       } else {
         // Out of attempts - reveal everything
         updateHintState(current);
         renderHintBoxes();
 
-        statusEl.textContent = "❌ Out of attempts!";
-        metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+        elements.statusElement.textContent = "❌ Out of attempts!";
+        elements.metaElement.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
         gameState.maxListenTime = 30; // Unlock full audio after game over
-        updateGameStateUI(gameState);
+        updateGameStateUI(gameState, elements);
         setTimeout(
-          () => showCompletionPopup(gameState, current, statusEl),
+          () => showCompletionPopup(gameState, current, elements),
           1500
         );
       }
     }
 
     // Clear the guess input
-    guessInput.value = "";
+    elements.guessInput.value = "";
   } catch (error) {
     console.error("Error checking guess:", error);
-    statusEl.textContent = "⚠️ Error processing guess. Try again.";
+    elements.statusElement.textContent = "⚠️ Error processing guess. Try again.";
   }
 }
 
 async function showCompletionPopup(
   gameState: GameState,
   current: currentSong,
-  statusEl: HTMLElement
+  elements: GameElements
 ): Promise<void> {
-  await end_of_game_fetch(current, statusEl);
+  await end_of_game_fetch(current, elements.statusElement);
 
-  const Popup = $("completion-Popup");
-  if (!Popup) {
-    console.error("Completion Popup not found");
-    return;
-  }
+  const popup = elements.completionPopup;
 
   // Calculate score based on game state
   const score = gameState.hasWon ? 6 - gameState.wrongGuesses : 0;
-  const scoreEl = $("Popup-score");
+  const scoreEl = elements.popupScore;
   if (scoreEl) {
     scoreEl.textContent = score.toString();
   }
 
   // Show number of guesses made
-  const guessesEl = $("Popup-guesses");
+  const guessesEl = elements.popupGuesses;
   if (guessesEl) {
     const guessesMade = gameState.wrongGuesses + (gameState.hasWon ? 1 : 0);
     guessesEl.textContent = guessesMade.toString();
@@ -255,9 +248,9 @@ async function showCompletionPopup(
 
   // Populate song information
   if (current) {
-    const songTitleEl = $("Popup-song-title");
-    const artistNameEl = $("Popup-artist-name");
-    const albumArtEl = $("Popup-album-art") as HTMLImageElement | null;
+    const songTitleEl = elements.popupSongTitle;
+    const artistNameEl = elements.popupArtistName;
+    const albumArtEl = elements.popupAlbumArt;
 
     if (songTitleEl && current.fullTrack) {
       songTitleEl.textContent = current.fullTrack?.trackName;
@@ -277,13 +270,13 @@ async function showCompletionPopup(
   }
 
   // Show the Popup
-  Popup.classList.remove("hidden");
+  popup.classList.remove("hidden");
 
   // Setup event listeners for Popup buttons
-  const yesBtn = $("Popup-yes") as HTMLButtonElement | null;
-  const noBtn = $("Popup-no") as HTMLButtonElement | null;
-  const playAgainBtn = $("Popup-play-again") as HTMLButtonElement | null;
-  const noteEl = $("Popup-note");
+  const yesBtn = elements.popupYesBtn;
+  const noBtn = elements.popupNoBtn;
+  const playAgainBtn = elements.popupPlayAgainBtn;
+  const noteEl = elements.popupNote;
 
   if (yesBtn && noteEl) {
     yesBtn.onclick = () => {
@@ -304,9 +297,9 @@ async function showCompletionPopup(
     };
   }
 
-  if (noBtn && Popup) {
+  if (noBtn) {
     noBtn.onclick = () => {
-      Popup.classList.add("hidden");
+      popup.classList.add("hidden");
     };
   }
 
@@ -317,9 +310,9 @@ async function showCompletionPopup(
   }
 
   // Close Popup when clicking outside
-  Popup.onclick = (e) => {
-    if (e.target === Popup) {
-      Popup.classList.add("hidden");
+  popup.onclick = (e) => {
+    if (e.target === popup) {
+      popup.classList.add("hidden");
     }
   };
 }
@@ -356,45 +349,46 @@ async function end_of_game_fetch(
 export async function reveal(
   gameState: GameState,
   current: currentSong | null,
-  statusEl: HTMLElement,
-  metaEl: HTMLElement
+  elements: GameElements
 ): Promise<void> {
   if (!current) return;
 
-  await end_of_game_fetch(current, statusEl);
+  await end_of_game_fetch(current, elements.statusElement);
 
   // Reveal all hints
   updateHintState(current);
   renderHintBoxes();
 
-  statusEl.textContent = "🔎 Revealed.";
-  metaEl.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+  elements.statusElement.textContent = "🔎 Revealed.";
+  elements.metaElement.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
 
   // Unlock full audio when revealed
   gameState.maxListenTime = 30;
   gameState.attemptsRemaining = 0;
-  updateGameStateUI(gameState);
+  updateGameStateUI(gameState, elements);
 
   // Show completion Popup after a short delay
-  setTimeout(() => showCompletionPopup(gameState, current, statusEl), 800);
+  setTimeout(() => showCompletionPopup(gameState, current, elements), 800);
 }
 
 export function hideDD(
-  guessDD: HTMLElement,
+  elements: GameElements,
   ddIndex: number,
   ddItems: DropdownItem[]
 ) {
+  const guessDD = elements.guessDropdown;
   guessDD.classList.add("hidden");
   guessDD.innerHTML = "";
   ddIndex = -1;
   ddItems = [];
 }
 
-function showDD(guessDD: HTMLElement) {
-  guessDD.classList.remove("hidden");
+function showDD(elements: GameElements) {
+  elements.guessDropdown.classList.remove("hidden");
 }
 
-function renderDD(items: DropdownItem[], guessDD: HTMLElement): void {
+function renderDD(items: DropdownItem[], elements: GameElements): void {
+  const guessDD = elements.guessDropdown;
   if (!guessDD) {
     console.warn(`guessDD null case`);
     return;
@@ -408,7 +402,7 @@ function renderDD(items: DropdownItem[], guessDD: HTMLElement): void {
     el.dataset.idx = String(i);
     el.innerHTML = `<img src="${it.artwork}" alt="" class="w-10 h-10 rounded-md object-cover">
       <div><div class="font-semibold">${it.title}</div><div class="text-gray-600">${it.artist}</div></div>`;
-    el.onclick = () => selectItem(i, items, guessDD);
+    el.onclick = () => selectItem(i, items, elements);
     guessDD.appendChild(el);
   });
   if (!items.length) {
@@ -417,10 +411,11 @@ function renderDD(items: DropdownItem[], guessDD: HTMLElement): void {
     empty.textContent = "No songs found.";
     guessDD.appendChild(empty);
   }
-  showDD(guessDD);
+  showDD(elements);
 }
 
-export function highlight(index: number, guessDD: HTMLElement): void {
+export function highlight(index: number, elements: GameElements): void {
+  const guessDD = elements.guessDropdown;
   Array.from(guessDD.children).forEach((c, i) =>
     c.setAttribute("aria-selected", i === index ? "true" : "false")
   );
@@ -431,7 +426,7 @@ export function highlight(index: number, guessDD: HTMLElement): void {
 export function selectItem(
   index: number,
   ddItems: DropdownItem[],
-  guessDD: HTMLElement
+  elements: GameElements
 ): void {
   // Ensure the index is valid
   const selectedItem = ddItems?.[index];
@@ -439,17 +434,12 @@ export function selectItem(
     console.warn(`selectItem: Invalid index ${index} or no items available.`);
     return;
   }
-  const guessInput = $("guess") as HTMLInputElement | null;
-  if (!guessInput) {
-    console.error("selectItem: Could not find guess input element.");
-    return;
-  }
 
   // Fill the input with the selected song title
-  guessInput.value = selectedItem.title;
+  elements.guessInput.value = selectedItem.title;
 
-  hideDD(guessDD, index, ddItems);
-  guessInput.focus();
+  hideDD(elements, index, ddItems);
+  elements.guessInput.focus();
 }
 
 function dedupeByTitle(results: ITunesTrack[]): DropdownItem[] {
@@ -471,7 +461,7 @@ function dedupeByTitle(results: ITunesTrack[]): DropdownItem[] {
 export async function searchArtistSongs(
   query: string,
   aborter: AbortController | null,
-  guessDD: HTMLElement,
+  elements: GameElements,
   ddIndex: number,
   ddItems: DropdownItem[]
 ): Promise<void> {
@@ -486,7 +476,7 @@ export async function searchArtistSongs(
 
   // Skip if the query is too short
   if (query.trim().length < 2) {
-    hideDD(guessDD, ddIndex, ddItems);
+    hideDD(elements, ddIndex, ddItems);
     return;
   }
 
@@ -506,16 +496,16 @@ export async function searchArtistSongs(
     const uniqueSongs = dedupeByTitle(data.results ?? []).slice(0, 30);
 
     ddItems = uniqueSongs;
-    renderDD(uniqueSongs, guessDD);
+    renderDD(uniqueSongs, elements);
 
     // Select the first suggestion by default
     ddIndex = uniqueSongs.length > 0 ? 0 : -1;
-    highlight(ddIndex, guessDD);
+    highlight(ddIndex, elements);
   } catch (error) {
     // If the user stopped typing before the request finished
     if (error instanceof DOMException && error.name === "AbortError") return;
 
     console.error("Error fetching artist songs:", error);
-    hideDD(guessDD, ddIndex, ddItems);
+    hideDD(elements, ddIndex, ddItems);
   }
 }

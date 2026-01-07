@@ -54,7 +54,8 @@ stop-run:
 	
 	@echo "Removing the transpiled scripts..."
 	rm ./scripts/*.js \
-	   ./scripts/game-scripting/*.js
+	   ./scripts/game-scripting/*.js \
+	   ./scripts/dom/*.js
 	@echo "Done."
 
 	@echo "The site is down and your filesystem was cleaned."

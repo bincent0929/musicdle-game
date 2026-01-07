@@ -1,4 +1,5 @@
-import { $ } from "../additional-functions.js";
+import { initializeElements } from "../dom/initialize-elements.js";
+import { GameElements } from "../dom/game-elements.js";
 import { initializeHintBoxes, renderHintBoxes } from "../hints.js";
 
 import {
@@ -20,6 +21,12 @@ import type {
   DropdownItem,
 } from "./game-logic-types.js";
 
+// ==== INITIALIZATION: ALL DOM QUERIES HAPPEN HERE ====
+initializeElements(); // Single call - grabs all 15+ elements ONCE
+
+// Create element accessor
+const elements = new GameElements();
+
 let gameState: GameState = {
   attemptsRemaining: 5,
   wrongGuesses: 0,
@@ -32,28 +39,11 @@ let currentSongId: string | null = null;
 
 initGameInfoPopup();
 
-const submitBtn = $("submit");
-if (submitBtn === null) throw new Error("Submit button not found.");
-const revealBtn = $("reveal");
-if (revealBtn === null) throw new Error("Reveal button not found.");
-const guessInput = $("guess") as HTMLInputElement;
-if (guessInput === null) throw new Error("Guess input not found.");
-const player = $("player") as HTMLAudioElement;
-if (player === null) throw new Error("Audio player not found.");
-
-// if (newBtn) newBtn.onclick = () => fetchSongURL(current, currentSongId);
-// indicates where the button would've been checked to be pressed for fetching the daily song
-
-let statusElement = $("status") as HTMLElement;
-if (!statusElement) throw new Error("Status element not found.");
-let metaElement = $("meta") as HTMLElement;
-if (!metaElement) throw new Error("Meta element not found.");
-
 // this are taken from the user's input on the page
-statusElement.textContent = "Loading top songs…";
-metaElement.textContent = "";
-guessInput.value = "";
-player.src = "";
+elements.statusElement.textContent = "Loading top songs…";
+elements.metaElement.textContent = "";
+elements.guessInput.value = "";
+elements.audioPlayer.src = "";
 
 initializeHintBoxes();
 renderHintBoxes();
@@ -67,24 +57,23 @@ if (fetchedData) {
    * of the values are empty or null
    */
   current = fetchedData.songPreviewURL;
-  player.src = current.preview;
-  player.load();
+  elements.audioPlayer.src = current.preview;
+  elements.audioPlayer.load();
 }
 
-setupAudioRestrictions(player, gameState);
+setupAudioRestrictions(gameState, elements);
 
-// Get the new player element after replacement in setupAudioRestrictions
-const restrictedPlayer = player;
-const p = restrictedPlayer.play();
+// Try to play
+const p = elements.audioPlayer.play();
 
 if (p && p.catch)
   await p.catch(() => {
-    statusElement.textContent = "Tap ▶️ to start playback (autoplay blocked).";
+    elements.statusElement.textContent = "Tap ▶️ to start playback (autoplay blocked).";
   });
-if (!restrictedPlayer.paused)
-  statusElement.textContent = "Playing preview… guess the title!";
-metaElement.textContent = "";
-updateGameStateUI(gameState);
+if (!elements.audioPlayer.paused)
+  elements.statusElement.textContent = "Playing preview… guess the title!";
+elements.metaElement.textContent = "";
+updateGameStateUI(gameState, elements);
 
 /**
  * This is where the song info is being updated.
@@ -92,79 +81,59 @@ updateGameStateUI(gameState);
  * It needs to be updated to grab the info from the guessed
  * song and put it into the info.
  */
-if (submitBtn)
-  submitBtn.onclick = () =>
-    checkGuess(
-      gameState,
-      current,
-      currentSongId,
-      guessInput,
-      statusElement,
-      metaElement
-    );
+elements.submitBtn.onclick = () =>
+  checkGuess(gameState, current, currentSongId, elements);
 
-if (revealBtn)
-  revealBtn.onclick = () =>
-    reveal(gameState, current, statusElement, metaElement);
+elements.revealBtn.onclick = () => reveal(gameState, current, elements);
 
-if (guessInput)
-  guessInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter")
-      checkGuess(
-        gameState,
-        current,
-        currentSongId,
-        guessInput,
-        statusElement,
-        metaElement
-      );
-  });
+elements.guessInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") checkGuess(gameState, current, currentSongId, elements);
+});
 
-const guessDD = $("guessDD") as HTMLDivElement;
+// Dropdown handling
 let ddIndex = -1;
 let ddItems: DropdownItem[] = [];
 let aborter: AbortController | null = null;
 
 const DEBOUNCE_MS = 180;
 let t: any = null;
-let guessElement = $("guess") as HTMLInputElement;
 
-guessElement.addEventListener("input", (e) => {
+elements.guessInput.addEventListener("input", (e) => {
   const eventTarget = e.target as HTMLInputElement;
   const q = eventTarget.value.trim();
   clearTimeout(t);
   if (q.length < 2) {
-    hideDD(guessDD, ddIndex, ddItems);
+    hideDD(elements, ddIndex, ddItems);
     return;
   }
   t = setTimeout(
-    () => searchArtistSongs(q, aborter, guessDD, ddIndex, ddItems),
+    () => searchArtistSongs(q, aborter, elements, ddIndex, ddItems),
     DEBOUNCE_MS
   );
 });
 
-guessElement.addEventListener("keydown", (e) => {
-  if (guessDD.classList.contains("hidden")) return;
+elements.guessInput.addEventListener("keydown", (e) => {
+  if (elements.guessDropdown.classList.contains("hidden")) return;
   if (e.key === "ArrowDown") {
     e.preventDefault();
     ddIndex = Math.min(ddIndex + 1, ddItems.length - 1);
-    highlight(ddIndex, guessDD);
+    highlight(ddIndex, elements);
   } else if (e.key === "ArrowUp") {
     e.preventDefault();
     ddIndex = Math.max(ddIndex - 1, 0);
-    highlight(ddIndex, guessDD);
+    highlight(ddIndex, elements);
   } else if (e.key === "Enter") {
     if (ddIndex >= 0) {
       e.preventDefault();
-      selectItem(ddIndex, ddItems, guessDD);
+      selectItem(ddIndex, ddItems, elements);
     }
   } else if (e.key === "Escape") {
-    hideDD(guessDD, ddIndex, ddItems);
+    hideDD(elements, ddIndex, ddItems);
   }
 });
 
 document.addEventListener("click", (e) => {
   const wrap = document.querySelector(".guess-wrap");
   if (!wrap) return;
-  if (!wrap.contains(e.target as Node)) hideDD(guessDD, ddIndex, ddItems);
+  if (!wrap.contains(e.target as Node)) hideDD(elements, ddIndex, ddItems);
 });
