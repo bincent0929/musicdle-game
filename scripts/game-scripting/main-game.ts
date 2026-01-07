@@ -68,7 +68,8 @@ const p = elements.audioPlayer.play();
 
 if (p && p.catch)
   await p.catch(() => {
-    elements.statusElement.textContent = "Tap ▶️ to start playback (autoplay blocked).";
+    elements.statusElement.textContent =
+      "Tap ▶️ to start playback (autoplay blocked).";
   });
 if (!elements.audioPlayer.paused)
   elements.statusElement.textContent = "Playing preview… guess the title!";
@@ -81,13 +82,12 @@ updateGameStateUI(gameState, elements);
  * It needs to be updated to grab the info from the guessed
  * song and put it into the info.
  */
-elements.submitBtn.onclick = () =>
-  checkGuess(gameState, current, currentSongId, elements);
+elements.submitBtn.onclick = () => checkGuess(gameState, current, elements);
 
 elements.revealBtn.onclick = () => reveal(gameState, current, elements);
 
 elements.guessInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") checkGuess(gameState, current, currentSongId, elements);
+  if (e.key === "Enter") checkGuess(gameState, current, elements);
 });
 
 // Dropdown handling

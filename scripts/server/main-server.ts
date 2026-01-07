@@ -45,11 +45,9 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
   try {
     const {
       guessText,
-      songId,
       gameOver,
     }: {
       guessText: string | null;
-      songId: string | null;
       gameOver: boolean | null;
     } = req.body;
 

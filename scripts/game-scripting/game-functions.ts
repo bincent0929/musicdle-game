@@ -118,12 +118,11 @@ export function setupAudioRestrictions(
 export async function checkGuess(
   gameState: GameState,
   current: currentSong | null,
-  currentSongId: string | null,
   elements: GameElements
 ): Promise<void> {
   // maybe remove these checks
   // the main program should ensure these are valid
-  if (!current || !currentSongId) return;
+  if (!current) return;
 
   const playerGuessText: string = elements.guessInput.value.trim();
   if (!playerGuessText) {
@@ -140,7 +139,6 @@ export async function checkGuess(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         guessText: playerGuessText,
-        songId: currentSongId,
         gameOver: false,
       }),
     });
@@ -149,7 +147,8 @@ export async function checkGuess(
 
     // Handle error responses
     if (!result.success) {
-      elements.statusElement.textContent = result.message || "Error processing guess.";
+      elements.statusElement.textContent =
+        result.message || "Error processing guess.";
       return;
     }
 
@@ -219,7 +218,8 @@ export async function checkGuess(
     elements.guessInput.value = "";
   } catch (error) {
     console.error("Error checking guess:", error);
-    elements.statusElement.textContent = "⚠️ Error processing guess. Try again.";
+    elements.statusElement.textContent =
+      "⚠️ Error processing guess. Try again.";
   }
 }
 
@@ -326,7 +326,6 @@ async function end_of_game_fetch(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       guessText: null,
-      songId: null,
       gameOver: true,
     }),
   });
