@@ -34,9 +34,8 @@ export function initGameInfoPopup(): void {
   });
 }
 
-export async function fetchSongURLAndId(): Promise<{
+export async function fetchSongURL(): Promise<{
   songPreviewURL: currentSong;
-  songId: string;
 } | null> {
   try {
     const urlResponse = await fetch("http://localhost:3000/api/daily-song-url");
@@ -55,7 +54,6 @@ export async function fetchSongURLAndId(): Promise<{
         albumName: "",
         fullTrack: null,
       },
-      songId: urlData.songId,
     };
   } catch (e) {
     console.error(

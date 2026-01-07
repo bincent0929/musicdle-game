@@ -33,7 +33,6 @@ app.get("/api/daily-song-url", (req: Request, res: Response) => {
   if (currentDaily) {
     res.json({
       previewUrl: currentDaily.song.preview,
-      songId: currentDaily.id,
     });
   } else {
     res
@@ -78,15 +77,6 @@ app.post("/api/validate-guess", async (req: Request, res: Response) => {
           success: false,
           error: "EMPTY_GUESS",
           message: "Please enter a guess.",
-        });
-      }
-
-      // Validate song ID (prevent replay attacks)
-      if (songId !== currentDaily.id) {
-        return res.status(400).json({
-          success: false,
-          error: "INVALID_SONG_ID",
-          message: "Song ID mismatch. Please refresh the page.",
         });
       }
 

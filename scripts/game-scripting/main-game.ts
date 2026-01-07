@@ -5,7 +5,7 @@ import {
   setupAudioRestrictions,
   updateGameStateUI,
   initGameInfoPopup,
-  fetchSongURLAndId,
+  fetchSongURL,
   hideDD,
   searchArtistSongs,
   checkGuess,
@@ -58,7 +58,7 @@ player.src = "";
 initializeHintBoxes();
 renderHintBoxes();
 
-const fetchedData = await fetchSongURLAndId();
+const fetchedData = await fetchSongURL();
 
 if (fetchedData) {
   /**
@@ -67,7 +67,6 @@ if (fetchedData) {
    * of the values are empty or null
    */
   current = fetchedData.songPreviewURL;
-  currentSongId = fetchedData.songId;
   player.src = current.preview;
   player.load();
 }
