@@ -16,6 +16,15 @@ import {
 
 import { ITunesSearchResponse, ITunesTrack } from "../api-types.js";
 
+/**
+ * Formats seconds into MM:SS format
+ */
+const formatTime = (s: number): string => {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+};
+
 // big old popup for game information
 export function initGameInfoPopup(elements: GameElements): Promise<void> {
   const popup = elements.gameInfoPopup;
@@ -81,8 +90,27 @@ export function updateGameStateUI(
   gameState: GameState,
   elements: GameElements
 ): void {
+  const player = elements.audioPlayer;
+  const unlockedBar = elements.unlockedBar;
+  const totalTimeEl = elements.totalTimeDisplay;
+
+  const fallbackDuration = 30;
+  const rawDuration = player?.duration ?? fallbackDuration;
+  const duration = Number.isFinite(rawDuration) && rawDuration > 0 ? rawDuration : fallbackDuration;
+  const allowedTime = gameState.hasWon ? duration : Math.min(gameState.maxListenTime, duration);
+
   elements.attemptsElement.textContent = `Attempts remaining: ${gameState.attemptsRemaining}/5`;
   elements.unlockedElement.textContent = `Unlocked: ${gameState.maxListenTime} seconds`;
+
+  if (unlockedBar) {
+    // Assuming 30s is the standard preview length
+    const percentage = Math.min((gameState.maxListenTime / 30) * 100, 100);
+    unlockedBar.style.width = `${percentage}%`;
+  }
+
+  if (totalTimeEl) {
+    totalTimeEl.textContent = formatTime(allowedTime);
+  }
 }
 
 /**
@@ -101,25 +129,143 @@ export function setupAudioRestrictions(
   // CRITICAL: Update the cached reference in ElementManager
   elements.updateAudioPlayer(newPlayer);
 
-  // timeupdate: pause and reset when reaching the time limit
-  newPlayer.addEventListener("timeupdate", () => {
-    if (!gameState.hasWon && newPlayer.currentTime >= gameState.maxListenTime) {
+  // --- Custom Player Elements ---
+  const playBtn = elements.playBtn;
+  let playIcon = elements.playIcon;
+  let pauseIcon = elements.pauseIcon;
+  const progressContainer = elements.progressContainer;
+  let progressBar = elements.progressBar;
+  const timeDisplay = elements.currentTimeDisplay;
+  const totalTimeDisplay = elements.totalTimeDisplay;
+
+  const toggleIcons = (isPlaying: boolean) => {
+    if (!playIcon || !pauseIcon) return;
+    if (isPlaying) {
+      playIcon.classList.add("hidden");
+      pauseIcon.classList.remove("hidden");
+    } else {
+      playIcon.classList.remove("hidden");
+      pauseIcon.classList.add("hidden");
+    }
+  };
+
+  // Ensure icons start in a paused state
+  toggleIcons(false);
+
+  const getDuration = () => {
+    const raw = newPlayer.duration;
+    return Number.isFinite(raw) && raw > 0 ? raw : 30;
+  };
+
+  const getAllowedTime = () => gameState.hasWon ? getDuration() : Math.min(gameState.maxListenTime, getDuration());
+
+  // --- Audio Events ---
+
+  // timeupdate: pause and reset when reaching the time limit + Update UI
+  newPlayer.addEventListener('timeupdate', () => {
+    const currentTime = newPlayer.currentTime;
+
+    // Restriction Logic
+    if (!gameState.hasWon && currentTime >= gameState.maxListenTime) {
       newPlayer.pause();
       newPlayer.currentTime = 0;
+    }
+
+    // UI Update
+    if (progressBar) {
+        const duration = getDuration();
+        const pct = duration ? Math.min((currentTime / duration) * 100, 100) : 0;
+        progressBar.style.width = `${pct}%`;
+    }
+    if (timeDisplay) {
+        const allowedTime = getAllowedTime();
+        timeDisplay.textContent = formatTime(Math.min(currentTime, allowedTime));
+    }
+    if (totalTimeDisplay) {
+        totalTimeDisplay.textContent = formatTime(getAllowedTime());
     }
   });
 
   // seeking: prevent seeking beyond unlocked time
-  newPlayer.addEventListener("seeking", () => {
-    if (!gameState.hasWon && newPlayer.currentTime > gameState.maxListenTime) {
-      newPlayer.currentTime = gameState.maxListenTime;
+  newPlayer.addEventListener('seeking', () => {
+    const allowedTime = getAllowedTime();
+    if (!gameState.hasWon && newPlayer.currentTime > allowedTime) {
+      newPlayer.currentTime = allowedTime;
     }
   });
 
   // ended: reset to beginning for replay
-  newPlayer.addEventListener("ended", () => {
+  newPlayer.addEventListener('ended', () => {
     newPlayer.currentTime = 0;
+    toggleIcons(false);
   });
+
+  newPlayer.addEventListener('play', () => {
+      toggleIcons(true);
+  });
+
+  newPlayer.addEventListener('pause', () => {
+      toggleIcons(false);
+  });
+
+  // --- UI Interaction Events ---
+
+  // Re-bind Play Button
+  if (playBtn) {
+      const newBtn = playBtn.cloneNode(true) as HTMLElement;
+      playBtn.parentNode?.replaceChild(newBtn, playBtn);
+
+      // Update the cached reference
+      elements.updatePlayBtn(newBtn);
+
+      // Re-get icon references from the new button
+      const newPlayIcon = newBtn.querySelector("#play-icon") as HTMLElement | null;
+      const newPauseIcon = newBtn.querySelector("#pause-icon") as HTMLElement | null;
+      if (newPlayIcon) playIcon = newPlayIcon;
+      if (newPauseIcon) pauseIcon = newPauseIcon;
+      toggleIcons(!newPlayer.paused);
+
+      newBtn.addEventListener("click", () => {
+          if (newPlayer.paused) {
+              newPlayer.play();
+              toggleIcons(true);
+          } else {
+              newPlayer.pause();
+              toggleIcons(false);
+          }
+      });
+  }
+
+  // Re-bind Progress Bar Click
+  if (progressContainer) {
+      const newContainer = progressContainer.cloneNode(true) as HTMLElement;
+      progressContainer.parentNode?.replaceChild(newContainer, progressContainer);
+
+      // Update the cached reference
+      elements.updateProgressContainer(newContainer);
+
+      const newProgressBar = newContainer.querySelector("#progress-bar") as HTMLElement | null;
+      if (newProgressBar) progressBar = newProgressBar;
+
+      newContainer.addEventListener("click", (e) => {
+          const rect = newContainer.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const width = rect.width;
+          const pct = Math.max(0, Math.min(1, x / width));
+          const duration = getDuration();
+          let targetTime = pct * duration;
+
+          // Clamp to unlocked time
+          if (!gameState.hasWon) {
+              const allowedTime = getAllowedTime();
+              if (targetTime > allowedTime) {
+                targetTime = allowedTime;
+              }
+          }
+
+          newPlayer.currentTime = targetTime;
+      });
+  }
 }
 
 // VERY MUCH needs to be refactored
