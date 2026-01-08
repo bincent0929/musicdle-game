@@ -36,9 +36,8 @@ let gameState: GameState = {
 
 let current: currentSong | null = null;
 
-initGameInfoPopup(elements);
+await initGameInfoPopup(elements);
 
-// this are taken from the user's input on the page
 elements.statusElement.textContent = "Loading top songs…";
 elements.metaElement.textContent = "";
 elements.guessInput.value = "";
@@ -61,6 +60,9 @@ if (fetchedData) {
 }
 
 setupAudioRestrictions(gameState, elements);
+
+// Wait for the game info popup to be closed before playing
+await initGameInfoPopup(elements);
 
 // Try to play
 const p = elements.audioPlayer.play();

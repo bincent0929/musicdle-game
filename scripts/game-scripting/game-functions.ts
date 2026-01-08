@@ -17,25 +17,30 @@ import {
 import { ITunesSearchResponse, ITunesTrack } from "../api-types.js";
 
 // big old popup for game information
-export function initGameInfoPopup(elements: GameElements): void {
+export function initGameInfoPopup(elements: GameElements): Promise<void> {
   const popup = elements.gameInfoPopup;
   const closeBtn = elements.gameInfoCloseBtn;
 
-  const hidePopup = () => {
-    // Move focus to the guess input before hiding the popup
-    // This prevents aria-hidden violation when descendant has focus
-    elements.guessInput.focus();
+  return new Promise((resolve) => {
+    const hidePopup = () => {
+      // Move focus to the guess input before hiding the popup
+      // This prevents aria-hidden violation when descendant has focus
+      elements.guessInput.focus();
 
-    // Now it's safe to hide the popup
-    popup.classList.add("hidden");
-    popup.setAttribute("aria-hidden", "true");
-  };
+      // Now it's safe to hide the popup
+      popup.classList.add("hidden");
+      popup.setAttribute("aria-hidden", "true");
 
-  closeBtn.addEventListener("click", hidePopup);
-  document.addEventListener("keydown", (event: KeyboardEvent) => {
-    if (event.key === "Escape" && !popup.classList.contains("hidden")) {
-      hidePopup();
-    }
+      // Resolve the promise when popup is closed
+      resolve();
+    };
+
+    closeBtn.addEventListener("click", hidePopup);
+    document.addEventListener("keydown", (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !popup.classList.contains("hidden")) {
+        hidePopup();
+      }
+    });
   });
 }
 
