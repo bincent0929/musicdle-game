@@ -1,3 +1,15 @@
 *.js
 .env
 styles/compiled-styles.css
+
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Node.js
+node_modules/
+package-lock.json
+
+# typescript
+tsconfig.tsbuildinfo

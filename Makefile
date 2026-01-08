@@ -1,78 +1,104 @@
-API_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
-# not needed yet
-TSC_STATS = tsc scripts/stats.ts --lib ES2015,DOM
-CADDY = caddy run --config local.caddyfile
-TAILWIND = tailwindcss -o styles/compiled-styles.css
-TAILWIND_WATCH = tailwindcss -o styles/compiled-styles.css --watch
+# Client Typescript
+TS_COMPILE = tsc --build scripts/tsconfig.json
+# Backend
 
-# New: Python backend
-BACKEND = python3 backend.py
+# Tailwind
+TAILWIND-OUTPUT-FILE = compiled-styles.css
+TAILWIND = tailwindcss -o styles/$(TAILWIND-OUTPUT-FILE)
+TAILWIND_WATCH = tailwindcss -o styles/$(TAILWIND-OUTPUT-FILE) --watch
+# Caddy
+CADDY = caddy run --config Caddyfiles/local.caddyfile
 
-# Use `make` and then run, start, etc. based on what you want to be running/ran
+# To run the site locally.
+# This will compile the Typescript and Tailwind once. Updates won't be watched for.
+
+# !!!!!!!!!!!!!!!!!!! The node modules have to be installed for the backend !!!!!!!!!!!!!!!!!!!
 
 run:
-	@echo "convert ts"
-	$(API_TSC)
-	$(TSC_STATS)
-	@echo "tailwind to css"
+	@echo "Starting the site..."
+
+	@echo "Transpiling the Typescript..."
+	$(TS_COMPILE)
+	@echo "Done."
+	
+	@echo "Compiling the classes to Tailwind"
 	$(TAILWIND)
-	@echo "start caddy"
-	$(CADDY)
+	@echo "Done."
 
+	@echo "Starting the backend..."
+	cd scripts/server \
+	 && npm install \
+	 && tmux new-session -d -s game-backend 'npm start'
+	@echo "Done."
+
+	@echo "Starting Caddy in the background..."
+	tmux new-session -d -s caddy '$(CADDY)'
+	@echo "Done."
+
+	@echo "The site is now running!"
+
+stop-run:
+	@echo "Stopping your site..."
+	
+	@echo "Stopping Caddy..."
+	tmux kill-session -t caddy
+	@echo "Done."
+
+	@echo "Stopping the backend..."
+	tmux kill-session -t game-backend
+	@echo "Done."
+
+	@echo "Removing the Tailwind compiled styles..."
+	rm ./styles/$(TAILWIND-OUTPUT-FILE)
+	@echo "Done."
+	
+	@echo "Removing the transpiled scripts..."
+	rm ./scripts/*.js \
+	   ./scripts/game-scripting/*.js \
+	   ./scripts/dom/*.js
+	@echo "Done."
+
+	@echo "The site is down and your filesystem was cleaned."
+
+# !!!!!!!!!!!!!!!!!!!! This doesn't work the backend needs to be added rq !!!!!!!!!!!!!!!!!!!!
+# To run the site locally with dynamic CSS updates
+# The same as `run` but you can also change the classes in your Tailwind or its input CSS file
+# to have it update while your site is started.
 start:
-	@echo "Converting TypeScript..."
-	$(API_TSC)
+	@echo "Starting the site..."
+
+	@echo "Transpiling the Typescript..."
+	$(GAME_TSC)
 	$(TSC_STATS)
-	@echo "Starting caddy in tmux session 'caddy'..."
-	tmux new-session -d -s caddy '$(CADDY)'
-	@echo "Starting tailwind watch in tmux session 'tailwind'..."
+	@echo "Done."
+	
+	@echo "Starting Tailwind compiler watch in the background..."
 	tmux new-session -d -s tailwind '$(TAILWIND_WATCH)'
-	@echo "Starting backend in tmux session 'backend'..."
-	tmux new-session -d -s backend '$(BACKEND)'
-	@echo "Services started! Use 'tmux attach -t caddy', 'tmux attach -t tailwind', or 'tmux attach -t backend' to view logs"
-	@echo "Use 'make stop' to stop all services"
-
-# New: Start only backend
-start-backend:
-	@echo "Starting backend in tmux session 'backend'..."
-	tmux new-session -d -s backend '$(BACKEND)'
-	@echo "Backend started! Use 'tmux attach -t backend' to view logs"
-
-start-caddy:
-	@echo "Starting caddy in tmux session 'caddy'..."
+	@echo "Done."
+	
+	@echo "Starting Caddy in the background..."
 	tmux new-session -d -s caddy '$(CADDY)'
-	@echo "Caddy started! Use 'tmux attach -t caddy' to view logs"
+	@echo "Done."
 
-start-tailwind:
-	@echo "Starting tailwind watch in tmux session 'tailwind'..."
-	tmux new-session -d -s tailwind '$(TAILWIND_WATCH)'
-	@echo "Tailwind watch started! Use 'tmux attach -t tailwind' to view logs"
+	@echo "The site is now running, and you can edit your styles and they'll update!"
 
-stop:
-	@echo "Stopping caddy tmux session..."
-	tmux kill-session -t caddy 2>/dev/null || echo "Caddy session not running"
-	@echo "Stopping tailwind tmux session..."
-	tmux kill-session -t tailwind 2>/dev/null || echo "Tailwind session not running"
-	@echo "Stopping backend tmux session..."
-	@echo "removed the compiled-styles"
-	rm ./styles/compiled-styles.css
-	tmux kill-session -t backend 2>/dev/null || echo "Backend session not running"
-	@echo "Removing the transpiled scripts"
+stop-start:
+	@echo "Stopping your site..."
+	
+	@echo "Stopping Caddy..."
+	tmux kill-session -t caddy
+	@echo "Done."
+
+	@echo "Stopping the Tailwind compiler..."
+	tmux kill-session -t tailwind
+	@echo "Done."
+
+	@echo "Removing the Tailwind compiled styles..."
+	rm ./styles/$(TAILWIND-OUTPUT-FILE)
+	@echo "Done."
+	
+	@echo "Removing the transpiled scripts..."
 	rm ./scripts/*.js
+	@echo "Done."
 
-# New: Stop backend only
-stop-backend:
-	@echo "Stopping backend tmux session..."
-	tmux kill-session -t backend 2>/dev/null || echo "Backend session not running"
-
-stop-caddy:
-	@echo "Stopping caddy tmux session..."
-	tmux kill-session -t caddy 2>/dev/null || echo "Caddy session not running"
-
-stop-tailwind:
-	@echo "Stopping tailwind tmux session..."
-	tmux kill-session -t tailwind 2>/dev/null || echo "Tailwind session not running"
-
-status:
-	@echo "Checking tmux sessions..."
-	@tmux list-sessions 2>/dev/null | grep -E '(caddy|tailwind|backend)' || echo "No caddy, tailwind, or backend sessions running"
+	@echo "The site is down and your filesystem was cleaned."
