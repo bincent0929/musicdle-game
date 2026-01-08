@@ -91,11 +91,15 @@ elements.guessInput.addEventListener("input", (e) => {
   clearTimeout(t);
   if (q.length < 2) {
     hideDD(elements, ddIndex, ddItems);
+    ddIndex = -1;
+    ddItems = [];
     return;
   }
   t = setTimeout(
     () =>
       searchArtistSongs(q, aborter, elements, ddIndex, ddItems, () => {
+        ddIndex = -1;
+        ddItems = [];
         checkGuess(gameState, current, elements);
       }),
     DEBOUNCE_MS
@@ -116,15 +120,23 @@ elements.guessInput.addEventListener("keydown", (e) => {
     if (ddIndex >= 0) {
       e.preventDefault();
       selectItem(ddIndex, ddItems, elements);
+      ddIndex = -1;
+      ddItems = [];
       checkGuess(gameState, current, elements);
     }
   } else if (e.key === "Escape") {
     hideDD(elements, ddIndex, ddItems);
+    ddIndex = -1;
+    ddItems = [];
   }
 });
 
 document.addEventListener("click", (e) => {
   const wrap = document.querySelector(".guess-wrap");
   if (!wrap) return;
-  if (!wrap.contains(e.target as Node)) hideDD(elements, ddIndex, ddItems);
+  if (!wrap.contains(e.target as Node)) {
+    hideDD(elements, ddIndex, ddItems);
+    ddIndex = -1;
+    ddItems = [];
+  }
 });
