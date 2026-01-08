@@ -48,7 +48,9 @@ export async function fetchSongURL(): Promise<{
   songPreviewURL: currentSong;
 } | null> {
   try {
-    const urlResponse = await fetch("http://localhost:3000/api/daily-song-url");
+    const urlResponse = await fetch(
+      "https://backend.musicdle.xyz/api/daily-song-url"
+    );
     if (!urlResponse.ok) {
       throw new Error(`Error fetching daily song: ${urlResponse.statusText}`);
     }
@@ -143,14 +145,17 @@ export async function checkGuess(
     elements.statusElement.textContent = "Checking...";
 
     // Send guess to server for validation
-    const response = await fetch("http://localhost:3000/api/validate-guess", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        guessText: playerGuessText,
-        gameOver: false,
-      }),
-    });
+    const response = await fetch(
+      "https://backend.musicdle.xyz/api/validate-guess",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guessText: playerGuessText,
+          gameOver: false,
+        }),
+      }
+    );
 
     const result = await response.json();
 
@@ -335,14 +340,17 @@ async function end_of_game_fetch(
   current: currentSong,
   statusEl: HTMLElement
 ): Promise<void> {
-  const response = await fetch("http://localhost:3000/api/validate-guess", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      guessText: null,
-      gameOver: true,
-    }),
-  });
+  const response = await fetch(
+    "https://backend.musicdle.xyz/api/validate-guess",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        guessText: null,
+        gameOver: true,
+      }),
+    }
+  );
 
   const result = await response.json();
 
