@@ -162,7 +162,7 @@ export async function checkGuess(
       current.genre = result.matches.genre;
       current.releaseYear = result.matches.year;
       current.albumName = result.matches.album;
-      current.title = result.songTitle;
+      current.fullTrack = result.trackData;
 
       updateHintState(current);
       renderHintBoxes();
@@ -170,7 +170,7 @@ export async function checkGuess(
       gameState.hasWon = true;
       gameState.maxListenTime = 30; // Unlock full 30-second preview
       elements.statusElement.textContent = "✅ Correct!";
-      elements.metaElement.innerHTML = `You got it! <b>${current.title}</b> by ${current.artist}`;
+      elements.metaElement.innerHTML = `You got it! <b>${current.fullTrack?.trackName}</b> by ${current.artist}`;
       updateGameStateUI(gameState, elements);
       // Show completion popup after a short delay
       setTimeout(() => showCompletionPopup(gameState, current, elements), 800);
