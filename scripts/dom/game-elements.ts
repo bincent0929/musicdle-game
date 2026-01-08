@@ -30,10 +30,6 @@ export class GameElements {
   }
 
   // ===== Button Elements =====
-  get submitBtn(): HTMLButtonElement {
-    return this.manager.get<HTMLButtonElement>("submit");
-  }
-
   get revealBtn(): HTMLButtonElement {
     return this.manager.get<HTMLButtonElement>("reveal");
   }

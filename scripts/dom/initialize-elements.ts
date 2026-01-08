@@ -17,7 +17,6 @@ export function initializeElements(): void {
     player: { required: true, type: "audio" },
 
     // Button elements
-    submit: { required: true, type: "button" },
     reveal: { required: true, type: "button" },
 
     // Status elements

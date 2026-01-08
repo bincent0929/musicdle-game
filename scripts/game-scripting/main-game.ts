@@ -36,8 +36,6 @@ let gameState: GameState = {
 
 let current: currentSong | null = null;
 
-await initGameInfoPopup(elements);
-
 elements.statusElement.textContent = "Loading top songs…";
 elements.metaElement.textContent = "";
 elements.guessInput.value = "";
@@ -77,19 +75,7 @@ if (!elements.audioPlayer.paused)
 elements.metaElement.textContent = "";
 updateGameStateUI(gameState, elements);
 
-/**
- * This is where the song info is being updated.
- * Right now it's just getting a true/false for the info.
- * It needs to be updated to grab the info from the guessed
- * song and put it into the info.
- */
-elements.submitBtn.onclick = () => checkGuess(gameState, current, elements);
-
 elements.revealBtn.onclick = () => reveal(gameState, current, elements);
-
-elements.guessInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") checkGuess(gameState, current, elements);
-});
 
 // Dropdown handling
 let ddIndex = -1;
@@ -108,7 +94,10 @@ elements.guessInput.addEventListener("input", (e) => {
     return;
   }
   t = setTimeout(
-    () => searchArtistSongs(q, aborter, elements, ddIndex, ddItems),
+    () =>
+      searchArtistSongs(q, aborter, elements, ddIndex, ddItems, () => {
+        checkGuess(gameState, current, elements);
+      }),
     DEBOUNCE_MS
   );
 });
@@ -127,6 +116,7 @@ elements.guessInput.addEventListener("keydown", (e) => {
     if (ddIndex >= 0) {
       e.preventDefault();
       selectItem(ddIndex, ddItems, elements);
+      checkGuess(gameState, current, elements);
     }
   } else if (e.key === "Escape") {
     hideDD(elements, ddIndex, ddItems);

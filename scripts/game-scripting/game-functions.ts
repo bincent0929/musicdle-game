@@ -400,7 +400,11 @@ function showDD(elements: GameElements) {
   elements.guessDropdown.classList.remove("hidden");
 }
 
-function renderDD(items: DropdownItem[], elements: GameElements): void {
+function renderDD(
+  items: DropdownItem[],
+  elements: GameElements,
+  onSelectCallback?: (index: number, items: DropdownItem[]) => void
+): void {
   const guessDD = elements.guessDropdown;
   if (!guessDD) {
     console.warn(`guessDD null case`);
@@ -415,7 +419,10 @@ function renderDD(items: DropdownItem[], elements: GameElements): void {
     el.dataset.idx = String(i);
     el.innerHTML = `<img src="${it.artwork}" alt="" class="w-10 h-10 rounded-md object-cover">
       <div><div class="font-semibold">${it.title}</div><div class="text-gray-600">${it.artist}</div></div>`;
-    el.onclick = () => selectItem(i, items, elements);
+    el.onclick = () => {
+      selectItem(i, items, elements);
+      if (onSelectCallback) onSelectCallback(i, items);
+    };
     guessDD.appendChild(el);
   });
   if (!items.length) {
@@ -476,7 +483,8 @@ export async function searchArtistSongs(
   aborter: AbortController | null,
   elements: GameElements,
   ddIndex: number,
-  ddItems: DropdownItem[]
+  ddItems: DropdownItem[],
+  onSelectCallback?: (index: number, items: DropdownItem[]) => void
 ): Promise<void> {
   // Cancel any ongoing request before starting a new one
   if (aborter) aborter.abort();
@@ -509,7 +517,7 @@ export async function searchArtistSongs(
     const uniqueSongs = dedupeByTitle(data.results ?? []).slice(0, 30);
 
     ddItems = uniqueSongs;
-    renderDD(uniqueSongs, elements);
+    renderDD(uniqueSongs, elements, onSelectCallback);
 
     // Select the first suggestion by default
     ddIndex = uniqueSongs.length > 0 ? 0 : -1;
