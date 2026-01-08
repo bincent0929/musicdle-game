@@ -59,29 +59,29 @@
   }
 }
 
-.canvas_center{
-    width: 100%;
-    text-align: center;
+.canvas_center {
+  width: 100%;
+  text-align: center;
 }
 
-  .stats-container {
-      display: flex;
-      align-items: flex-start;  
-      gap: 8rem;              
-      flex-wrap: wrap;       
-  }
+.stats-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 8rem;
+  flex-wrap: wrap;
+}
 
-  .chart-wrapper {
-      flex: 1;                  
-      width: 500px;         
-      height: 500px;  
-      margin-left: 7rem;        
-  }
+.chart-wrapper {
+  flex: 1;
+  width: 500px;
+  height: 500px;
+  margin-left: 7rem;
+}
 
-  .stats-text {
-      flex: 1;
-      min-width: 200px;        
-      text-align: left;
-      font-size: 20px;
-      line-height: 5; 
-  }
+.stats-text {
+  flex: 1;
+  min-width: 200px;
+  text-align: left;
+  font-size: 20px;
+  line-height: 5;
+}

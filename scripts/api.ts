@@ -1,57 +1,21 @@
-import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "./api-types.js";
+//import type { ITunesTrack, ITunesSearchResponse, ITunesRSSEntry, ITunesRSSResponse } from "./api-types.js";
 
-import type { currentSong } from "./game-logic-types.js";
+import type { currentSong } from "./game-scripting/game-logic-types.js";
 
-/**
- * Extract year from release date string
- */
-export function extractYear(releaseDate?: string): string {
-  if (!releaseDate) return "Unknown";
-  return new Date(releaseDate).getFullYear().toString();
-}
+//import { extractYear } from "./additional-functions.js";
 
-/* ------------ main game: pick & play a popular track ------------ */
-/**
- * 1. pulls from the itunes API for the top songs.
- * 2. randomly picks one songs from the fetched songs.
- * 3. pulls the artist name, preview, and title from the lookup API.
- * @param tries 
- * @returns Promise<{preview: string, artist: string, title: string}>
- */
-export async function pickSongWithPreview(tries = 6): Promise<currentSong> {
-  
-  //////////////////////////// change this to fetch from a backend that caches the iTunes response
-  // the max amount of songs you can get is 200 from iTunes
-  const feed: ITunesRSSResponse = await fetch('https://itunes.apple.com/us/rss/topsongs/limit=200/genre=1/json')
-    .then(r => r.json()).catch(e => ({ feed: { entry: [] } }));
-  
-  // entries should also be returned to be used in checkGuess
-  const entries = feed?.feed?.entry || [];
-  if (!entries.length) throw new Error("No songs found for that genre/country.");
-  // ^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-  // 2) Try up to N random entries until one has previewUrl
-  for (let i = 0; i < tries; i++) {
-    const chosen = entries[Math.floor(Math.random() * entries.length)];
-    const trackId: ITunesRSSEntry['id']['attributes']['im:id'] = chosen?.id?.attributes?.["im:id"];
-    if (!trackId) continue;
-
-    const looked: ITunesSearchResponse | null = await fetch(`https://itunes.apple.com/lookup?id=${encodeURIComponent(trackId)}&entity=song`)
-      .then(r => r.json()).catch(() => null);
-    const item: ITunesTrack | undefined = looked?.results?.find((x: ITunesTrack) => x.kind === "song") || looked?.results?.[0];
-    
-    const preview = item?.previewUrl;
-    if (preview && item) {
-      return {
-        preview,
-        artist: item.artistName,
-        title: item.trackName,
-        genre: item.primaryGenreName,
-        releaseYear: extractYear(item.releaseDate),
-        albumName: item.collectionName,
-        fullTrack: item
-      };
+export async function daily_url_fetch(): Promise<string> {
+  try {
+    // we need to add something here to have it call the local backend instead
+    // of the cloud backend
+    const response = await fetch('http://localhost:3000/api/daily-song-url');
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`);
     }
+    const song: currentSong = await response.json();
+    return song.preview;
+  } catch (error) {
+    console.error("Failed to fetch daily song:", error);
+    throw error;
   }
-  throw new Error("Could not find a preview for any of the picked tracks. Try again.");
 }

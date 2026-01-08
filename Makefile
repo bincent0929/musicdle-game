@@ -1,6 +1,7 @@
-# Typescript
-API_TSC = tsc scripts/game-logic.ts --outDir scripts --target ES2017 --lib ES2017,DOM
-TSC_STATS = tsc scripts/stats.ts --lib ES2015,DOM
+# Client Typescript
+TS_COMPILE = tsc --build scripts/tsconfig.json
+# Backend
+
 # Tailwind
 TAILWIND-OUTPUT-FILE = compiled-styles.css
 TAILWIND = tailwindcss -o styles/$(TAILWIND-OUTPUT-FILE)
@@ -10,18 +11,26 @@ CADDY = caddy run --config Caddyfiles/local.caddyfile
 
 # To run the site locally.
 # This will compile the Typescript and Tailwind once. Updates won't be watched for.
+
+# !!!!!!!!!!!!!!!!!!! The node modules have to be installed for the backend !!!!!!!!!!!!!!!!!!!
+
 run:
 	@echo "Starting the site..."
 
 	@echo "Transpiling the Typescript..."
-	$(API_TSC)
-	$(TSC_STATS)
+	$(TS_COMPILE)
 	@echo "Done."
 	
 	@echo "Compiling the classes to Tailwind"
 	$(TAILWIND)
 	@echo "Done."
-	
+
+	@echo "Starting the backend..."
+	cd scripts/server \
+	 && npm install \
+	 && tmux new-session -d -s game-backend 'npm start'
+	@echo "Done."
+
 	@echo "Starting Caddy in the background..."
 	tmux new-session -d -s caddy '$(CADDY)'
 	@echo "Done."
@@ -35,16 +44,23 @@ stop-run:
 	tmux kill-session -t caddy
 	@echo "Done."
 
+	@echo "Stopping the backend..."
+	tmux kill-session -t game-backend
+	@echo "Done."
+
 	@echo "Removing the Tailwind compiled styles..."
 	rm ./styles/$(TAILWIND-OUTPUT-FILE)
 	@echo "Done."
 	
 	@echo "Removing the transpiled scripts..."
-	rm ./scripts/*.js
+	rm ./scripts/*.js \
+	   ./scripts/game-scripting/*.js \
+	   ./scripts/dom/*.js
 	@echo "Done."
 
 	@echo "The site is down and your filesystem was cleaned."
 
+# !!!!!!!!!!!!!!!!!!!! This doesn't work the backend needs to be added rq !!!!!!!!!!!!!!!!!!!!
 # To run the site locally with dynamic CSS updates
 # The same as `run` but you can also change the classes in your Tailwind or its input CSS file
 # to have it update while your site is started.
@@ -52,7 +68,7 @@ start:
 	@echo "Starting the site..."
 
 	@echo "Transpiling the Typescript..."
-	$(API_TSC)
+	$(GAME_TSC)
 	$(TSC_STATS)
 	@echo "Done."
 	

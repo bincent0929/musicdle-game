@@ -16,3 +16,8 @@ musicdle.xyz {
 		file_server
 	}
 }
+
+backend.musicdle.xyz {
+	encode gzip
+	reverse_proxy 127.0.0.1:3000
+}
