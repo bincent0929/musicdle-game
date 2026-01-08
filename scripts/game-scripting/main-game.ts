@@ -36,7 +36,7 @@ let gameState: GameState = {
 
 let current: currentSong | null = null;
 
-initGameInfoPopup();
+initGameInfoPopup(elements);
 
 // this are taken from the user's input on the page
 elements.statusElement.textContent = "Loading top songs…";

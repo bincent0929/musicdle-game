@@ -17,12 +17,16 @@ import {
 import { ITunesSearchResponse, ITunesTrack } from "../api-types.js";
 
 // big old popup for game information
-export function initGameInfoPopup(): void {
-  const popup = $("game-info-popup");
-  const closeBtn = $("game-info-close");
-  if (!popup || !closeBtn) return;
+export function initGameInfoPopup(elements: GameElements): void {
+  const popup = elements.gameInfoPopup;
+  const closeBtn = elements.gameInfoCloseBtn;
 
   const hidePopup = () => {
+    // Move focus to the guess input before hiding the popup
+    // This prevents aria-hidden violation when descendant has focus
+    elements.guessInput.focus();
+
+    // Now it's safe to hide the popup
     popup.classList.add("hidden");
     popup.setAttribute("aria-hidden", "true");
   };
