@@ -200,11 +200,16 @@ export async function checkGuess(
         updateGameStateUI(gameState, elements);
       } else {
         // Out of attempts - reveal everything
+        // this does another fetch. which I don't know if I want that
+        // I think there should be a check of whether there are more
+        // attempts left and then have it do a fetch
+        await end_of_game_fetch(current, elements.statusElement);
+
         updateHintState(current);
         renderHintBoxes();
 
         elements.statusElement.textContent = "❌ Out of attempts!";
-        elements.metaElement.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+        elements.metaElement.innerHTML = `Answer: <b>${current.fullTrack?.trackName}</b> — ${current.artist}`;
         gameState.maxListenTime = 30; // Unlock full audio after game over
         updateGameStateUI(gameState, elements);
         setTimeout(
@@ -228,7 +233,7 @@ async function showCompletionPopup(
   current: currentSong,
   elements: GameElements
 ): Promise<void> {
-  await end_of_game_fetch(current, elements.statusElement);
+  //await end_of_game_fetch(current, elements.statusElement);
 
   const popup = elements.completionPopup;
 
@@ -359,7 +364,7 @@ export async function reveal(
   renderHintBoxes();
 
   elements.statusElement.textContent = "🔎 Revealed.";
-  elements.metaElement.innerHTML = `Answer: <b>${current.title}</b> — ${current.artist}`;
+  elements.metaElement.innerHTML = `Answer: <b>${current.fullTrack?.trackName}</b> — ${current.artist}`;
 
   // Unlock full audio when revealed
   gameState.maxListenTime = 30;
