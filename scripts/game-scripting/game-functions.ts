@@ -90,26 +90,13 @@ export function updateGameStateUI(
   gameState: GameState,
   elements: GameElements
 ): void {
-  const player = elements.audioPlayer;
-  const unlockedBar = elements.unlockedBar;
-  const totalTimeEl = elements.totalTimeDisplay;
-
-  const fallbackDuration = 30;
-  const rawDuration = player?.duration ?? fallbackDuration;
-  const duration = Number.isFinite(rawDuration) && rawDuration > 0 ? rawDuration : fallbackDuration;
-  const allowedTime = gameState.hasWon ? duration : Math.min(gameState.maxListenTime, duration);
-
   elements.attemptsElement.textContent = `Attempts remaining: ${gameState.attemptsRemaining}/5`;
-  elements.unlockedElement.textContent = `Unlocked: ${gameState.maxListenTime} seconds`;
 
+  // Update the unlocked bar to reflect current maxListenTime
+  const unlockedBar = elements.unlockedBar;
   if (unlockedBar) {
-    // Assuming 30s is the standard preview length
-    const percentage = Math.min((gameState.maxListenTime / 30) * 100, 100);
-    unlockedBar.style.width = `${percentage}%`;
-  }
-
-  if (totalTimeEl) {
-    totalTimeEl.textContent = formatTime(allowedTime);
+    const unlockedPct = Math.min((gameState.maxListenTime / 30) * 100, 100);
+    unlockedBar.style.width = `${unlockedPct}%`;
   }
 }
 
@@ -135,8 +122,7 @@ export function setupAudioRestrictions(
   let pauseIcon = elements.pauseIcon;
   const progressContainer = elements.progressContainer;
   let progressBar = elements.progressBar;
-  const timeDisplay = elements.currentTimeDisplay;
-  const totalTimeDisplay = elements.totalTimeDisplay;
+  const unlockedBar = elements.unlockedBar;
 
   const toggleIcons = (isPlaying: boolean) => {
     if (!playIcon || !pauseIcon) return;
@@ -173,16 +159,12 @@ export function setupAudioRestrictions(
 
     // UI Update
     if (progressBar) {
-        const duration = getDuration();
-        const pct = duration ? Math.min((currentTime / duration) * 100, 100) : 0;
+        const pct = gameState.maxListenTime > 0 ? Math.min((currentTime / gameState.maxListenTime) * (gameState.maxListenTime / 30) * 100, 100) : 0;
         progressBar.style.width = `${pct}%`;
     }
-    if (timeDisplay) {
-        const allowedTime = getAllowedTime();
-        timeDisplay.textContent = formatTime(Math.min(currentTime, allowedTime));
-    }
-    if (totalTimeDisplay) {
-        totalTimeDisplay.textContent = formatTime(getAllowedTime());
+    if (unlockedBar) {
+        const unlockedPct = Math.min((gameState.maxListenTime / 30) * 100, 100);
+        unlockedBar.style.width = `${unlockedPct}%`;
     }
   });
 
@@ -246,6 +228,11 @@ export function setupAudioRestrictions(
 
       const newProgressBar = newContainer.querySelector("#progress-bar") as HTMLElement | null;
       if (newProgressBar) progressBar = newProgressBar;
+
+      const newUnlockedBar = newContainer.querySelector("#unlocked-bar") as HTMLElement | null;
+      if (newUnlockedBar) {
+        elements.updateUnlockedBar(newUnlockedBar);
+      }
 
       newContainer.addEventListener("click", (e) => {
           const rect = newContainer.getBoundingClientRect();

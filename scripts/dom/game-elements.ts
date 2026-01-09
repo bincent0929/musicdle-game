@@ -50,14 +50,6 @@ export class GameElements {
     return this.manager.get("progress-bar");
   }
 
-  get currentTimeDisplay(): HTMLElement {
-    return this.manager.get("current-time");
-  }
-
-  get totalTimeDisplay(): HTMLElement {
-    return this.manager.get("total-time");
-  }
-
   get unlockedBar(): HTMLElement {
     return this.manager.get("unlocked-bar");
   }
@@ -76,6 +68,13 @@ export class GameElements {
     this.manager.replace("progress-container", newContainer);
   }
 
+  /**
+   * Update unlocked bar reference after cloning (for setupAudioRestrictions)
+   */
+  updateUnlockedBar(newBar: HTMLElement): void {
+    this.manager.replace("unlocked-bar", newBar);
+  }
+
   // ===== Button Elements =====
   get revealBtn(): HTMLButtonElement {
     return this.manager.get<HTMLButtonElement>("reveal");
@@ -92,10 +91,6 @@ export class GameElements {
 
   get attemptsElement(): HTMLElement {
     return this.manager.get("attempts");
-  }
-
-  get unlockedElement(): HTMLElement {
-    return this.manager.get("unlocked");
   }
 
   // ===== Dropdown Elements =====
