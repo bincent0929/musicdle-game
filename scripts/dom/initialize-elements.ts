@@ -23,7 +23,14 @@ export function initializeElements(): void {
     status: { required: true },
     meta: { required: true },
     attempts: { required: true },
-    unlocked: { required: true },
+
+    // Custom player UI elements
+    "play-btn": { required: true },
+    "play-icon": { required: true },
+    "pause-icon": { required: true },
+    "progress-container": { required: true },
+    "progress-bar": { required: true },
+    "unlocked-bar": { required: true },
 
     // Dropdown elements
     guessDD: { required: true, type: "div" },

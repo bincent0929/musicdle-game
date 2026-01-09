@@ -29,6 +29,52 @@ export class GameElements {
     this.manager.replace("player", newPlayer);
   }
 
+  // ===== Custom Player UI Elements =====
+  get playBtn(): HTMLElement {
+    return this.manager.get("play-btn");
+  }
+
+  get playIcon(): HTMLElement {
+    return this.manager.get("play-icon");
+  }
+
+  get pauseIcon(): HTMLElement {
+    return this.manager.get("pause-icon");
+  }
+
+  get progressContainer(): HTMLElement {
+    return this.manager.get("progress-container");
+  }
+
+  get progressBar(): HTMLElement {
+    return this.manager.get("progress-bar");
+  }
+
+  get unlockedBar(): HTMLElement {
+    return this.manager.get("unlocked-bar");
+  }
+
+  /**
+   * Update play button reference after cloning (for setupAudioRestrictions)
+   */
+  updatePlayBtn(newBtn: HTMLElement): void {
+    this.manager.replace("play-btn", newBtn);
+  }
+
+  /**
+   * Update progress container reference after cloning (for setupAudioRestrictions)
+   */
+  updateProgressContainer(newContainer: HTMLElement): void {
+    this.manager.replace("progress-container", newContainer);
+  }
+
+  /**
+   * Update unlocked bar reference after cloning (for setupAudioRestrictions)
+   */
+  updateUnlockedBar(newBar: HTMLElement): void {
+    this.manager.replace("unlocked-bar", newBar);
+  }
+
   // ===== Button Elements =====
   get revealBtn(): HTMLButtonElement {
     return this.manager.get<HTMLButtonElement>("reveal");
@@ -45,10 +91,6 @@ export class GameElements {
 
   get attemptsElement(): HTMLElement {
     return this.manager.get("attempts");
-  }
-
-  get unlockedElement(): HTMLElement {
-    return this.manager.get("unlocked");
   }
 
   // ===== Dropdown Elements =====

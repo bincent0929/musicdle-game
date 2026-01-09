@@ -89,15 +89,54 @@
 
       <div class="border border-gray-400 rounded-2xl p-4 mt-4">
         <div class="flex gap-2.5 items-center justify-center flex-wrap">
-          <!--
-          <button id="new" class="bg-gradient-to-r from-blue-500 via-yellow-400 to-blue-500 p-[2px] rounded-lg">
-            <span class="px-3 py-2 rounded-lg text-base block text-black font-medium">
-              Play the daily song
-            </span>
-          </button>
-          -->
+          <!-- Custom Audio Player -->
+          <div
+            class="flex items-center gap-3 w-full max-w-md bg-white border border-gray-300 rounded-xl p-2 shadow-sm"
+          >
+            <button
+              id="play-btn"
+              class="flex-shrink-0 w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center justify-center transition-colors focus:outline-none"
+            >
+              <svg
+                id="play-icon"
+                class="w-5 h-5 ml-0.5"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <svg
+                id="pause-icon"
+                class="w-5 h-5 hidden"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+              </svg>
+            </button>
 
-          <audio id="player" controls preload="none"></audio>
+            <div class="flex-1 flex flex-col justify-center gap-1">
+              <div
+                id="progress-container"
+                class="relative h-2 bg-gray-200 rounded-full cursor-pointer overflow-hidden"
+              >
+                <!-- The part of the song that is unlocked/playable -->
+                <div
+                  id="unlocked-bar"
+                  class="absolute top-0 left-0 h-full bg-blue-200 transition-all duration-500"
+                  style="width: 20%"
+                ></div>
+                <!-- The current playback position -->
+                <div
+                  id="progress-bar"
+                  class="absolute top-0 left-0 h-full bg-blue-800 transition-all duration-100"
+                  style="width: 0%"
+                ></div>
+              </div>
+            </div>
+
+            <audio id="player" preload="none" class="hidden"></audio>
+          </div>
         </div>
 
         <div class="flex gap-2.5 flex-wrap items-center mt-2.5">
@@ -136,7 +175,6 @@
           <div id="meta" class="text-gray-600 mt-1.5"></div>
           <div class="flex gap-4 justify-center mt-3 text-sm text-gray-700">
             <div id="attempts" class="font-medium"></div>
-            <div id="unlocked" class="font-medium"></div>
           </div>
         </div>
       </div>
