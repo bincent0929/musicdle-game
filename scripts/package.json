@@ -2,8 +2,11 @@
   "name": "musicdle-scripts",
   "version": "1.0.0",
   "scripts": {
-    "build": "vite build",
-    "dev": "vite"
+    "build": "vite build && npm run build:server",
+    "build:server": "cd server && npm run build",
+    "build:frontend": "vite build",
+    "dev": "vite",
+    "clean": "rm -rf dist && cd server && npm run clean"
   },
   "devDependencies": {
     "@types/node": "^25.0.8",
