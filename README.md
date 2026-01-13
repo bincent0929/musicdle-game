@@ -1,6 +1,8 @@
 # Musicdle
 
-This is a Wordle-like song guessing game built with Typescript, HTML, TailwindCSS, Docker, and Caddy.
+## By [Vincent Roberson](https://github.com/bincent0929) And [Nathan Bryant](https://github.com/NcollegeB)
+
+This is a simple Wordle-like song guessing game built with **Typescript**, **HTML**, **TailwindCSS**, **Docker**, and **Caddy**.
 
 ## Building The Website As A Developer
 
