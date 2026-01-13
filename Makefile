@@ -17,10 +17,10 @@ CADDY = caddy run --config Caddyfiles/local.caddyfile
 run:
 	@echo "Starting the site..."
 
-	@echo "Building Typescript with Vite..."
+	@echo "Building TypeScript (frontend + backend) with Vite and tsc..."
 	$(VITE_BUILD)
 	@echo "Done."
-	
+
 	@echo "Compiling the classes to Tailwind"
 	$(TAILWIND)
 	@echo "Done."
@@ -39,7 +39,7 @@ run:
 
 stop-run:
 	@echo "Stopping your site..."
-	
+
 	@echo "Stopping Caddy..."
 	tmux kill-session -t caddy
 	@echo "Done."
@@ -51,12 +51,40 @@ stop-run:
 	@echo "Removing the Tailwind compiled styles..."
 	rm ./styles/$(TAILWIND-OUTPUT-FILE)
 	@echo "Done."
-	
+
 	@echo "Removing the built scripts..."
-	rm -rf ./scripts/dist
+	cd scripts && npm run clean
 	@echo "Done."
 
 	@echo "The site is down and your filesystem was cleaned."
+
+# Development mode - runs backend with ts-node for rapid development
+dev:
+	@echo "Starting development servers..."
+
+	@echo "Starting backend in dev mode (ts-node)..."
+	cd scripts/server \
+	 && npm install \
+	 && tmux new-session -d -s game-backend 'npm run dev'
+	@echo "Done."
+
+	@echo "Starting Tailwind watch..."
+	tmux new-session -d -s tailwind '$(TAILWIND_WATCH)'
+	@echo "Done."
+
+	@echo "Starting Caddy..."
+	tmux new-session -d -s caddy '$(CADDY)'
+	@echo "Done."
+
+	@echo "Development servers running!"
+
+stop-dev:
+	@echo "Stopping development servers..."
+	tmux kill-session -t caddy || true
+	tmux kill-session -t game-backend || true
+	tmux kill-session -t tailwind || true
+	rm ./styles/$(TAILWIND-OUTPUT-FILE) || true
+	@echo "Done."
 
 # !!!!!!!!!!!!!!!!!!!! This doesn't work the backend needs to be added rq !!!!!!!!!!!!!!!!!!!!
 # To run the site locally with dynamic CSS updates

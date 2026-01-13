@@ -4,6 +4,9 @@
 styles/compiled-styles.css
 dist/
 
+# Backend build output
+scripts/server/dist/
+
 # Rust
 target/
 **/*.rs.bk

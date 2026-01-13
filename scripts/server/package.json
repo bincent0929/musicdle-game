@@ -4,8 +4,10 @@
   "description": "Backend for Musicdle",
   "main": "main-server.ts",
   "scripts": {
-    "start": "ts-node main-server.ts",
-    "build": "tsc"
+    "start": "node dist/server/main-server.js",
+    "dev": "ts-node main-server.ts",
+    "build": "tsc",
+    "clean": "rm -rf dist"
   },
   "dependencies": {
     "cors": "^2.8.5",
