@@ -1,11 +1,13 @@
-# For Building The Website
+# Musicdle
 
-1. Open the folder in a devcontainer
-2. Use either `make run` or `make start` in the terminal to get a local version of the game started.
+This is a Wordle-like song guessing game built with Typescript, HTML, TailwindCSS, Docker, and Caddy.
 
-- Use `make run` to get the website running.
-- Using `make start` to get the website going for coding it.
+## Building The Website As A Developer
 
-- Not matter what, the Typescript would need to be recompiled after **every** edit.
+1. Open the folder in a devcontainer.
+2. Use either `make run` in the terminal to get a local version of the game started.
+3. Use `make stop-run` to stop the website and clean the directory.
 
-## MusicDle
+## P.S.
+
+For more information, check out the [wiki](https://github.com/bincent0929/musicdle-game/wiki)!
