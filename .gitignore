@@ -1,6 +1,8 @@
 *.js
+!vite.config.js
 .env
 styles/compiled-styles.css
+dist/
 
 # Rust
 target/

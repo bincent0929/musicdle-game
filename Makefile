@@ -1,5 +1,5 @@
-# Client Typescript
-TS_COMPILE = tsc --build scripts/tsconfig.json
+# Client Typescript - using Vite for bundling with environment variables
+VITE_BUILD = cd scripts && npm run build
 # Backend
 
 # Tailwind
@@ -17,8 +17,8 @@ CADDY = caddy run --config Caddyfiles/local.caddyfile
 run:
 	@echo "Starting the site..."
 
-	@echo "Transpiling the Typescript..."
-	$(TS_COMPILE)
+	@echo "Building Typescript with Vite..."
+	$(VITE_BUILD)
 	@echo "Done."
 	
 	@echo "Compiling the classes to Tailwind"
@@ -52,10 +52,8 @@ stop-run:
 	rm ./styles/$(TAILWIND-OUTPUT-FILE)
 	@echo "Done."
 	
-	@echo "Removing the transpiled scripts..."
-	rm ./scripts/*.js \
-	   ./scripts/game-scripting/*.js \
-	   ./scripts/dom/*.js
+	@echo "Removing the built scripts..."
+	rm -rf ./scripts/dist
 	@echo "Done."
 
 	@echo "The site is down and your filesystem was cleaned."
