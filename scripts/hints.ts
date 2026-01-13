@@ -38,7 +38,7 @@ export function initializeHintBoxes(): void {
 
   // Create the hint boxes
   hintContainer.innerHTML = `
-  <h3 class="text-lg font-bold text-center mb-3">Song Info</h3>
+  <h3 class="text-lg font-bold text-center mb-3">What You've Got Right So Far</h3>
   <div class="flex gap-2 flex-wrap justify-center">
       <div id="hint-artist" class="hint-box px-3 py-2 rounded-md border-2 min-w-[100px] bg-gray-100 border-gray-300 text-gray-600">
       <div class="text-xs font-semibold uppercase">Artist</div>
