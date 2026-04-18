@@ -5,6 +5,9 @@ ENV PATH="$PNPM_HOME:$PATH"
 
 RUN corepack enable pnpm
 
+ARG VITE_API_BASE_URL=https://backend.musicdle.xyz/api
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 WORKDIR /build
 
 # Install dependencies before copying source for better layer caching
