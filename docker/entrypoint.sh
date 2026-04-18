@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-node /game-website/scripts/server/dist/main-server.js &
+node /game-website/scripts/server/dist/server/main-server.js &
 NODE_PID=$!
 
 trap 'kill "$NODE_PID"' TERM INT
