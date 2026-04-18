@@ -37,7 +37,6 @@ WORKDIR /game-website
 
 COPY --from=builder /build/index.html ./
 COPY --from=builder /build/game.html ./
-COPY --from=builder /build/game-completed.html ./
 COPY --from=builder /build/assets ./assets
 COPY --from=builder /build/styles ./styles
 COPY --from=builder /build/scripts/dist ./scripts/dist
