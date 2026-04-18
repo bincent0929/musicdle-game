@@ -1,3 +1,6 @@
+/**
+ * This isn't being used currently.
+ */
 declare const Chart: any; //was having issue with Chart object in Typescript, this seemed to fix it
 
 document.addEventListener("DOMContentLoaded", function (): void {
