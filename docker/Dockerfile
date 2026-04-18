@@ -1,21 +1,23 @@
 FROM node:22-slim AS builder
 
+RUN corepack enable pnpm
+
 WORKDIR /build
 
 # Install Tailwind CSS separately (not a project dependency)
-RUN npm install --global tailwindcss @tailwindcss/cli
+RUN pnpm add --global tailwindcss @tailwindcss/cli
 
 # Install dependencies before copying source for better layer caching
-COPY scripts/package.json scripts/package-lock.json ./scripts/
-RUN npm ci --prefix scripts
+COPY scripts/package.json ./scripts/
+RUN pnpm -C scripts install
 
-COPY scripts/server/package.json scripts/server/package-lock.json ./scripts/server/
-RUN npm ci --prefix scripts/server
+COPY scripts/server/package.json ./scripts/server/
+RUN pnpm -C scripts/server install
 
 COPY . .
 
-RUN npm run --prefix scripts build:frontend
-RUN npm run --prefix scripts/server build
+RUN pnpm -C scripts run build:frontend
+RUN pnpm -C scripts/server run build
 
 # Generate Tailwind CSS by scanning HTML files
 RUN mkdir -p styles \
