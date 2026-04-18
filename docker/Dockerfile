@@ -1,11 +1,11 @@
 FROM node:22-slim AS builder
 
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
 RUN corepack enable pnpm
 
 WORKDIR /build
-
-# Install Tailwind CSS separately (not a project dependency)
-RUN pnpm add --global tailwindcss @tailwindcss/cli
 
 # Install dependencies before copying source for better layer caching
 COPY scripts/package.json ./scripts/
@@ -22,7 +22,7 @@ RUN pnpm -C scripts/server run build
 # Generate Tailwind CSS by scanning HTML files
 RUN mkdir -p styles \
     && printf '@import "tailwindcss";' > /tmp/tw-input.css \
-    && tailwindcss -i /tmp/tw-input.css -o styles/compiled-styles.css
+    && pnpm dlx @tailwindcss/cli -i /tmp/tw-input.css -o styles/compiled-styles.css
 
 
 FROM caddy:2-alpine
