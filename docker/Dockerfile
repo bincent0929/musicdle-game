@@ -19,10 +19,14 @@ COPY . .
 RUN pnpm -C scripts run build:frontend
 RUN pnpm -C scripts/server run build
 
-# Generate Tailwind CSS by scanning HTML files
-RUN mkdir -p styles \
-    && printf '@import "tailwindcss";' > /tmp/tw-input.css \
-    && pnpm dlx @tailwindcss/cli -i /tmp/tw-input.css -o styles/compiled-styles.css
+# Generate Tailwind CSS — run from an isolated dir that owns tailwindcss in node_modules
+# so @import "tailwindcss" can resolve; @source points back at the HTML files
+RUN mkdir -p /build/styles /tmp/twbuild \
+    && cd /tmp/twbuild \
+    && printf '{"dependencies":{"tailwindcss":"^4","@tailwindcss/cli":"^4"}}' > package.json \
+    && pnpm install \
+    && printf '@import "tailwindcss";\n@source "/build/**/*.html";' > input.css \
+    && pnpm exec tailwindcss -i input.css -o /build/styles/compiled-styles.css
 
 
 FROM caddy:2-alpine
