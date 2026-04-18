@@ -1,3 +1,7 @@
+{
+	admin off
+}
+
 musicdle.xyz {
 	encode gzip
 
